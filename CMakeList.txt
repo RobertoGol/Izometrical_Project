@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(BunkerProtocolISO VERSION 1.0 LANGUAGES CXX)
 
 # ==============================================================================
-# C++17
+# C++17 (нужен для std::filesystem, std::clamp, inline constexpr)
 # ==============================================================================
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,74 +10,76 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # ==============================================================================
 # Найти SFML (2.5+)
+# Установка:
+#   vcpkg: vcpkg install sfml
+#   apt:   sudo apt install libsfml-dev
+#   brew:  brew install sfml
 # ==============================================================================
 find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 
 # ==============================================================================
 # Исходники
+# Большинство систем — header-only (в include/).
+# Только main.cpp и PlayerController.cpp — компилируемые.
 # ==============================================================================
 set(SOURCES
     src/main.cpp
-
-    # Core engine
-    src/core/IsoMath.cpp
-    src/core/Camera.cpp
-    src/core/Renderer.cpp
-    src/core/InputManager.cpp
-    src/core/ResourceManager.cpp
-
-    # World
-    src/world/TileMap.cpp
-    src/world/LootSystem.cpp
-    src/world/WorldSession.cpp
-
-    # Entities
-    src/entities/Player.cpp
     src/entities/PlayerController.cpp
-    src/entities/Enemy.cpp
-    src/entities/EnemySpawner.cpp
-    src/entities/EntityManager.cpp
-    src/entities/Titan.cpp
-
-    # Physics
-    src/physics/Collisions.cpp
-    src/physics/SpatialGrid.cpp
-
-    # Combat
-    src/combat/BulletSystem.cpp
-    src/combat/Tactics.cpp
-    src/combat/WeaponSystem.cpp
-
-    # Vehicles
-    src/vehicles/VehicleManager.cpp
-
-    # UI / HUD
-    src/ui/HUD.cpp
-    src/ui/UIEffects.cpp
-
-    # Inventory & Save
-    src/inventory/Inventory.cpp
-    src/inventory/SaveSystem.cpp
-
-    # Progression & Story
-    src/progression/Progression.cpp
-    src/progression/StoryRoute.cpp
-    src/progression/SkillSystem.cpp
 )
 
+# ==============================================================================
+# Исполняемый файл
+# ==============================================================================
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+# ==============================================================================
+# Include-директории
+# ==============================================================================
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+# ==============================================================================
+# Линковка SFML
+# ==============================================================================
 target_link_libraries(${PROJECT_NAME} PRIVATE
     sfml-graphics
     sfml-window
     sfml-system
 )
 
-# Копируем assets в build
+# ==============================================================================
+# Для std::filesystem на некоторых компиляторах (GCC < 9)
+# ==============================================================================
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+    target_link_libraries(${PROJECT_NAME} PRIVATE stdc++fs)
+endif()
+
+# ==============================================================================
+# Копируем assets в build-директорию
+# ==============================================================================
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets")
-    file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/assets" DESTINATION "${CMAKE_BINARY_DIR}")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+        "$<TARGET_FILE_DIR:${PROJECT_NAME}>/assets"
+        COMMENT "Copying assets to build directory..."
+    )
+endif()
+
+# ==============================================================================
+# Предупреждения компилятора
+# ==============================================================================
+if(MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        /W4
+        /wd4100  # неиспользованные параметры
+        /wd4244  # double -> float
+        /wd4267  # size_t -> int
+    )
+else()
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        -Wall -Wextra -Wpedantic
+        -Wno-unused-parameter
+    )
 endif()
