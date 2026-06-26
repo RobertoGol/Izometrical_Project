@@ -2,6 +2,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <algorithm>
+#include <vector>
 
 // ── Все системы движка ──
 #include "Constants.hpp"
@@ -25,6 +27,7 @@
 #include "MapScreen.hpp"
 #include "TimeShift.hpp"
 #include "TextureGenerator.hpp"
+#include "HostileAISystem.hpp"
 
 // ═══════════════════════════════════════════════════════
 // Отрисовка изометрического пола
@@ -72,7 +75,8 @@ void renderFloor(sf::RenderWindow& window, const bunker::GameState& gs,
 // ═══════════════════════════════════════════════════════
 void renderEntities(sf::RenderWindow& window, const bunker::GameState& gs,
                     const bunker::PlayerController& playerCtrl,
-                    const bunker::TimeShift& timeShift) {
+                    const bunker::TimeShift& timeShift,
+                    const bunker::HostileAISystem& hostileAI) {
     std::vector<bunker::RenderObject> renderQueue;
 
     // Pip-Pad на полу
@@ -103,16 +107,68 @@ void renderEntities(sf::RenderWindow& window, const bunker::GameState& gs,
         }});
     }
 
-    // Враги (разные цвета в разных таймлайнах)
+    // Враги: теперь цвета и форма зависят от HostileAISystem
     bool isPast = timeShift.isPast();
-    for (const auto& e : gs.enemies) {
+    const auto& hostileStates = hostileAI.debugStates();
+    for (std::size_t i = 0; i < gs.enemies.size(); ++i) {
+        const auto& e = gs.enemies[i];
         if (!e.isAlive) continue;
+
         float ex = e.position.x, ey = e.position.y, er = e.radius;
-        renderQueue.push_back({ ex + ey, [&, ex, ey, er, isPast]() {
-            sf::CircleShape shape(8.0f + er * 5.0f, isPast ? 4 : 3);
-            shape.setFillColor(isPast ? sf::Color(100, 150, 255) : sf::Color(255, 50, 50));
-            shape.setOrigin(8.0f + er * 5.0f, 8.0f + er * 5.0f);
+        bunker::HostileKind kind = bunker::HostileKind::VerminRush;
+        bunker::HostileAlertState alert = bunker::HostileAlertState::Idle;
+        if (i < hostileStates.size()) {
+            kind = hostileStates[i].kind;
+            alert = hostileStates[i].alert;
+        }
+
+        renderQueue.push_back({ ex + ey, [&, ex, ey, er, isPast, kind, alert]() {
+            sf::Color body = sf::Color(255, 50, 50);
+            int points = 3;
+
+            switch (kind) {
+                case bunker::HostileKind::VerminRush:
+                    body = sf::Color(210, 45, 45);
+                    points = 3;
+                    break;
+                case bunker::HostileKind::GhoulRush:
+                    body = sf::Color(150, 230, 80);
+                    points = 8;
+                    break;
+                case bunker::HostileKind::HumanTactical:
+                    body = sf::Color(235, 170, 70);
+                    points = 4;
+                    break;
+                case bunker::HostileKind::RobotControl:
+                    body = sf::Color(135, 170, 230);
+                    points = 6;
+                    break;
+            }
+
+            if (isPast) {
+                body = sf::Color(
+                    static_cast<sf::Uint8>(std::min(255, body.r / 2 + 50)),
+                    static_cast<sf::Uint8>(std::min(255, body.g / 2 + 90)),
+                    static_cast<sf::Uint8>(std::min(255, body.b + 40)),
+                    220
+                );
+            }
+
+            float radius = 8.0f + er * 5.0f;
+            sf::CircleShape shape(radius, points);
+            shape.setFillColor(body);
+            shape.setOrigin(radius, radius);
             shape.setPosition(bunker::IsoMath::worldToScreen(ex, ey));
+
+            if (alert == bunker::HostileAlertState::Aggro) {
+                shape.setOutlineThickness(2.0f);
+                shape.setOutlineColor(sf::Color(255, 40, 40));
+            } else if (alert == bunker::HostileAlertState::Suspicious ||
+                       alert == bunker::HostileAlertState::Searching) {
+                shape.setOutlineThickness(1.5f);
+                shape.setOutlineColor(sf::Color(255, 220, 60));
+            }
+
             window.draw(shape);
         }});
     }
@@ -201,6 +257,7 @@ int main() {
     bunker::MapScreen        mapScreen;
     bunker::TimeShift        timeShift;
     bunker::TextureGenerator texGen;
+    bunker::HostileAISystem hostileAI;
 
     // ── Генерация текстур при первом запуске ──
     texGen.generateAllOnFirstRun();
@@ -211,6 +268,16 @@ int main() {
 
     // ── Генерация мира ──
     worldSession.generateDefaultWorld(gs, enemySpawner);
+
+    // ── Инициализация Hostile AI для уже созданных врагов ──
+    // Старые Enemy из EnemySpawner получают полные профили из GMyGameDoNotTouch.
+    for (std::size_t i = 0; i < gs.enemies.size(); ++i) {
+        bunker::HostileKind kind = bunker::HostileKind::VerminRush;
+        if (i % 4 == 1) kind = bunker::HostileKind::GhoulRush;
+        if (i % 4 == 2) kind = bunker::HostileKind::HumanTactical;
+        if (i % 4 == 3) kind = bunker::HostileKind::RobotControl;
+        hostileAI.assignKind(gs, i, kind);
+    }
 
     // ── Инициализация TimeShift (после генерации мира!) ──
     timeShift.initialize(gs, enemySpawner);
@@ -232,6 +299,11 @@ int main() {
     vehicleMgr.spawnVehicle("motorcycle", {16.0f, 3.0f, 0.0f});
 
     sf::Clock clock;
+
+    // InputManager уже забирает SFML events, поэтому M/T обрабатываем edge-check'ом.
+    bool prevMapKey = false;
+    bool prevTimeShiftKey = false;
+
     std::cout << "[SYSTEM] Bunker Protocol ISO запущен." << std::endl;
 
     // ═══════════════════════════════════════════════
@@ -245,17 +317,15 @@ int main() {
         // ── 1. Ввод ──
         bunker::InputSnapshot input = inputMgr.capture(window);
 
-        // Доп. события (зум карты, TimeShift по T, карта по M)
-        sf::Event evt;
-        while (window.pollEvent(evt)) {
-            if (evt.type == sf::Event::Closed) gs.isRunning = false;
-            if (mapScreen.isOpen()) mapScreen.handleInput(evt, dt);
+        // Доп. клавиши, которые раньше терялись из-за двойного pollEvent.
+        bool mapKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::M);
+        bool timeShiftKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::T);
 
-            if (evt.type == sf::Event::KeyPressed) {
-                if (evt.key.code == sf::Keyboard::M) mapScreen.toggle();
-                if (evt.key.code == sf::Keyboard::T) timeShift.tryShift(gs);
-            }
-        }
+        if (mapKeyNow && !prevMapKey) mapScreen.toggle();
+        if (timeShiftKeyNow && !prevTimeShiftKey) timeShift.tryShift(gs);
+
+        prevMapKey = mapKeyNow;
+        prevTimeShiftKey = timeShiftKeyNow;
 
         if (input.quit) gs.isRunning = false;
 
@@ -356,8 +426,9 @@ int main() {
         bulletSys.update(gs, dt);
 
         // Враги
+        // Спавнер всё ещё отвечает за волны, но поведение врагов теперь ведёт HostileAISystem.
         enemySpawner.updateWaveSpawning(gs, dt);
-        enemySpawner.updateEnemyAI(gs, dt);
+        hostileAI.update(gs, dt);
 
         // Коллизии
         bunker::Collisions::resolveAllCollisions(gs);
@@ -377,7 +448,7 @@ int main() {
         renderFloor(window, gs, timeShift);
 
         // Сущности (Z-sort, разные цвета врагов по таймлайну)
-        renderEntities(window, gs, playerCtrl, timeShift);
+        renderEntities(window, gs, playerCtrl, timeShift, hostileAI);
 
         // Пули + молнии
         bulletSys.render(gs, window, camera.getView());
