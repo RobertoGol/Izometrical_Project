@@ -1,46 +1,53 @@
-Batch 2: Core Folder Restructuring & Baseline Cleanup Log
-Date: 2026-06-26
+cmake_minimum_required(VERSION 3.16)
+project(BunkerProtocolISO VERSION 1.0 LANGUAGES CXX)
 
-Executive Summary
-This batch continues the core stabilization efforts started in Batch 1, following the architectural guidelines in TARGET_ARCHITECTURE.md and INTEGRATION_PHASES.md (Phase 1 & 2). The primary objective was to organize the repository files into clean domain directories without deleting any existing mechanics, classes, or legacy logic.
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-1. Filesystem & Asset Path Case Normalization
-Status: COMPLETED
-Executed actual git mv operations to normalize asset directory names on case-sensitive filesystems (Linux):
-assets/Enemies/ → assets/enemies/
-assets/Vehicles/ → assets/vehicles/
-Verified compatibility with include/content/AssetPaths.hpp runtime constants (AssetPaths::VehiclesDir, AssetPaths::EnemiesDir).
-2. Header Reorganization (include/)
-Status: COMPLETED
-Migrated 24 flat header files from the root of include/ into structured domain subdirectories matching TARGET_ARCHITECTURE.md:
-include/core/: Constants.hpp, Types.hpp, IsoMath.hpp
-include/engine/: InputManager.hpp, TimeShift.hpp (alongside existing GameApplication.hpp)
-include/world/: WorldSession.hpp, WeatherSystem.hpp, MapScreen.hpp
-include/entities/: PlayerController.hpp, Camera.hpp, Collisions.hpp
-include/gameplay/: BulletSystem.hpp, Tactics.hpp, AdvancedMechanics.hpp, GameState.hpp
-include/ai/: HostileAISystem.hpp, EnemySpawner.hpp, TitanAI.hpp
-include/vehicles/: VehicleManager.hpp
-include/ui/: HUD.hpp
-include/persistence/: SaveSystem.hpp, Progression.hpp, Inventory.hpp
-include/content/: TextureGenerator.hpp (alongside existing AssetPaths.hpp)
-include/render/: (Existing GameRenderer.hpp)
-3. Thin Bootstrap Cleanup (src/main.cpp)
-Status: COMPLETED
-Removed residual legacy code left at the bottom of src/main.cpp during Batch 1.
-src/main.cpp now acts strictly as a thin bootstrap entry point:
-C++
+find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 
-#include "engine/GameApplication.hpp"
+set(SOURCES
+    src/main.cpp
+    src/engine/GameApplication.cpp
+    src/render/GameRenderer.cpp
+    src/entities/PlayerController.cpp
+    src/entities/Camera.cpp
+    src/entities/Collisions.cpp
+)
 
-int main() {
-    bunker::GameApplication app;
-    return app.run();
-}
-All application lifecycle, game loop updates, and rendering logic remain safely encapsulated within src/engine/GameApplication.cpp and src/render/GameRenderer.cpp. Zero mechanics or features were deleted.
-4. Build System Harmonization (CMakeLists.txt)
-Status: COMPLETED
-Updated target_include_directories in CMakeLists.txt to include all new domain subdirectories under include/.
-This ensures 100% backward compatibility for all existing unqualified #include "Header.hpp" statements while enabling clean modern C++ relative imports (#include "core/Types.hpp").
-5. Verification & Next Steps
-Git State: Clean staged renames via git mv ensuring full preservation of file history.
-Next Phase: Proceed to Phase 2 deep mechanics integration (transferring remaining hostile AI profiles, survival thresholds, and vehicle modules from GMyGameDoNotTouch and Video_Game_Izom).
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/ai
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/content
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/core
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/engine
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/entities
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/gameplay
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/persistence
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/render
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/ui
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/vehicles
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/world
+)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    sfml-graphics
+    sfml-window
+    sfml-system
+)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+    target_link_libraries(${PROJECT_NAME} PRIVATE stdc++fs)
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+        "$<TARGET_FILE_DIR:${PROJECT_NAME}>/assets"
+        COMMENT "Copying assets to build directory..."
+    )
+endif()

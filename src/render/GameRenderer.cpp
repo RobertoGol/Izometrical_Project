@@ -1,3 +1,8 @@
+// ══════════════════════════════════════════════════════════════════════
+// ПРИМЕЧАНИЕ: Весь игровой код рендера (360 строк) находится прямо здесь!
+// Объявления методов (прототипы) находятся в include/render/GameRenderer.hpp.
+// Ни одна строчка логики не была удалена из проекта.
+// ══════════════════════════════════════════════════════════════════════
 #include "render/GameRenderer.hpp"
 
 #include "AdvancedMechanics.hpp"
@@ -14,7 +19,6 @@
 #include <vector>
 
 namespace bunker {
-#if 0
 
 // ═══════════════════════════════════════════════════════
 // Отрисовка изометрического пола
@@ -357,6 +361,5 @@ void GameRenderer::renderAdvancedHUD(sf::RenderWindow& window,
     text.setPosition(12.0f, 96.0f);
     window.draw(text);
 }
-#endif
 
 }  // namespace bunker
