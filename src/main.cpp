@@ -28,6 +28,7 @@
 #include "TimeShift.hpp"
 #include "TextureGenerator.hpp"
 #include "HostileAISystem.hpp"
+#include "AdvancedMechanics.hpp"
 
 // ═══════════════════════════════════════════════════════
 // Отрисовка изометрического пола
@@ -227,6 +228,135 @@ void renderEntities(sf::RenderWindow& window, const bunker::GameState& gs,
     }
 }
 
+
+// ═══════════════════════════════════════════════════════
+// Отрисовка перенесённых advanced-механик:
+// Weather, C.A.M.P., breakables, shock waves, HUD-подсказки.
+// ═══════════════════════════════════════════════════════
+void renderAdvancedWorld(sf::RenderWindow& window, const bunker::AdvancedMechanics& adv) {
+    // Разрушаемые объекты
+    for (const auto& b : adv.reactive.breakables()) {
+        if (b.broken) continue;
+
+        sf::Color color = sf::Color(150, 110, 60);
+        int points = 4;
+        float radius = 8.0f;
+        switch (b.kind) {
+            case bunker::BreakableKind::Glass:      color = sf::Color(125, 210, 255, 150); points = 4; radius = 7.0f; break;
+            case bunker::BreakableKind::Vegetation: color = sf::Color(75, 170, 70);        points = 7; radius = 9.0f; break;
+            case bunker::BreakableKind::Crate:      color = sf::Color(170, 120, 55);       points = 4; radius = 9.0f; break;
+            case bunker::BreakableKind::Barrel:     color = sf::Color(210, 75, 45);        points = 12; radius = 8.0f; break;
+            case bunker::BreakableKind::Console:    color = sf::Color(85, 165, 210);       points = 6; radius = 10.0f; break;
+        }
+
+        sf::CircleShape shape(radius, points);
+        shape.setOrigin(radius, radius);
+        shape.setPosition(bunker::IsoMath::worldToScreen(b.position.x, b.position.y));
+        shape.setFillColor(color);
+        shape.setOutlineThickness(1.0f);
+        shape.setOutlineColor(sf::Color::Black);
+        window.draw(shape);
+    }
+
+    // Волны от взрывов/ударов
+    for (const auto& w : adv.reactive.waves()) {
+        float sr = w.radius * 24.0f;
+        sf::CircleShape ring(sr);
+        ring.setOrigin(sr, sr);
+        ring.setPosition(bunker::IsoMath::worldToScreen(w.origin.x, w.origin.y));
+        ring.setFillColor(sf::Color(0, 0, 0, 0));
+        ring.setOutlineThickness(2.0f);
+        ring.setOutlineColor(sf::Color(255, 230, 120, 90));
+        window.draw(ring);
+    }
+
+    // C.A.M.P. построенные объекты
+    for (const auto& obj : adv.camp.objects()) {
+        sf::Vector2f pos = bunker::IsoMath::worldToScreen(obj.tileX + 0.5f, obj.tileY + 0.5f);
+        if (obj.type == bunker::CampObjectType::DefenseTurret) {
+            sf::CircleShape t(9.0f, 3);
+            t.setOrigin(9.0f, 9.0f);
+            t.setPosition(pos);
+            t.setFillColor(sf::Color(210, 210, 70));
+            t.setOutlineThickness(1.5f);
+            t.setOutlineColor(sf::Color::Black);
+            window.draw(t);
+        } else if (obj.type == bunker::CampObjectType::SupplyCrate) {
+            sf::RectangleShape c({14.0f, 12.0f});
+            c.setOrigin(7.0f, 6.0f);
+            c.setPosition(pos);
+            c.setFillColor(sf::Color(80, 200, 110));
+            c.setOutlineThickness(1.0f);
+            c.setOutlineColor(sf::Color::Black);
+            window.draw(c);
+        }
+    }
+
+    // Превью строительства
+    if (adv.camp.enabled()) {
+        const auto& p = adv.camp.preview();
+        sf::ConvexShape tile(4);
+        tile.setPoint(0, bunker::IsoMath::worldToScreen(static_cast<float>(p.tileX),     static_cast<float>(p.tileY)));
+        tile.setPoint(1, bunker::IsoMath::worldToScreen(static_cast<float>(p.tileX + 1), static_cast<float>(p.tileY)));
+        tile.setPoint(2, bunker::IsoMath::worldToScreen(static_cast<float>(p.tileX + 1), static_cast<float>(p.tileY + 1)));
+        tile.setPoint(3, bunker::IsoMath::worldToScreen(static_cast<float>(p.tileX),     static_cast<float>(p.tileY + 1)));
+        tile.setFillColor(p.isPlacementValid ? sf::Color(60, 220, 90, 75) : sf::Color(220, 60, 60, 75));
+        tile.setOutlineThickness(2.0f);
+        tile.setOutlineColor(p.isPlacementValid ? sf::Color(90, 255, 120) : sf::Color(255, 90, 90));
+        window.draw(tile);
+    }
+}
+
+void renderAdvancedHUD(sf::RenderWindow& window, const bunker::AdvancedMechanics& adv, const sf::Font* font) {
+    // Погодный экранный фильтр
+    const auto& weather = adv.weather.state();
+    if (weather.type != bunker::WeatherType::Clear) {
+        sf::RectangleShape overlay({static_cast<float>(Config::SCREEN_WIDTH), static_cast<float>(Config::SCREEN_HEIGHT)});
+        if (weather.type == bunker::WeatherType::EtherFog) overlay.setFillColor(sf::Color(80, 120, 180, static_cast<sf::Uint8>(45 + 60 * weather.intensity)));
+        if (weather.type == bunker::WeatherType::AcidRain) overlay.setFillColor(sf::Color(70, 180, 70, static_cast<sf::Uint8>(35 + 55 * weather.intensity)));
+        if (weather.type == bunker::WeatherType::AshStorm) overlay.setFillColor(sf::Color(180, 120, 70, static_cast<sf::Uint8>(35 + 55 * weather.intensity)));
+        window.draw(overlay);
+    }
+
+    if (!font) return;
+
+    sf::Text text;
+    text.setFont(*font);
+    text.setCharacterSize(14);
+    text.setFillColor(sf::Color(230, 235, 210));
+    text.setOutlineThickness(1.0f);
+    text.setOutlineColor(sf::Color::Black);
+
+    const auto& tank = adv.tankUtility.runtime();
+    const auto& weapon = adv.survival.weapon();
+
+    std::string util = "BucketRig";
+    if (tank.utility == bunker::TankUtilityMode::RamShield) util = "RamShield";
+    if (tank.utility == bunker::TankUtilityMode::TowCoupler) util = "TowCoupler";
+
+    std::string seat = (tank.seat == bunker::TankSeat::Driver) ? "Driver" : "Gunner";
+
+    std::ostringstream ss;
+    ss << "ADVANCED MECHANICS\n"
+       << "Weather: " << weather.banner << " " << static_cast<int>(weather.intensity * 100.0f) << "%\n"
+       << "Stress: " << static_cast<int>(adv.survival.stress())
+       << " | Ammo: " << weapon.magazine << "/" << weapon.reserveAmmo
+       << (weapon.isReloading ? " RELOADING" : "") << "\n"
+       << "Tank: " << util << " | Seat: " << seat
+       << " | Heat: " << static_cast<int>(tank.cannonThermalLoad)
+       << (tank.overheated ? " OVERHEATED" : "") << "\n"
+       << "CAMP[B]: " << (adv.camp.enabled() ? "ON" : "OFF")
+       << " | ToolGun[F7 mode/F8 use/F2 undo/F3 redo]\n";
+
+    if (!adv.story.lastEvent().empty()) ss << "Story: " << adv.story.lastEvent() << "\n";
+    if (!adv.radio.lastSubtitle().empty()) ss << adv.radio.lastSubtitle() << "\n";
+    if (!adv.toolgun.lastValidation().empty()) ss << adv.toolgun.lastValidation() << "\n";
+
+    text.setString(ss.str());
+    text.setPosition(12.0f, 96.0f);
+    window.draw(text);
+}
+
 // ═══════════════════════════════════════════════════════
 // MAIN
 // ═══════════════════════════════════════════════════════
@@ -258,6 +388,7 @@ int main() {
     bunker::TimeShift        timeShift;
     bunker::TextureGenerator texGen;
     bunker::HostileAISystem hostileAI;
+    bunker::AdvancedMechanics adv;
 
     // ── Генерация текстур при первом запуске ──
     texGen.generateAllOnFirstRun();
@@ -268,6 +399,7 @@ int main() {
 
     // ── Генерация мира ──
     worldSession.generateDefaultWorld(gs, enemySpawner);
+    adv.initialize(gs, inventory);
 
     // ── Инициализация Hostile AI для уже созданных врагов ──
     // Старые Enemy из EnemySpawner получают полные профили из GMyGameDoNotTouch.
@@ -303,6 +435,17 @@ int main() {
     // InputManager уже забирает SFML events, поэтому M/T обрабатываем edge-check'ом.
     bool prevMapKey = false;
     bool prevTimeShiftKey = false;
+    bool prevHealKey = false;
+    bool prevRationKey = false;
+    bool prevReloadKey = false;
+    bool prevCampCycleKey = false;
+    bool prevUseUtilityKey = false;
+    bool prevTapeKey = false;
+    bool prevToolModeKey = false;
+    bool prevToolUseKey = false;
+    bool prevUndoKey = false;
+    bool prevRedoKey = false;
+    bool prevDeliveryKey = false;
 
     std::cout << "[SYSTEM] Bunker Protocol ISO запущен." << std::endl;
 
@@ -320,12 +463,47 @@ int main() {
         // Доп. клавиши, которые раньше терялись из-за двойного pollEvent.
         bool mapKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::M);
         bool timeShiftKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::T);
+        bool healKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::H);
+        bool rationKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::Y);
+        bool reloadKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::R);
+        bool campCycleKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::C);
+        bool useUtilityKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::U);
+        bool tapeKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::L);
+        bool toolModeKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::F7);
+        bool toolUseKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::F8);
+        bool undoKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::F2);
+        bool redoKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::F3);
+        bool deliveryKeyNow = sf::Keyboard::isKeyPressed(sf::Keyboard::F6);
 
         if (mapKeyNow && !prevMapKey) mapScreen.toggle();
         if (timeShiftKeyNow && !prevTimeShiftKey) timeShift.tryShift(gs);
 
+        // Advanced hotkeys. Всё edge-triggered, чтобы не срабатывало 60 раз/сек.
+        if (healKeyNow && !prevHealKey) adv.survival.useStim(gs, inventory);
+        if (rationKeyNow && !prevRationKey) adv.survival.eatRation(gs, inventory, bunker::RationKind::Stamina);
+        if (reloadKeyNow && !prevReloadKey && gs.playerMode == bunker::UnitMode::Scout) adv.survival.startReload(inventory);
+        if (campCycleKeyNow && !prevCampCycleKey) adv.camp.cycleType();
+        if (useUtilityKeyNow && !prevUseUtilityKey && gs.playerMode == bunker::UnitMode::Titan) adv.tankUtility.useUtility(gs);
+        if (tapeKeyNow && !prevTapeKey) std::cout << adv.radio.playNextUnplayed() << std::endl;
+        if (toolModeKeyNow && !prevToolModeKey) adv.toolgun.cycleMode();
+        if (toolUseKeyNow && !prevToolUseKey && inventory.hasItem(777)) adv.toolgun.apply(gs, gs.mouseWorldPos, adv.prefabs);
+        if (undoKeyNow && !prevUndoKey) adv.toolgun.undo(gs);
+        if (redoKeyNow && !prevRedoKey) adv.toolgun.redo(gs);
+        if (deliveryKeyNow && !prevDeliveryKey) adv.lanline.requestDelivery("ammo", gs.playerPos);
+
         prevMapKey = mapKeyNow;
         prevTimeShiftKey = timeShiftKeyNow;
+        prevHealKey = healKeyNow;
+        prevRationKey = rationKeyNow;
+        prevReloadKey = reloadKeyNow;
+        prevCampCycleKey = campCycleKeyNow;
+        prevUseUtilityKey = useUtilityKeyNow;
+        prevTapeKey = tapeKeyNow;
+        prevToolModeKey = toolModeKeyNow;
+        prevToolUseKey = toolUseKeyNow;
+        prevUndoKey = undoKeyNow;
+        prevRedoKey = redoKeyNow;
+        prevDeliveryKey = deliveryKeyNow;
 
         if (input.quit) gs.isRunning = false;
 
@@ -407,10 +585,16 @@ int main() {
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::F10)) {
                     bulletSys.fireDebugGunChainLightning(gs);
                 } else {
-                    bulletSys.fireScoutWeapon(gs, gs.isAiming);
+                    if (adv.survival.consumeRound()) {
+                        bulletSys.fireScoutWeapon(gs, gs.isAiming);
+                    } else {
+                        adv.survival.startReload(inventory);
+                    }
                 }
             } else if (gs.playerMode == bunker::UnitMode::Titan) {
-                titanAI.fireFromCockpit(gs);
+                if (adv.tankUtility.registerCannonShot(gs, gs.titan.currentWeapon == bunker::TankWeaponMode::Cannon ? 24.0f : 7.0f)) {
+                    titanAI.fireFromCockpit(gs);
+                }
             }
         }
 
@@ -436,6 +620,14 @@ int main() {
         // Мир (эрозия, осада, Pip-Pad)
         worldSession.update(gs, dt);
 
+        // Advanced переносы из двух старых репозиториев
+        adv.update(gs, inventory, input, dt);
+
+        // C.A.M.P. place: B включает режим, ЛКМ ставит объект если не стреляем по врагу.
+        if (adv.camp.enabled() && input.isShooting) {
+            adv.camp.place(gs, inventory, adv.skills.buildCostMultiplier());
+        }
+
         // Камера
         camera.update(gs.playerPos, gs.mouseWorldPos, gs.isAiming, dt);
 
@@ -450,6 +642,9 @@ int main() {
         // Сущности (Z-sort, разные цвета врагов по таймлайну)
         renderEntities(window, gs, playerCtrl, timeShift, hostileAI);
 
+        // Advanced world: breakables, shock waves, C.A.M.P.
+        renderAdvancedWorld(window, adv);
+
         // Пули + молнии
         bulletSys.render(gs, window, camera.getView());
 
@@ -463,6 +658,8 @@ int main() {
             timeShift.renderHUD(window, fontLoaded ? &globalFont : nullptr);
             timeShift.renderTransitionEffect(window);
         }
+
+        renderAdvancedHUD(window, adv, fontLoaded ? &globalFont : nullptr);
 
         window.display();
     }
