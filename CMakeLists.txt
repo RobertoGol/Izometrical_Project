@@ -19,11 +19,13 @@ find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 
 # ==============================================================================
 # Исходники
-# Большинство систем — header-only (в include/).
-# Только main.cpp и PlayerController.cpp — компилируемые.
+# Большинство legacy-систем пока header-only (в include/), но runtime/render
+# постепенно выносятся из main.cpp в нормальные компилируемые модули.
 # ==============================================================================
 set(SOURCES
     src/main.cpp
+    src/engine/GameApplication.cpp
+    src/render/GameRenderer.cpp
     src/entities/PlayerController.cpp
 )
 

@@ -29,6 +29,16 @@
 #include "TextureGenerator.hpp"
 #include "HostileAISystem.hpp"
 #include "AdvancedMechanics.hpp"
+#include "engine/GameApplication.hpp"
+
+
+
+
+
+int main() {
+    bunker::GameApplication app;
+    return app.run();
+}
 
 // ═══════════════════════════════════════════════════════
 // Отрисовка изометрического пола
