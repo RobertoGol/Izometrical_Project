@@ -1,4 +1,4 @@
-#include "render/GameRenderer.hpp"
+#pragma once
 
 #include "AdvancedMechanics.hpp"
 #include "Constants.hpp"
@@ -7,7 +7,7 @@
 #include "IsoMath.hpp"
 #include "TimeShift.hpp"
 #include "Types.hpp"
-
+#include <SFML/Graphics.hpp>
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -15,26 +15,37 @@
 
 namespace bunker {
 
+class VehicleManager;
+class PlayerController;
+class Tactics;
+class TitanAI;
+class PlayerInventory;
+
+class GameRenderer {
+public:
+    static void renderFloor(sf::RenderWindow& window, const GameState& gs, const TimeShift& timeShift);
+    static void renderEntities(sf::RenderWindow& window, const GameState& gs, const TimeShift& timeShift, const HostileAISystem& hostileAI);
+    static void renderAdvancedWorld(sf::RenderWindow& window, const AdvancedMechanics& adv);
+    static void renderAdvancedHUD(sf::RenderWindow& window, const AdvancedMechanics& adv, const sf::Font* font);
+};
+
 // ═══════════════════════════════════════════════════════
 // Отрисовка изометрического пола
 // ═══════════════════════════════════════════════════════
-void GameRenderer::renderFloor(sf::RenderWindow& window,
-                               const GameState& gs,
-                               const TimeShift& timeShift) {
+inline void GameRenderer::renderFloor(sf::RenderWindow& window, const GameState& gs, const TimeShift& timeShift) {
     for (int x = 0; x < Config::MAP_WIDTH; ++x) {
         for (int y = 0; y < Config::MAP_HEIGHT; ++y) {
             sf::ConvexShape tile(4);
-            tile.setPoint(0, IsoMath::worldToScreen(static_cast<float>(x),     static_cast<float>(y)));
+            tile.setPoint(0, IsoMath::worldToScreen(static_cast<float>(x), static_cast<float>(y)));
             tile.setPoint(1, IsoMath::worldToScreen(static_cast<float>(x + 1), static_cast<float>(y)));
             tile.setPoint(2, IsoMath::worldToScreen(static_cast<float>(x + 1), static_cast<float>(y + 1)));
-            tile.setPoint(3, IsoMath::worldToScreen(static_cast<float>(x),     static_cast<float>(y + 1)));
-
+            tile.setPoint(3, IsoMath::worldToScreen(static_cast<float>(x), static_cast<float>(y + 1)));
             if (gs.sectorMap[x][y] == 1) {
                 if (timeShift.isPast()) {
-                    tile.setFillColor(sf::Color(60, 70, 90));       // Прошлое — синеватые стены
+                    tile.setFillColor(sf::Color(60, 70, 90)); // Прошлое — синеватые стены
                     tile.setOutlineColor(sf::Color(80, 90, 115));
                 } else {
-                    tile.setFillColor(sf::Color(70, 75, 85));       // Настоящее — серые стены
+                    tile.setFillColor(sf::Color(70, 75, 85)); // Настоящее — серые стены
                     tile.setOutlineColor(sf::Color(90, 95, 105));
                 }
             } else if (gs.etherErosionMap[x][y] > 5.0f) {
@@ -43,14 +54,13 @@ void GameRenderer::renderFloor(sf::RenderWindow& window,
                 tile.setOutlineColor(sf::Color(50, 30, 60));
             } else {
                 if (timeShift.isPast()) {
-                    tile.setFillColor(sf::Color(30, 35, 45));       // Прошлое — холодные тона
+                    tile.setFillColor(sf::Color(30, 35, 45)); // Прошлое — холодные тона
                     tile.setOutlineColor(sf::Color(45, 50, 60));
                 } else {
-                    tile.setFillColor(sf::Color(35, 35, 40));       // Настоящее
+                    tile.setFillColor(sf::Color(35, 35, 40)); // Настоящее
                     tile.setOutlineColor(sf::Color(50, 50, 55));
                 }
             }
-
             tile.setOutlineThickness(1.0f);
             window.draw(tile);
         }
@@ -60,12 +70,8 @@ void GameRenderer::renderFloor(sf::RenderWindow& window,
 // ═══════════════════════════════════════════════════════
 // Отрисовка сущностей с Z-сортировкой
 // ═══════════════════════════════════════════════════════
-void GameRenderer::renderEntities(sf::RenderWindow& window,
-                                  const GameState& gs,
-                                  const TimeShift& timeShift,
-                                  const HostileAISystem& hostileAI) {
+inline void GameRenderer::renderEntities(sf::RenderWindow& window, const GameState& gs, const TimeShift& timeShift, const HostileAISystem& hostileAI) {
     std::vector<RenderObject> renderQueue;
-
     // Pip-Pad на полу
     if (!gs.bunkerProgression.hasFoundPipPad) {
         float px = gs.bunkerProgression.pipPadSpawnPos.x;
@@ -78,7 +84,6 @@ void GameRenderer::renderEntities(sf::RenderWindow& window,
             window.draw(pad);
         }});
     }
-
     // Лут-контейнеры
     for (const auto& c : gs.lootContainers) {
         float cx = c.position.x;
@@ -94,14 +99,12 @@ void GameRenderer::renderEntities(sf::RenderWindow& window,
             window.draw(box);
         }});
     }
-
     // Враги: цвета и форма зависят от HostileAISystem
     bool isPast = timeShift.isPast();
     const auto& hostileStates = hostileAI.debugStates();
     for (std::size_t i = 0; i < gs.enemies.size(); ++i) {
         const auto& e = gs.enemies[i];
         if (!e.isAlive) continue;
-
         float ex = e.position.x;
         float ey = e.position.y;
         float er = e.radius;
@@ -111,11 +114,9 @@ void GameRenderer::renderEntities(sf::RenderWindow& window,
             kind = hostileStates[i].kind;
             alert = hostileStates[i].alert;
         }
-
         renderQueue.push_back({ ex + ey, [&, ex, ey, er, isPast, kind, alert]() {
             sf::Color body = sf::Color(255, 50, 50);
             int points = 3;
-
             switch (kind) {
                 case HostileKind::VerminRush:
                     body = sf::Color(210, 45, 45);
@@ -134,7 +135,6 @@ void GameRenderer::renderEntities(sf::RenderWindow& window,
                     points = 6;
                     break;
             }
-
             if (isPast) {
                 body = sf::Color(
                     static_cast<sf::Uint8>(std::min(255, body.r / 2 + 50)),
@@ -143,13 +143,11 @@ void GameRenderer::renderEntities(sf::RenderWindow& window,
                     220
                 );
             }
-
             float radius = 8.0f + er * 5.0f;
             sf::CircleShape shape(radius, points);
             shape.setFillColor(body);
             shape.setOrigin(radius, radius);
             shape.setPosition(IsoMath::worldToScreen(ex, ey));
-
             if (alert == HostileAlertState::Aggro) {
                 shape.setOutlineThickness(2.0f);
                 shape.setOutlineColor(sf::Color(255, 40, 40));
@@ -158,11 +156,9 @@ void GameRenderer::renderEntities(sf::RenderWindow& window,
                 shape.setOutlineThickness(1.5f);
                 shape.setOutlineColor(sf::Color(255, 220, 60));
             }
-
             window.draw(shape);
         }});
     }
-
     // Вышка связи
     {
         float tx = gs.towerPosition.x;
@@ -177,7 +173,6 @@ void GameRenderer::renderEntities(sf::RenderWindow& window,
             window.draw(tower);
         }});
     }
-
     // Танк БТ-7274
     {
         float bx = gs.titan.position.x;
@@ -193,7 +188,6 @@ void GameRenderer::renderEntities(sf::RenderWindow& window,
             window.draw(bt);
         }});
     }
-
     // Игрок (только если НЕ в Танке)
     if (gs.playerMode != UnitMode::Titan) {
         float ppx = gs.playerPos.x;
@@ -208,13 +202,11 @@ void GameRenderer::renderEntities(sf::RenderWindow& window,
             window.draw(pShape);
         }});
     }
-
     // Z-сортировка и отрисовка
     std::sort(renderQueue.begin(), renderQueue.end(),
         [](const RenderObject& a, const RenderObject& b) {
             return a.depth < b.depth;
         });
-
     for (auto& obj : renderQueue) {
         obj.drawFunc();
     }
@@ -224,23 +216,20 @@ void GameRenderer::renderEntities(sf::RenderWindow& window,
 // Отрисовка перенесённых advanced-механик:
 // Weather, C.A.M.P., breakables, shock waves.
 // ═══════════════════════════════════════════════════════
-void GameRenderer::renderAdvancedWorld(sf::RenderWindow& window,
-                                       const AdvancedMechanics& adv) {
+inline void GameRenderer::renderAdvancedWorld(sf::RenderWindow& window, const AdvancedMechanics& adv) {
     // Разрушаемые объекты
     for (const auto& b : adv.reactive.breakables()) {
         if (b.broken) continue;
-
         sf::Color color = sf::Color(150, 110, 60);
         int points = 4;
         float radius = 8.0f;
         switch (b.kind) {
-            case BreakableKind::Glass:      color = sf::Color(125, 210, 255, 150); points = 4;  radius = 7.0f;  break;
-            case BreakableKind::Vegetation: color = sf::Color(75, 170, 70);        points = 7;  radius = 9.0f;  break;
-            case BreakableKind::Crate:      color = sf::Color(170, 120, 55);       points = 4;  radius = 9.0f;  break;
-            case BreakableKind::Barrel:     color = sf::Color(210, 75, 45);        points = 12; radius = 8.0f;  break;
-            case BreakableKind::Console:    color = sf::Color(85, 165, 210);       points = 6;  radius = 10.0f; break;
+            case BreakableKind::Glass:      color = sf::Color(125, 210, 255, 150); points = 4; radius = 7.0f; break;
+            case BreakableKind::Vegetation: color = sf::Color(75, 170, 70);        points = 7; radius = 9.0f; break;
+            case BreakableKind::Crate:      color = sf::Color(170, 120, 55);       points = 4; radius = 9.0f; break;
+            case BreakableKind::Barrel:     color = sf::Color(210, 75, 45);        points = 12; radius = 8.0f; break;
+            case BreakableKind::Console:    color = sf::Color(85, 165, 210);       points = 6; radius = 10.0f; break;
         }
-
         sf::CircleShape shape(radius, points);
         shape.setOrigin(radius, radius);
         shape.setPosition(IsoMath::worldToScreen(b.position.x, b.position.y));
@@ -249,7 +238,6 @@ void GameRenderer::renderAdvancedWorld(sf::RenderWindow& window,
         shape.setOutlineColor(sf::Color::Black);
         window.draw(shape);
     }
-
     // Волны от взрывов/ударов
     for (const auto& w : adv.reactive.waves()) {
         float sr = w.radius * 24.0f;
@@ -261,7 +249,6 @@ void GameRenderer::renderAdvancedWorld(sf::RenderWindow& window,
         ring.setOutlineColor(sf::Color(255, 230, 120, 90));
         window.draw(ring);
     }
-
     // C.A.M.P. построенные объекты
     for (const auto& obj : adv.camp.objects()) {
         sf::Vector2f pos = IsoMath::worldToScreen(obj.tileX + 0.5f, obj.tileY + 0.5f);
@@ -283,15 +270,14 @@ void GameRenderer::renderAdvancedWorld(sf::RenderWindow& window,
             window.draw(c);
         }
     }
-
     // Превью строительства
     if (adv.camp.enabled()) {
         const auto& p = adv.camp.preview();
         sf::ConvexShape tile(4);
-        tile.setPoint(0, IsoMath::worldToScreen(static_cast<float>(p.tileX),     static_cast<float>(p.tileY)));
+        tile.setPoint(0, IsoMath::worldToScreen(static_cast<float>(p.tileX), static_cast<float>(p.tileY)));
         tile.setPoint(1, IsoMath::worldToScreen(static_cast<float>(p.tileX + 1), static_cast<float>(p.tileY)));
         tile.setPoint(2, IsoMath::worldToScreen(static_cast<float>(p.tileX + 1), static_cast<float>(p.tileY + 1)));
-        tile.setPoint(3, IsoMath::worldToScreen(static_cast<float>(p.tileX),     static_cast<float>(p.tileY + 1)));
+        tile.setPoint(3, IsoMath::worldToScreen(static_cast<float>(p.tileX), static_cast<float>(p.tileY + 1)));
         tile.setFillColor(p.isPlacementValid ? sf::Color(60, 220, 90, 75) : sf::Color(220, 60, 60, 75));
         tile.setOutlineThickness(2.0f);
         tile.setOutlineColor(p.isPlacementValid ? sf::Color(90, 255, 120) : sf::Color(255, 90, 90));
@@ -299,9 +285,7 @@ void GameRenderer::renderAdvancedWorld(sf::RenderWindow& window,
     }
 }
 
-void GameRenderer::renderAdvancedHUD(sf::RenderWindow& window,
-                                     const AdvancedMechanics& adv,
-                                     const sf::Font* font) {
+inline void GameRenderer::renderAdvancedHUD(sf::RenderWindow& window, const AdvancedMechanics& adv, const sf::Font* font) {
     // Погодный экранный фильтр
     const auto& weather = adv.weather.state();
     if (weather.type != WeatherType::Clear) {
@@ -317,41 +301,28 @@ void GameRenderer::renderAdvancedHUD(sf::RenderWindow& window,
         }
         window.draw(overlay);
     }
-
     if (!font) return;
-
     sf::Text text;
     text.setFont(*font);
     text.setCharacterSize(14);
     text.setFillColor(sf::Color(230, 235, 210));
     text.setOutlineThickness(1.0f);
     text.setOutlineColor(sf::Color::Black);
-
     const auto& tank = adv.tankUtility.runtime();
     const auto& weapon = adv.survival.weapon();
-
     std::string util = "BucketRig";
     if (tank.utility == TankUtilityMode::RamShield) util = "RamShield";
     if (tank.utility == TankUtilityMode::TowCoupler) util = "TowCoupler";
-
     std::string seat = (tank.seat == TankSeat::Driver) ? "Driver" : "Gunner";
-
     std::ostringstream ss;
     ss << "ADVANCED MECHANICS\n"
        << "Weather: " << weather.banner << " " << static_cast<int>(weather.intensity * 100.0f) << "%\n"
-       << "Stress: " << static_cast<int>(adv.survival.stress())
-       << " | Ammo: " << weapon.magazine << "/" << weapon.reserveAmmo
-       << (weapon.isReloading ? " RELOADING" : "") << "\n"
-       << "Tank: " << util << " | Seat: " << seat
-       << " | Heat: " << static_cast<int>(tank.cannonThermalLoad)
-       << (tank.overheated ? " OVERHEATED" : "") << "\n"
-       << "CAMP[B]: " << (adv.camp.enabled() ? "ON" : "OFF")
-       << " | ToolGun[F7 mode/F8 use/F2 undo/F3 redo]\n";
-
+       << "Stress: " << static_cast<int>(adv.survival.stress()) << " | Ammo: " << weapon.magazine << "/" << weapon.reserveAmmo << (weapon.isReloading ? " RELOADING" : "") << "\n"
+       << "Tank: " << util << " | Seat: " << seat << " | Heat: " << static_cast<int>(tank.cannonThermalLoad) << (tank.overheated ? " OVERHEATED" : "") << "\n"
+       << "CAMP[B]: " << (adv.camp.enabled() ? "ON" : "OFF") << " | ToolGun[F7 mode/F8 use/F2 undo/F3 redo]\n";
     if (!adv.story.lastEvent().empty()) ss << "Story: " << adv.story.lastEvent() << "\n";
     if (!adv.radio.lastSubtitle().empty()) ss << adv.radio.lastSubtitle() << "\n";
     if (!adv.toolgun.lastValidation().empty()) ss << adv.toolgun.lastValidation() << "\n";
-
     text.setString(ss.str());
     text.setPosition(12.0f, 96.0f);
     window.draw(text);

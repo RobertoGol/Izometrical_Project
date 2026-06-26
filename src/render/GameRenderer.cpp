@@ -14,6 +14,7 @@
 #include <vector>
 
 namespace bunker {
+#if 0
 
 // ═══════════════════════════════════════════════════════
 // Отрисовка изометрического пола
@@ -356,5 +357,6 @@ void GameRenderer::renderAdvancedHUD(sf::RenderWindow& window,
     text.setPosition(12.0f, 96.0f);
     window.draw(text);
 }
+#endif
 
 }  // namespace bunker

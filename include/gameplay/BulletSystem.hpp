@@ -5,6 +5,8 @@
 #include "IsoMath.hpp"
 #include "Constants.hpp"
 #include "AdvancedMechanics.hpp"
+#include "gameplay/DamageSystem.hpp"
+#include <SFML/Graphics.hpp>
 
 #include <cmath>
 #include <algorithm>
@@ -153,10 +155,7 @@ public:
                                 ? adv->skills.tankDamageMultiplier()
                                 : adv->skills.footDamageMultiplier();
 
-                            e.health -= dmg;
-                            if (e.health <= 0.0f) {
-                                e.isAlive = false;
-                                gs.score += 150;
+                            if (DamageSystem::applyEnemyDamage(gs, e, dmg, DamageType::Kinetic)) {
                                 if (adv) {
                                     adv->skills.grantXp(gs, 60);
                                     adv->profile.registerKill(adv->playerProfile);
@@ -381,20 +380,51 @@ private:
                 float dmg = 85.0f * std::max(0.35f, falloff);
                 if (adv) dmg *= adv->skills.tankDamageMultiplier();
 
-                e.health -= dmg;
+                bool killed = DamageSystem::applyEnemyDamage(gs, e, dmg, DamageType::Explosive);
                 // Ударной волной отталкиваем врага от эпицентра.
                 Vector3D away = normalizeDir(e.position - b.current);
                 e.position += away * (0.35f + falloff * 0.65f);
 
-                if (e.health <= 0.0f) {
-                    e.isAlive = false;
-                    gs.score += 150;
+                if (killed) {
                     if (adv) {
                         adv->skills.grantXp(gs, 80);
                         adv->profile.registerKill(adv->playerProfile);
                     }
                 }
             }
+        }
+    }
+
+public:
+    void fireDebugGunChainLightning(GameState& gs) {
+        if (gs.enemies.empty()) return;
+        Vector3D curr = gs.playerPos;
+        for (auto& e : gs.enemies) {
+            if (!e.isAlive) continue;
+            float dx = curr.x - e.position.x;
+            float dy = curr.y - e.position.y;
+            if ((dx * dx + dy * dy) < 100.0f) {
+                Bullet b;
+                b.start = curr;
+                b.current = e.position;
+                b.type = BulletType::Standard;
+                b.speed = 100.0f;
+                gs.bullets.push_back(b);
+                DamageSystem::applyEnemyDamage(gs, e, 500.0f, DamageType::Electric);
+                curr = e.position;
+            }
+        }
+        gs.fireCooldown = 0.25f;
+    }
+
+    void render(const GameState& gs, sf::RenderWindow& window, const sf::View&) const {
+        for (const auto& b : gs.bullets) {
+            if (!b.isAlive) continue;
+            sf::CircleShape dot(3.0f);
+            dot.setFillColor(sf::Color(255, 240, 100));
+            dot.setOrigin(3.0f, 3.0f);
+            dot.setPosition(IsoMath::worldToScreen(b.current.x, b.current.y));
+            window.draw(dot);
         }
     }
 };
