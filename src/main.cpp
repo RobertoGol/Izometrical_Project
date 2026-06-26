@@ -23,11 +23,14 @@
 #include "Progression.hpp"
 #include "HUD.hpp"
 #include "MapScreen.hpp"
+#include "TimeShift.hpp"
+#include "TextureGenerator.hpp"
 
 // ═══════════════════════════════════════════════════════
 // Отрисовка изометрического пола
 // ═══════════════════════════════════════════════════════
-void renderFloor(sf::RenderWindow& window, const bunker::GameState& gs) {
+void renderFloor(sf::RenderWindow& window, const bunker::GameState& gs,
+                 const bunker::TimeShift& timeShift) {
     for (int x = 0; x < Config::MAP_WIDTH; ++x) {
         for (int y = 0; y < Config::MAP_HEIGHT; ++y) {
             sf::ConvexShape tile(4);
@@ -37,18 +40,25 @@ void renderFloor(sf::RenderWindow& window, const bunker::GameState& gs) {
             tile.setPoint(3, bunker::IsoMath::worldToScreen(static_cast<float>(x),     static_cast<float>(y + 1)));
 
             if (gs.sectorMap[x][y] == 1) {
-                // Стена
-                tile.setFillColor(sf::Color(70, 75, 85));
-                tile.setOutlineColor(sf::Color(90, 95, 105));
+                if (timeShift.isPast()) {
+                    tile.setFillColor(sf::Color(60, 70, 90));       // Прошлое — синеватые стены
+                    tile.setOutlineColor(sf::Color(80, 90, 115));
+                } else {
+                    tile.setFillColor(sf::Color(70, 75, 85));       // Настоящее — серые стены
+                    tile.setOutlineColor(sf::Color(90, 95, 105));
+                }
             } else if (gs.etherErosionMap[x][y] > 5.0f) {
-                // Эрозия
                 int intensity = static_cast<int>(std::min(gs.etherErosionMap[x][y] * 1.5f, 80.0f));
                 tile.setFillColor(sf::Color(30 + intensity/2, 20, 35 + intensity));
                 tile.setOutlineColor(sf::Color(50, 30, 60));
             } else {
-                // Обычный пол
-                tile.setFillColor(sf::Color(35, 35, 40));
-                tile.setOutlineColor(sf::Color(50, 50, 55));
+                if (timeShift.isPast()) {
+                    tile.setFillColor(sf::Color(30, 35, 45));       // Прошлое — холодные тона
+                    tile.setOutlineColor(sf::Color(45, 50, 60));
+                } else {
+                    tile.setFillColor(sf::Color(35, 35, 40));       // Настоящее
+                    tile.setOutlineColor(sf::Color(50, 50, 55));
+                }
             }
 
             tile.setOutlineThickness(1.0f);
@@ -58,10 +68,11 @@ void renderFloor(sf::RenderWindow& window, const bunker::GameState& gs) {
 }
 
 // ═══════════════════════════════════════════════════════
-// Отрисовка игровых объектов с Z-сортировкой
+// Отрисовка сущностей с Z-сортировкой
 // ═══════════════════════════════════════════════════════
 void renderEntities(sf::RenderWindow& window, const bunker::GameState& gs,
-                    const bunker::PlayerController& playerCtrl) {
+                    const bunker::PlayerController& playerCtrl,
+                    const bunker::TimeShift& timeShift) {
     std::vector<bunker::RenderObject> renderQueue;
 
     // Pip-Pad на полу
@@ -92,14 +103,14 @@ void renderEntities(sf::RenderWindow& window, const bunker::GameState& gs,
         }});
     }
 
-    // Враги
+    // Враги (разные цвета в разных таймлайнах)
+    bool isPast = timeShift.isPast();
     for (const auto& e : gs.enemies) {
         if (!e.isAlive) continue;
-        float ex = e.position.x, ey = e.position.y;
-        float er = e.radius;
-        renderQueue.push_back({ ex + ey, [&, ex, ey, er]() {
-            sf::CircleShape shape(8.0f + er * 5.0f, 3);
-            shape.setFillColor(sf::Color(255, 50, 50));
+        float ex = e.position.x, ey = e.position.y, er = e.radius;
+        renderQueue.push_back({ ex + ey, [&, ex, ey, er, isPast]() {
+            sf::CircleShape shape(8.0f + er * 5.0f, isPast ? 4 : 3);
+            shape.setFillColor(isPast ? sf::Color(100, 150, 255) : sf::Color(255, 50, 50));
             shape.setOrigin(8.0f + er * 5.0f, 8.0f + er * 5.0f);
             shape.setPosition(bunker::IsoMath::worldToScreen(ex, ey));
             window.draw(shape);
@@ -123,9 +134,10 @@ void renderEntities(sf::RenderWindow& window, const bunker::GameState& gs,
     // Танк БТ-7274
     {
         float bx = gs.titan.position.x, by = gs.titan.position.y;
-        renderQueue.push_back({ bx + by, [&, bx, by]() {
+        bool piloted = gs.titan.isPiloted;
+        renderQueue.push_back({ bx + by, [&, bx, by, piloted]() {
             sf::CircleShape bt(16.0f, 4);
-            bt.setFillColor(sf::Color(230, 115, 25));
+            bt.setFillColor(piloted ? sf::Color(255, 160, 40) : sf::Color(230, 115, 25));
             bt.setOrigin(16, 16);
             bt.setPosition(bunker::IsoMath::worldToScreen(bx, by));
             bt.setOutlineThickness(2.0f);
@@ -134,18 +146,16 @@ void renderEntities(sf::RenderWindow& window, const bunker::GameState& gs,
         }});
     }
 
-    // Игрок
-    {
+    // Игрок (только если НЕ в Танке)
+    if (gs.playerMode != bunker::UnitMode::Titan) {
         float ppx = gs.playerPos.x, ppy = gs.playerPos.y;
-        bool isTitan = (gs.playerMode == bunker::UnitMode::Titan);
-        renderQueue.push_back({ ppx + ppy + 0.01f, [&, ppx, ppy, isTitan]() {
-            float r = isTitan ? 16.0f : 12.0f;
-            sf::CircleShape pShape(r);
-            pShape.setFillColor(isTitan ? sf::Color(230, 140, 40) : sf::Color::Cyan);
-            pShape.setOrigin(r, r);
+        renderQueue.push_back({ ppx + ppy + 0.01f, [&, ppx, ppy]() {
+            sf::CircleShape pShape(12.0f);
+            pShape.setFillColor(sf::Color::Cyan);
+            pShape.setOrigin(12, 12);
             pShape.setPosition(bunker::IsoMath::worldToScreen(ppx, ppy));
             pShape.setOutlineThickness(2.0f);
-            pShape.setOutlineColor(isTitan ? sf::Color(200, 100, 10) : sf::Color(0, 200, 200));
+            pShape.setOutlineColor(sf::Color(0, 200, 200));
             window.draw(pShape);
         }});
     }
@@ -175,7 +185,7 @@ int main() {
     );
     window.setFramerateLimit(60);
 
-    // ── Инициализация всех систем ──
+    // ── Инициализация систем ──
     bunker::GameState        gs;
     bunker::InputManager     inputMgr;
     bunker::Camera           camera;
@@ -189,6 +199,11 @@ int main() {
     bunker::PlayerInventory  inventory;
     bunker::HUD              hud;
     bunker::MapScreen        mapScreen;
+    bunker::TimeShift        timeShift;
+    bunker::TextureGenerator texGen;
+
+    // ── Генерация текстур при первом запуске ──
+    texGen.generateAllOnFirstRun();
 
     // ── Загрузка модульных конфигов ──
     vehicleMgr.scanAndLoadConfigs("assets/vehicles");
@@ -197,6 +212,9 @@ int main() {
     // ── Генерация мира ──
     worldSession.generateDefaultWorld(gs, enemySpawner);
 
+    // ── Инициализация TimeShift (после генерации мира!) ──
+    timeShift.initialize(gs, enemySpawner);
+
     // ── Попытка загрузки сейва ──
     if (bunker::SaveSystem::saveExists(1)) {
         bunker::SaveSystem::readSave(1, gs, inventory);
@@ -204,11 +222,10 @@ int main() {
     }
 
     // ── Шрифт ──
-    hud.loadFont("assets/fonts/default.ttf");
     sf::Font globalFont;
-    if (globalFont.loadFromFile("assets/fonts/default.ttf")) {
-        mapScreen.loadFont(globalFont);
-    }
+    bool fontLoaded = globalFont.loadFromFile("assets/fonts/default.ttf");
+    hud.loadFont("assets/fonts/default.ttf");
+    if (fontLoaded) mapScreen.loadFont(globalFont);
 
     // ── Спавн транспорта на карту ──
     vehicleMgr.spawnVehicle("steamcar",   {3.0f, 3.0f, 0.0f});
@@ -222,29 +239,29 @@ int main() {
     // ═══════════════════════════════════════════════
     while (window.isOpen() && gs.isRunning) {
         float dt = clock.restart().asSeconds();
-        if (dt > 0.1f) dt = 0.1f;  // Защита от лагов
+        if (dt > 0.1f) dt = 0.1f;
         gs.deltaTime = dt;
 
         // ── 1. Ввод ──
         bunker::InputSnapshot input = inputMgr.capture(window);
 
-        // Обработка событий для карты (зум колёсиком)
+        // Доп. события (зум карты, TimeShift по T, карта по M)
         sf::Event evt;
         while (window.pollEvent(evt)) {
             if (evt.type == sf::Event::Closed) gs.isRunning = false;
             if (mapScreen.isOpen()) mapScreen.handleInput(evt, dt);
-            // Клавиша M — переключение карты
-            if (evt.type == sf::Event::KeyPressed && evt.key.code == sf::Keyboard::M) {
-                mapScreen.toggle();
+
+            if (evt.type == sf::Event::KeyPressed) {
+                if (evt.key.code == sf::Keyboard::M) mapScreen.toggle();
+                if (evt.key.code == sf::Keyboard::T) timeShift.tryShift(gs);
             }
         }
 
         if (input.quit) gs.isRunning = false;
 
-        // ── Если карта открыта — только скролл, без геймплея ──
+        // ── Карта открыта — пауза геймплея ──
         if (mapScreen.isOpen()) {
             mapScreen.updatePan(dt);
-
             window.clear(sf::Color(20, 20, 22));
             mapScreen.render(window, gs);
             window.display();
@@ -255,35 +272,23 @@ int main() {
         gs.mouseWorldPos = camera.screenToWorld(window, input.mousePixelPos);
 
         // ── 3. Сохранение / Загрузка ──
-        if (input.saveGame) {
-            bunker::SaveSystem::writeSave(1, gs, inventory);
-        }
-        if (input.loadGame) {
-            bunker::SaveSystem::readSave(1, gs, inventory);
-        }
+        if (input.saveGame) bunker::SaveSystem::writeSave(1, gs, inventory);
+        if (input.loadGame) bunker::SaveSystem::readSave(1, gs, inventory);
 
         // ── 4. Переключение Пилот ↔ Танк (Tab) ──
         if (input.switchMode) {
             if (gs.playerMode == bunker::UnitMode::Scout) {
-                // Проверяем расстояние до Танка
-                float dx = gs.playerPos.x - gs.titan.position.x;
-                float dy = gs.playerPos.y - gs.titan.position.y;
-                if ((dx * dx + dy * dy) < 4.0f) {
-                    gs.playerMode = bunker::UnitMode::Titan;
-                    gs.titan.isPiloted = true;
-                    gs.playerPos = gs.titan.position;
+                if (titanAI.tryMount(gs)) {
                     tactics.enterVehicle();
                 }
             } else {
-                gs.playerMode = bunker::UnitMode::Scout;
-                gs.titan.isPiloted = false;
-                gs.playerPos.x = gs.titan.position.x + 1.0f;
+                titanAI.dismount(gs);
                 tactics.exitVehicle();
             }
         }
 
-        // ── 5. Смена класса пилота (1-7) ──
-        if (gs.playerMode == bunker::UnitMode::Scout) {
+        // ── 5. Смена класса пилота (1-7, только Scout) ──
+        if (gs.playerMode == bunker::UnitMode::Scout && !vehicleMgr.isPlayerInVehicle()) {
             bunker::PilotClass classes[] = {
                 bunker::PilotClass::Grapple, bunker::PilotClass::Cloak,
                 bunker::PilotClass::Stim, bunker::PilotClass::PhaseShift,
@@ -297,6 +302,9 @@ int main() {
 
         // ── 6. Обновление систем ──
 
+        // TimeShift
+        timeShift.update(dt);
+
         // Транспорт
         if (vehicleMgr.isPlayerInVehicle()) {
             vehicleMgr.update(gs, input, dt);
@@ -304,38 +312,35 @@ int main() {
             // Пешком
             playerCtrl.update(gs, input, dt);
 
-            // Посадка в транспорт (E)
+            // Посадка в транспорт или взаимодействие с контейнером (E)
             if (input.interact) {
                 if (!vehicleMgr.mountNearest(gs)) {
-                    // Если не транспорт — пробуем контейнер
                     worldSession.interactWithContainers(gs, inventory);
                 }
             }
         }
 
-        // Тактики
+        // Тактики (только Scout)
         tactics.updateCooldowns(gs, dt);
-        if (input.activateTactical && gs.playerMode == bunker::UnitMode::Scout) {
+        if (input.activateTactical && gs.playerMode == bunker::UnitMode::Scout
+            && !vehicleMgr.isPlayerInVehicle()) {
             tactics.activateTactical(gs, gs.mouseWorldPos);
         }
         tactics.processGrapplePhysics(gs, dt);
 
-        // Танк БТ-7274
+        // Танк БТ-7274 (всегда обновляется — и автономный и пилотируемый)
         titanAI.update(gs, input, dt);
-        if (gs.titan.fireCooldown > 0.0f)
-            gs.titan.fireCooldown -= dt;
 
         // Стрельба
         if (input.isShooting && gs.fireCooldown <= 0.0f) {
             if (gs.playerMode == bunker::UnitMode::Scout && !vehicleMgr.isPlayerInVehicle()) {
-                // DebugGun (F10 зажат)
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::F10)) {
                     bulletSys.fireDebugGunChainLightning(gs);
                 } else {
                     bulletSys.fireScoutWeapon(gs, gs.isAiming);
                 }
             } else if (gs.playerMode == bunker::UnitMode::Titan) {
-                bulletSys.fireTitanWeapon(gs);
+                titanAI.fireFromCockpit(gs);
             }
         }
 
@@ -344,8 +349,8 @@ int main() {
             bulletSys.fireTitanMissiles(gs);
         }
 
-        // Автострельба Титана
-        bulletSys.titanAutoFire(gs);
+        // Автострельба Танка (автономный режим)
+        titanAI.autoFire(gs);
 
         // Баллистика
         bulletSys.update(gs, dt);
@@ -366,23 +371,27 @@ int main() {
         // ── 7. Рендер ──
         window.clear(sf::Color(20, 20, 22));
 
-        // Игровая камера
         camera.applyTo(window);
 
-        // Пол + стены
-        renderFloor(window, gs);
+        // Пол + стены (с учётом таймлайна)
+        renderFloor(window, gs, timeShift);
 
-        // Сущности (Z-sort)
-        renderEntities(window, gs, playerCtrl);
+        // Сущности (Z-sort, разные цвета врагов по таймлайну)
+        renderEntities(window, gs, playerCtrl, timeShift);
 
         // Пули + молнии
         bulletSys.render(gs, window, camera.getView());
 
-        // Сброс View на экранный для HUD
+        // ── HUD (экранные координаты) ──
         window.setView(window.getDefaultView());
 
-        // HUD
         hud.render(window, gs, playerCtrl, tactics, titanAI, vehicleMgr, inventory);
+
+        // TimeShift HUD (индикатор таймлайна + заряд)
+        if (timeShift.isInitialized()) {
+            timeShift.renderHUD(window, fontLoaded ? &globalFont : nullptr);
+            timeShift.renderTransitionEffect(window);
+        }
 
         window.display();
     }
