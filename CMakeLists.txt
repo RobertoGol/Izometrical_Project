@@ -1,38 +1,69 @@
-#pragma once
+cmake_minimum_required(VERSION 3.16)
+project(BunkerProtocolISO VERSION 1.0 LANGUAGES CXX)
 
-#include "core/Types.hpp"
-#include "core/Constants.hpp"
-#include <string>
-#include <vector>
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-namespace bunker {
+find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 
-class PlayerInventory {
-private:
-    std::vector<InventoryItem> m_Slots;
-    float m_MaxWeight     = Config::INVENTORY_MAX_WEIGHT;
-    float m_CurrentWeight = 0.0f;
+set(SOURCES
+    src/main.cpp
+    src/engine/GameApplication.cpp
+    src/engine/InputManager.cpp
+    src/engine/TimeShift.cpp
+    src/world/WorldSession.cpp
+    src/world/MapScreen.cpp
+    src/world/WeatherSystem.cpp
+    src/vehicles/VehicleManager.cpp
+    src/gameplay/Tactics.cpp
+    src/gameplay/BulletSystem.cpp
+    src/ai/EnemySpawner.cpp
+    src/ai/HostileAISystem.cpp
+    src/ai/TitanAI.cpp
+    src/persistence/Inventory.cpp
+    src/persistence/Progression.cpp
+    src/persistence/SaveSystem.cpp
+    src/ui/HUD.cpp
+    src/ui/TerminalUI.cpp
+    src/render/GameRenderer.cpp
+    src/entities/PlayerController.cpp
+    src/entities/Camera.cpp
+    src/entities/Collisions.cpp
+)
 
-public:
-    PlayerInventory() = default;
+add_executable(${PROJECT_NAME} ${SOURCES})
 
-    bool addItem(unsigned int id, ItemType type, int count, float weight, const std::string& name);
-    bool removeItem(unsigned int id, int count);
-    bool hasItem(unsigned int id, int minCount = 1) const;
-    int  getItemCount(unsigned int id) const;
-    void clear();
-    void giveDevKit();
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/ai
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/content
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/core
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/engine
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/entities
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/gameplay
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/persistence
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/render
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/ui
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/vehicles
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/world
+)
 
-    const std::vector<InventoryItem>& getSlots()  const { return m_Slots; }
-    float getCurrentWeight() const { return m_CurrentWeight; }
-    float getMaxWeight()     const { return m_MaxWeight; }
-    float getWeightPercent() const { return (m_MaxWeight > 0.0f) ? m_CurrentWeight / m_MaxWeight : 0.0f; }
-    int   getSlotCount()     const { return static_cast<int>(m_Slots.size()); }
-    bool  isEmpty()          const { return m_Slots.empty(); }
-    bool  isFull()           const { return m_CurrentWeight >= m_MaxWeight; }
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    sfml-graphics
+    sfml-window
+    sfml-system
+)
 
-private:
-    void recalculateWeight();
-};
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+    target_link_libraries(${PROJECT_NAME} PRIVATE stdc++fs)
+endif()
 
-}  // namespace bunker
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+        "$<TARGET_FILE_DIR:${PROJECT_NAME}>/assets"
+        COMMENT "Copying assets to build directory..."
+    )
+endif()

@@ -8,6 +8,7 @@
 #include "EnemySpawner.hpp"
 #include "GameState.hpp"
 #include "HUD.hpp"
+#include "ui/TerminalUI.hpp"
 #include "HostileAISystem.hpp"
 #include "InputManager.hpp"
 #include "Inventory.hpp"
@@ -67,6 +68,7 @@ namespace bunker
         WorldSession m_WorldSession;
         PlayerInventory m_Inventory;
         HUD m_Hud;
+        TerminalManager m_TerminalUI;
         MapScreen m_MapScreen;
         TimeShift m_TimeShift;
         TextureGenerator m_TextureGenerator;

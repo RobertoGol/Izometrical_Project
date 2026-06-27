@@ -393,6 +393,7 @@ namespace bunker
                 m_SoulLineUsed = true;
                 gs.playerHealth = 1.0f;
                 m_Stress = 100.0f;
+                std::cout << "[SURVIVAL] !! SOUL LINE !! Срыв смерти! Нить души удержала Пилота в Убежище 17!" << std::endl;
                 return;
             }
             if (gs.playerHealth > 0.0f && gs.playerHealth < gs.playerMaxHealth * 0.16f && !m_SecondWindUsed && m_Stress >= 55.0f)

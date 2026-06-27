@@ -106,6 +106,9 @@ namespace bunker
         m_Hud.loadFont(AssetPaths::DefaultFont);
         if (m_FontLoaded)
         {
+            m_TerminalUI.loadFont(m_GlobalFont);
+        }
+        {
             m_MapScreen.loadFont(m_GlobalFont);
         }
     }
@@ -129,6 +132,17 @@ namespace bunker
         if (input.quit)
         {
             m_GameState.isRunning = false;
+        }
+
+        // Терминал открыт — пауза gameplay
+        if (m_TerminalUI.isOpen())
+        {
+            m_TerminalUI.handleWindowEvents(m_Window, m_GameState);
+            m_TerminalUI.update(dt);
+            m_Window.clear(sf::Color(10, 20, 12));
+            m_TerminalUI.render(m_Window, m_GameState);
+            m_Window.display();
+            return;
         }
 
         // Карта открыта — пауза gameplay, но карта продолжает получать pan-update.
@@ -329,12 +343,15 @@ namespace bunker
         // Пешком.
         m_PlayerController.update(m_GameState, input, dt);
 
-        // Посадка в транспорт или взаимодействие с контейнером (E).
+        // Посадка в транспорт, подключение к терминалу или подбор лута (E).
         if (input.interact)
         {
-            if (!m_VehicleManager.mountNearest(m_GameState))
+            if (!m_TerminalUI.tryInteractTerminal(m_GameState))
             {
-                m_WorldSession.interactWithContainers(m_GameState, m_Inventory);
+                if (!m_VehicleManager.mountNearest(m_GameState))
+                {
+                    m_WorldSession.interactWithContainers(m_GameState, m_Inventory);
+                }
             }
         }
     }
