@@ -5,17 +5,19 @@
 #include "ai/EnemySpawner.hpp"
 #include "persistence/Inventory.hpp"
 
-namespace bunker {
+namespace bunker
+{
 
-class WorldSession {
-public:
-    WorldSession() = default;
-    void generateDefaultWorld(GameState& gs, EnemySpawner& spawner);
-    void update(GameState& gs, float dt);
-    void interactWithContainers(GameState& gs, PlayerInventory& inventory);
+    class WorldSession
+    {
+    public:
+        WorldSession() = default;
+        void generateDefaultWorld(GameState &gs, EnemySpawner &spawner);
+        void update(GameState &gs, float dt);
+        void interactWithContainers(GameState &gs, PlayerInventory &inventory);
 
-private:
-    void spreadErosionToNeighbors(GameState& gs);
-};
+    private:
+        void spreadErosionToNeighbors(GameState &gs);
+    };
 
-}  // namespace bunker
+} // namespace bunker

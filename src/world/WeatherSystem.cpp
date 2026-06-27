@@ -4,196 +4,245 @@
 #include <cstdlib>
 #include <iostream>
 
-namespace bunker {
+namespace bunker
+{
 
-void WeatherSystem::initializeRandom() {
-    m_State = WeatherRuntimeState{};
-    m_State.nextEventIn = 20.0f + random01() * 25.0f;
-    recalculateDerivedValues();
-}
-
-void WeatherSystem::resetToClear() {
-    m_State = WeatherRuntimeState{};
-    recalculateDerivedValues();
-}
-
-void WeatherSystem::forceWeather(WeatherType type, float targetIntensity) {
-    targetIntensity = std::clamp(targetIntensity, 0.0f, 1.0f);
-
-    if (type == WeatherType::Clear || targetIntensity <= 0.01f) {
-        m_State.targetIntensity = 0.0f;
-        m_State.type = WeatherType::Clear;
-        m_State.banner = "CLEAR";
-        return;
+    void WeatherSystem::initializeRandom()
+    {
+        m_State = WeatherRuntimeState{};
+        m_State.nextEventIn = 20.0f + random01() * 25.0f;
+        recalculateDerivedValues();
     }
 
-    m_State.current = type;
-    m_State.type = type;
-    m_State.targetIntensity = targetIntensity;
-    m_State.banner = label();
-
-    if (type == WeatherType::EtherStorm) {
-        m_State.thunderTimer = 0.8f + random01() * 2.0f;
-    }
-}
-
-void WeatherSystem::update(GameState& gs, float dt) {
-    if (dt <= 0.0f) return;
-    if (dt > 0.1f) dt = 0.1f;
-
-    m_State.eventTimer += dt;
-    m_State.damageTickTimer += dt;
-    m_State.visualTimer += dt;
-
-    if (m_State.eventTimer >= m_State.nextEventIn) {
-        chooseNextWeather();
+    void WeatherSystem::resetToClear()
+    {
+        m_State = WeatherRuntimeState{};
+        recalculateDerivedValues();
     }
 
-    updateIntensity(dt);
-    updateThunder(dt);
-    recalculateDerivedValues();
-    applyWorldEffects(gs, dt);
+    void WeatherSystem::forceWeather(WeatherType type, float targetIntensity)
+    {
+        targetIntensity = std::clamp(targetIntensity, 0.0f, 1.0f);
 
-    if (m_State.damageTickTimer >= 0.50f) {
-        applyDamageTick(gs, m_State.damageTickTimer);
-        m_State.damageTickTimer = 0.0f;
-    }
-}
+        if (type == WeatherType::Clear || targetIntensity <= 0.01f)
+        {
+            m_State.targetIntensity = 0.0f;
+            m_State.type = WeatherType::Clear;
+            m_State.banner = "CLEAR";
+            return;
+        }
 
-std::string WeatherSystem::label() const {
-    switch (m_State.current) {
-        case WeatherType::Clear:      return "CLEAR";
-        case WeatherType::EtherFog:   return "ETHER FOG";
-        case WeatherType::AcidRain:   return "ACID RAIN";
-        case WeatherType::AshStorm:   return "ASH STORM";
-        case WeatherType::EtherStorm: return "ETHER STORM";
-    }
-    return "UNKNOWN";
-}
+        m_State.current = type;
+        m_State.type = type;
+        m_State.targetIntensity = targetIntensity;
+        m_State.banner = label();
 
-void WeatherSystem::renderWorldOverlay(sf::RenderWindow& window) const {
-    if (m_State.intensity <= 0.01f || m_State.current == WeatherType::Clear) return;
-
-    sf::View oldView = window.getView();
-    window.setView(window.getDefaultView());
-
-    const float W = static_cast<float>(Config::SCREEN_WIDTH);
-    const float H = static_cast<float>(Config::SCREEN_HEIGHT);
-    const float I = std::clamp(m_State.intensity, 0.0f, 1.0f);
-
-    if (m_State.current == WeatherType::EtherFog || m_State.current == WeatherType::EtherStorm) {
-        drawFogOverlay(window, W, H, I);
+        if (type == WeatherType::EtherStorm)
+        {
+            m_State.thunderTimer = 0.8f + random01() * 2.0f;
+        }
     }
 
-    if (m_State.current == WeatherType::AcidRain || m_State.current == WeatherType::EtherStorm) {
-        drawAcidRainOverlay(window, W, H, I);
+    void WeatherSystem::update(GameState &gs, float dt)
+    {
+        if (dt <= 0.0f)
+            return;
+        if (dt > 0.1f)
+            dt = 0.1f;
+
+        m_State.eventTimer += dt;
+        m_State.damageTickTimer += dt;
+        m_State.visualTimer += dt;
+
+        if (m_State.eventTimer >= m_State.nextEventIn)
+        {
+            chooseNextWeather();
+        }
+
+        updateIntensity(dt);
+        updateThunder(dt);
+        recalculateDerivedValues();
+        applyWorldEffects(gs, dt);
+
+        if (m_State.damageTickTimer >= 0.50f)
+        {
+            applyDamageTick(gs, m_State.damageTickTimer);
+            m_State.damageTickTimer = 0.0f;
+        }
     }
 
-    if (m_State.flashAlpha > 0.01f) {
-        sf::RectangleShape flash({W, H});
-        flash.setFillColor(sf::Color(215, 190, 255, static_cast<sf::Uint8>(std::clamp(m_State.flashAlpha, 0.0f, 160.0f))));
-        window.draw(flash);
+    std::string WeatherSystem::label() const
+    {
+        switch (m_State.current)
+        {
+        case WeatherType::Clear:
+            return "CLEAR";
+        case WeatherType::EtherFog:
+            return "ETHER FOG";
+        case WeatherType::AcidRain:
+            return "ACID RAIN";
+        case WeatherType::AshStorm:
+            return "ASH STORM";
+        case WeatherType::EtherStorm:
+            return "ETHER STORM";
+        }
+        return "UNKNOWN";
     }
 
-    window.setView(oldView);
-}
+    void WeatherSystem::renderWorldOverlay(sf::RenderWindow &window) const
+    {
+        if (m_State.intensity <= 0.01f || m_State.current == WeatherType::Clear)
+            return;
 
-void WeatherSystem::renderHUD(sf::RenderWindow& window, const sf::Font* font) const {
-    if (!font) return;
+        sf::View oldView = window.getView();
+        window.setView(window.getDefaultView());
 
-    sf::Text text;
-    text.setFont(*font);
-    text.setCharacterSize(13);
-    text.setFillColor(hudColor());
-    text.setPosition(12.0f, 96.0f);
+        const float W = static_cast<float>(Config::SCREEN_WIDTH);
+        const float H = static_cast<float>(Config::SCREEN_HEIGHT);
+        const float I = std::clamp(m_State.intensity, 0.0f, 1.0f);
 
-    std::string line = "WEATHER: " + label() +
-        "  INT " + std::to_string(static_cast<int>(m_State.intensity * 100.0f)) + "%";
+        if (m_State.current == WeatherType::EtherFog || m_State.current == WeatherType::EtherStorm)
+        {
+            drawFogOverlay(window, W, H, I);
+        }
 
-    if (m_State.current == WeatherType::EtherFog) {
-        line += "  VIS -" + std::to_string(static_cast<int>((1.0f - m_State.visibilityMultiplier) * 100.0f)) + "%";
-    } else if (m_State.current == WeatherType::AcidRain) {
-        line += "  ACID " + oneDecimal(m_State.acidDamagePerSecond) + "/s";
-    } else if (m_State.current == WeatherType::EtherStorm) {
-        line += "  VIS -" + std::to_string(static_cast<int>((1.0f - m_State.visibilityMultiplier) * 100.0f)) + "%";
-        line += "  ACID " + oneDecimal(m_State.acidDamagePerSecond) + "/s";
+        if (m_State.current == WeatherType::AcidRain || m_State.current == WeatherType::EtherStorm)
+        {
+            drawAcidRainOverlay(window, W, H, I);
+        }
+
+        if (m_State.flashAlpha > 0.01f)
+        {
+            sf::RectangleShape flash({W, H});
+            flash.setFillColor(sf::Color(215, 190, 255, static_cast<sf::Uint8>(std::clamp(m_State.flashAlpha, 0.0f, 160.0f))));
+            window.draw(flash);
+        }
+
+        window.setView(oldView);
     }
 
-    text.setString(line);
-    window.draw(text);
-}
+    void WeatherSystem::renderHUD(sf::RenderWindow &window, const sf::Font *font) const
+    {
+        if (!font)
+            return;
 
-void WeatherSystem::chooseNextWeather() {
-    m_State.eventTimer = 0.0f;
-    m_State.nextEventIn = 32.0f + random01() * 50.0f;
+        sf::Text text;
+        text.setFont(*font);
+        text.setCharacterSize(13);
+        text.setFillColor(hudColor());
+        text.setPosition(12.0f, 96.0f);
 
-    const float roll = random01();
-    WeatherType next = WeatherType::Clear;
-    float target = 0.0f;
+        std::string line = "WEATHER: " + label() +
+                           "  INT " + std::to_string(static_cast<int>(m_State.intensity * 100.0f)) + "%";
 
-    if (roll < 0.42f) {
-        next = WeatherType::Clear;
-        target = 0.0f;
-    } else if (roll < 0.68f) {
-        next = WeatherType::EtherFog;
-        target = 0.30f + random01() * 0.50f;
-    } else if (roll < 0.90f) {
-        next = WeatherType::AcidRain;
-        target = 0.30f + random01() * 0.55f;
-    } else {
-        next = WeatherType::EtherStorm;
-        target = 0.55f + random01() * 0.40f;
+        if (m_State.current == WeatherType::EtherFog)
+        {
+            line += "  VIS -" + std::to_string(static_cast<int>((1.0f - m_State.visibilityMultiplier) * 100.0f)) + "%";
+        }
+        else if (m_State.current == WeatherType::AcidRain)
+        {
+            line += "  ACID " + oneDecimal(m_State.acidDamagePerSecond) + "/s";
+        }
+        else if (m_State.current == WeatherType::EtherStorm)
+        {
+            line += "  VIS -" + std::to_string(static_cast<int>((1.0f - m_State.visibilityMultiplier) * 100.0f)) + "%";
+            line += "  ACID " + oneDecimal(m_State.acidDamagePerSecond) + "/s";
+        }
+
+        text.setString(line);
+        window.draw(text);
     }
 
-    forceWeather(next, target);
-    std::cout << "[WEATHER] incoming: " << weatherName(next)
-              << " intensity=" << static_cast<int>(target * 100.0f) << "%" << std::endl;
-}
+    void WeatherSystem::chooseNextWeather()
+    {
+        m_State.eventTimer = 0.0f;
+        m_State.nextEventIn = 32.0f + random01() * 50.0f;
 
-void WeatherSystem::updateIntensity(float dt) {
-    const float diff = m_State.targetIntensity - m_State.intensity;
-    const float step = m_State.transitionSpeed * dt;
+        const float roll = random01();
+        WeatherType next = WeatherType::Clear;
+        float target = 0.0f;
 
-    if (std::fabs(diff) <= step) {
-        m_State.intensity = m_State.targetIntensity;
-    } else {
-        m_State.intensity += (diff > 0.0f ? step : -step);
+        if (roll < 0.42f)
+        {
+            next = WeatherType::Clear;
+            target = 0.0f;
+        }
+        else if (roll < 0.68f)
+        {
+            next = WeatherType::EtherFog;
+            target = 0.30f + random01() * 0.50f;
+        }
+        else if (roll < 0.90f)
+        {
+            next = WeatherType::AcidRain;
+            target = 0.30f + random01() * 0.55f;
+        }
+        else
+        {
+            next = WeatherType::EtherStorm;
+            target = 0.55f + random01() * 0.40f;
+        }
+
+        forceWeather(next, target);
+        std::cout << "[WEATHER] incoming: " << weatherName(next)
+                  << " intensity=" << static_cast<int>(target * 100.0f) << "%" << std::endl;
     }
 
-    m_State.intensity = std::clamp(m_State.intensity, 0.0f, 1.0f);
+    void WeatherSystem::updateIntensity(float dt)
+    {
+        const float diff = m_State.targetIntensity - m_State.intensity;
+        const float step = m_State.transitionSpeed * dt;
 
-    if (m_State.targetIntensity <= 0.01f && m_State.intensity <= 0.01f) {
-        m_State.current = WeatherType::Clear;
-        m_State.intensity = 0.0f;
+        if (std::fabs(diff) <= step)
+        {
+            m_State.intensity = m_State.targetIntensity;
+        }
+        else
+        {
+            m_State.intensity += (diff > 0.0f ? step : -step);
+        }
+
+        m_State.intensity = std::clamp(m_State.intensity, 0.0f, 1.0f);
+
+        if (m_State.targetIntensity <= 0.01f && m_State.intensity <= 0.01f)
+        {
+            m_State.current = WeatherType::Clear;
+            m_State.intensity = 0.0f;
+        }
     }
-}
 
-void WeatherSystem::updateThunder(float dt) {
-    if (m_State.flashAlpha > 0.0f) {
-        m_State.flashAlpha = std::max(0.0f, m_State.flashAlpha - 260.0f * dt);
+    void WeatherSystem::updateThunder(float dt)
+    {
+        if (m_State.flashAlpha > 0.0f)
+        {
+            m_State.flashAlpha = std::max(0.0f, m_State.flashAlpha - 260.0f * dt);
+        }
+
+        if (m_State.current != WeatherType::EtherStorm || m_State.intensity <= 0.10f)
+        {
+            return;
+        }
+
+        m_State.thunderTimer -= dt;
+        if (m_State.thunderTimer <= 0.0f)
+        {
+            m_State.flashAlpha = 50.0f + 100.0f * m_State.intensity;
+            m_State.thunderTimer = 2.8f + random01() * 5.5f;
+        }
     }
 
-    if (m_State.current != WeatherType::EtherStorm || m_State.intensity <= 0.10f) {
-        return;
-    }
+    void WeatherSystem::recalculateDerivedValues()
+    {
+        const float I = std::clamp(m_State.intensity, 0.0f, 1.0f);
 
-    m_State.thunderTimer -= dt;
-    if (m_State.thunderTimer <= 0.0f) {
-        m_State.flashAlpha = 50.0f + 100.0f * m_State.intensity;
-        m_State.thunderTimer = 2.8f + random01() * 5.5f;
-    }
-}
+        m_State.visibilityMultiplier = 1.0f;
+        m_State.sensorNoise = 0.0f;
+        m_State.erosionBoost = 0.0f;
+        m_State.acidDamagePerSecond = 0.0f;
+        m_State.floorSlickness = 0.0f;
 
-void WeatherSystem::recalculateDerivedValues() {
-    const float I = std::clamp(m_State.intensity, 0.0f, 1.0f);
-
-    m_State.visibilityMultiplier = 1.0f;
-    m_State.sensorNoise = 0.0f;
-    m_State.erosionBoost = 0.0f;
-    m_State.acidDamagePerSecond = 0.0f;
-    m_State.floorSlickness = 0.0f;
-
-    switch (m_State.current) {
+        switch (m_State.current)
+        {
         case WeatherType::Clear:
             break;
 
@@ -218,107 +267,135 @@ void WeatherSystem::recalculateDerivedValues() {
             m_State.acidDamagePerSecond = I * 1.15f;
             m_State.floorSlickness = I * 0.35f;
             break;
+        }
+        m_State.type = m_State.current;
+        m_State.banner = label();
     }
-    m_State.type = m_State.current;
-    m_State.banner = label();
-}
 
-void WeatherSystem::applyWorldEffects(GameState& gs, float dt) {
-    if (m_State.erosionBoost <= 0.001f) return;
+    void WeatherSystem::applyWorldEffects(GameState &gs, float dt)
+    {
+        if (m_State.erosionBoost <= 0.001f)
+            return;
 
-    const float add = m_State.erosionBoost * 4.0f * dt;
-    for (int x = 1; x < Config::MAP_WIDTH - 1; ++x) {
-        for (int y = 1; y < Config::MAP_HEIGHT - 1; ++y) {
-            if (gs.etherErosionMap[x][y] > 1.0f) {
-                gs.etherErosionMap[x][y] = std::min(100.0f, gs.etherErosionMap[x][y] + add);
+        const float add = m_State.erosionBoost * 4.0f * dt;
+        for (int x = 1; x < Config::MAP_WIDTH - 1; ++x)
+        {
+            for (int y = 1; y < Config::MAP_HEIGHT - 1; ++y)
+            {
+                if (gs.etherErosionMap[x][y] > 1.0f)
+                {
+                    gs.etherErosionMap[x][y] = std::min(100.0f, gs.etherErosionMap[x][y] + add);
+                }
             }
         }
     }
-}
 
-void WeatherSystem::applyDamageTick(GameState& gs, float elapsed) {
-    if (m_State.acidDamagePerSecond <= 0.001f) return;
+    void WeatherSystem::applyDamageTick(GameState &gs, float elapsed)
+    {
+        if (m_State.acidDamagePerSecond <= 0.001f)
+            return;
 
-    const float dmg = m_State.acidDamagePerSecond * elapsed;
+        const float dmg = m_State.acidDamagePerSecond * elapsed;
 
-    if (gs.playerMode == UnitMode::Titan || gs.titan.isPiloted) {
-        DamageSystem::applyTitanDamage(gs, dmg * 0.45f, DamageType::Acid);
-        gs.titan.systems.tracksCondition = std::max(0.0f, gs.titan.systems.tracksCondition - dmg * 0.08f);
-        gs.titan.systems.sensorLink = std::max(0.0f, gs.titan.systems.sensorLink - dmg * 0.06f);
-        gs.titan.systems.turretStatus = std::max(0.0f, gs.titan.systems.turretStatus - dmg * 0.03f);
-    } else {
-        DamageSystem::applyPlayerDamage(gs, dmg, DamageType::Acid);
+        if (gs.playerMode == UnitMode::Titan || gs.titan.isPiloted)
+        {
+            DamageSystem::applyTitanDamage(gs, dmg * 0.45f, DamageType::Acid);
+            gs.titan.systems.tracksCondition = std::max(0.0f, gs.titan.systems.tracksCondition - dmg * 0.08f);
+            gs.titan.systems.sensorLink = std::max(0.0f, gs.titan.systems.sensorLink - dmg * 0.06f);
+            gs.titan.systems.turretStatus = std::max(0.0f, gs.titan.systems.turretStatus - dmg * 0.03f);
+        }
+        else
+        {
+            DamageSystem::applyPlayerDamage(gs, dmg, DamageType::Acid);
+        }
     }
-}
 
-void WeatherSystem::drawFogOverlay(sf::RenderWindow& window, float W, float H, float I) const {
-    sf::RectangleShape fog({W, H});
-    fog.setFillColor(sf::Color(115, 70, 180, static_cast<sf::Uint8>(30 + 95 * I)));
-    window.draw(fog);
+    void WeatherSystem::drawFogOverlay(sf::RenderWindow &window, float W, float H, float I) const
+    {
+        sf::RectangleShape fog({W, H});
+        fog.setFillColor(sf::Color(115, 70, 180, static_cast<sf::Uint8>(30 + 95 * I)));
+        window.draw(fog);
 
-    for (int i = 0; i < 9; ++i) {
-        const float phase = std::fmod(m_State.visualTimer * (14.0f + i * 1.7f) + i * 97.0f, H + 140.0f);
-        const float y = phase - 70.0f;
+        for (int i = 0; i < 9; ++i)
+        {
+            const float phase = std::fmod(m_State.visualTimer * (14.0f + i * 1.7f) + i * 97.0f, H + 140.0f);
+            const float y = phase - 70.0f;
 
-        sf::RectangleShape band({W, 16.0f + 20.0f * I});
-        band.setPosition(0.0f, y);
-        band.setFillColor(sf::Color(180, 125, 255, static_cast<sf::Uint8>(15 + 30 * I)));
-        window.draw(band);
+            sf::RectangleShape band({W, 16.0f + 20.0f * I});
+            band.setPosition(0.0f, y);
+            band.setFillColor(sf::Color(180, 125, 255, static_cast<sf::Uint8>(15 + 30 * I)));
+            window.draw(band);
+        }
     }
-}
 
-void WeatherSystem::drawAcidRainOverlay(sf::RenderWindow& window, float W, float H, float I) const {
-    sf::RectangleShape tint({W, H});
-    tint.setFillColor(sf::Color(70, 115, 30, static_cast<sf::Uint8>(18 + 55 * I)));
-    window.draw(tint);
+    void WeatherSystem::drawAcidRainOverlay(sf::RenderWindow &window, float W, float H, float I) const
+    {
+        sf::RectangleShape tint({W, H});
+        tint.setFillColor(sf::Color(70, 115, 30, static_cast<sf::Uint8>(18 + 55 * I)));
+        window.draw(tint);
 
-    const int drops = static_cast<int>(70 + 180 * I);
-    const int Wi = std::max(1, static_cast<int>(W + 90.0f));
-    const int Hi = std::max(1, static_cast<int>(H + 90.0f));
-    const int tX = static_cast<int>(m_State.visualTimer * 235.0f);
-    const int tY = static_cast<int>(m_State.visualTimer * 390.0f);
+        const int drops = static_cast<int>(70 + 180 * I);
+        const int Wi = std::max(1, static_cast<int>(W + 90.0f));
+        const int Hi = std::max(1, static_cast<int>(H + 90.0f));
+        const int tX = static_cast<int>(m_State.visualTimer * 235.0f);
+        const int tY = static_cast<int>(m_State.visualTimer * 390.0f);
 
-    for (int i = 0; i < drops; ++i) {
-        const float x = static_cast<float>((i * 53 + tX) % Wi) - 45.0f;
-        const float y = static_cast<float>((i * 89 + tY) % Hi) - 45.0f;
+        for (int i = 0; i < drops; ++i)
+        {
+            const float x = static_cast<float>((i * 53 + tX) % Wi) - 45.0f;
+            const float y = static_cast<float>((i * 89 + tY) % Hi) - 45.0f;
 
-        sf::Vertex line[] = {
-            sf::Vertex(sf::Vector2f(x, y), sf::Color(150, 255, 75, static_cast<sf::Uint8>(65 + 45 * I))),
-            sf::Vertex(sf::Vector2f(x - 8.0f, y + 24.0f), sf::Color(150, 255, 75, 22))
-        };
-        window.draw(line, 2, sf::Lines);
+            sf::Vertex line[] = {
+                sf::Vertex(sf::Vector2f(x, y), sf::Color(150, 255, 75, static_cast<sf::Uint8>(65 + 45 * I))),
+                sf::Vertex(sf::Vector2f(x - 8.0f, y + 24.0f), sf::Color(150, 255, 75, 22))};
+            window.draw(line, 2, sf::Lines);
+        }
     }
-}
 
-sf::Color WeatherSystem::hudColor() const {
-    switch (m_State.current) {
-        case WeatherType::Clear:      return sf::Color(150, 210, 160);
-        case WeatherType::EtherFog:   return sf::Color(210, 165, 255);
-        case WeatherType::AcidRain:   return sf::Color(165, 255, 90);
+    sf::Color WeatherSystem::hudColor() const
+    {
+        switch (m_State.current)
+        {
+        case WeatherType::Clear:
+            return sf::Color(150, 210, 160);
+        case WeatherType::EtherFog:
+            return sf::Color(210, 165, 255);
+        case WeatherType::AcidRain:
+            return sf::Color(165, 255, 90);
         case WeatherType::AshStorm:
-        case WeatherType::EtherStorm: return sf::Color(235, 190, 255);
+        case WeatherType::EtherStorm:
+            return sf::Color(235, 190, 255);
+        }
+        return sf::Color::White;
     }
-    return sf::Color::White;
-}
 
-std::string WeatherSystem::weatherName(WeatherType t) {
-    switch (t) {
-        case WeatherType::Clear:      return "CLEAR";
-        case WeatherType::EtherFog:   return "ETHER FOG";
-        case WeatherType::AcidRain:   return "ACID RAIN";
-        case WeatherType::AshStorm:   return "ASH STORM";
-        case WeatherType::EtherStorm: return "ETHER STORM";
+    std::string WeatherSystem::weatherName(WeatherType t)
+    {
+        switch (t)
+        {
+        case WeatherType::Clear:
+            return "CLEAR";
+        case WeatherType::EtherFog:
+            return "ETHER FOG";
+        case WeatherType::AcidRain:
+            return "ACID RAIN";
+        case WeatherType::AshStorm:
+            return "ASH STORM";
+        case WeatherType::EtherStorm:
+            return "ETHER STORM";
+        }
+        return "UNKNOWN";
     }
-    return "UNKNOWN";
-}
 
-std::string WeatherSystem::oneDecimal(float v) {
-    int scaled = static_cast<int>(v * 10.0f + 0.5f);
-    return std::to_string(scaled / 10) + "." + std::to_string(std::abs(scaled % 10));
-}
+    std::string WeatherSystem::oneDecimal(float v)
+    {
+        int scaled = static_cast<int>(v * 10.0f + 0.5f);
+        return std::to_string(scaled / 10) + "." + std::to_string(std::abs(scaled % 10));
+    }
 
-float WeatherSystem::random01() {
-    return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-}
+    float WeatherSystem::random01()
+    {
+        return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+    }
 
-}  // namespace bunker
+} // namespace bunker

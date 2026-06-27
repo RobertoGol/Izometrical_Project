@@ -8,47 +8,49 @@
 #include <algorithm>
 #include <string>
 
-namespace bunker {
+namespace bunker
+{
 
-class TacticsManager {
-private:
-    PilotClass  m_ActivePilotClass  = PilotClass::Grapple;
-    TitanClass  m_ActiveTitanClass  = TitanClass::Tone;
-    bool        m_InsideVehicle     = false;
+    class TacticsManager
+    {
+    private:
+        PilotClass m_ActivePilotClass = PilotClass::Grapple;
+        TitanClass m_ActiveTitanClass = TitanClass::Tone;
+        bool m_InsideVehicle = false;
 
-public:
-    StatModifiers currentStats;
+    public:
+        StatModifiers currentStats;
 
-    float tacticalCooldown     = 0.0f;
-    float tacticalActiveTimer  = 0.0f;
-    bool  isTacticalActive     = false;
+        float tacticalCooldown = 0.0f;
+        float tacticalActiveTimer = 0.0f;
+        bool isTacticalActive = false;
 
-    GrapplePhysics grapple;
-    DeployableShield aWallShield;
+        GrapplePhysics grapple;
+        DeployableShield aWallShield;
 
-    Vector3D pulseBladePos;
-    float    pulseBladeDuration = 0.0f;
-    float    pulseBladeRadius   = 0.0f;
-    bool     isPulseBladeActive = false;
-    bool     isPhaseDimensionActive = false;
+        Vector3D pulseBladePos;
+        float pulseBladeDuration = 0.0f;
+        float pulseBladeRadius = 0.0f;
+        bool isPulseBladeActive = false;
+        bool isPhaseDimensionActive = false;
 
-    TacticsManager() = default;
+        TacticsManager() = default;
 
-    void updateCooldowns(GameState& gs, float dt);
-    void activateTactical(GameState& gs, const Vector3D& mouseWorld);
-    void processGrapplePhysics(GameState& gs, float dt);
-    void changePilotClass(PilotClass newClass);
-    void changeTitanFirmware(TitanClass newClass);
-    void enterVehicle();
-    void exitVehicle();
+        void updateCooldowns(GameState &gs, float dt);
+        void activateTactical(GameState &gs, const Vector3D &mouseWorld);
+        void processGrapplePhysics(GameState &gs, float dt);
+        void changePilotClass(PilotClass newClass);
+        void changeTitanFirmware(TitanClass newClass);
+        void enterVehicle();
+        void exitVehicle();
 
-    PilotClass getActivePilotClass() const { return m_ActivePilotClass; }
-    TitanClass getActiveTitanClass() const { return m_ActiveTitanClass; }
-    bool       isInVehicle()         const { return m_InsideVehicle; }
-    std::string getActiveClassName() const;
+        PilotClass getActivePilotClass() const { return m_ActivePilotClass; }
+        TitanClass getActiveTitanClass() const { return m_ActiveTitanClass; }
+        bool isInVehicle() const { return m_InsideVehicle; }
+        std::string getActiveClassName() const;
 
-private:
-    void updateActiveStats();
-};
+    private:
+        void updateActiveStats();
+    };
 
-}  // namespace bunker
+} // namespace bunker
