@@ -137,9 +137,18 @@ void GameApplication::processEdgeHotkeys(const InputSnapshot& input) {
     if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Y), m_EdgeKeys.ration)) {
         m_Advanced.survival.eatRation(m_GameState, m_Inventory, RationKind::Stamina);
     }
-    if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::R), m_EdgeKeys.reload) &&
-        m_GameState.playerMode == UnitMode::Scout) {
-        m_Advanced.survival.startReload(m_Inventory);
+    if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::R), m_EdgeKeys.reload)) {
+        if (m_GameState.playerMode == UnitMode::Scout) {
+            m_Advanced.survival.startReload(m_Inventory);
+        } else if (m_GameState.playerMode == UnitMode::Titan) {
+            m_TitanAI.cycleCockpitFireMode();
+        }
+    }
+    if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::G), m_EdgeKeys.seatSwap) &&
+        m_GameState.playerMode == UnitMode::Titan) {
+        m_Advanced.tankUtility.swapSeat();
+        std::cout << "[COCKPIT] Место в кабине изменено → " 
+                  << (m_Advanced.tankUtility.runtime().seat == TankSeat::Driver ? "Водитель" : "Стрелок") << std::endl;
     }
     if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::C), m_EdgeKeys.campCycle)) {
         m_Advanced.camp.cycleType();

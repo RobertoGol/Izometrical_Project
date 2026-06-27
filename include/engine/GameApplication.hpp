@@ -47,6 +47,7 @@ private:
         bool undo = false;
         bool redo = false;
         bool delivery = false;
+        bool seatSwap = false;
     };
 
     sf::RenderWindow m_Window;
