@@ -86,21 +86,21 @@ namespace bunker
 
     private:
         void ensureStateSize(const GameState &gs);
-        static HostileRuntimeState makeRuntimeState(HostileKind kind);
+        HostileRuntimeState makeRuntimeState(HostileKind kind) const;
         void applyMechanicalDegradation(HostileProfile &p, const HostileRuntimeState &st, Enemy &e) const;
-        void updateAwareness(HostileRuntimeState &st, const HostileProfile &p, float distSq, float visibilityMultiplier, float dt) const;
+        void updateAwareness(HostileRuntimeState &st, const HostileProfile &p, const Vector3D &target, float dist, float dt) const;
         void updateIdle(Enemy &e, float dt) const;
-        void updateSearching(GameState &gs, Enemy &e, HostileRuntimeState &st, float speed, float dt) const;
-        void updateAggro(GameState &gs, Enemy &e, HostileRuntimeState &st, const HostileProfile &p, float dt);
-        void updateMelee(GameState &gs, Enemy &e, HostileRuntimeState &st, const HostileProfile &p, const Vector3D &target, float distSq, float dt);
-        void updateRanged(GameState &gs, Enemy &e, HostileRuntimeState &st, const HostileProfile &p, const Vector3D &target, float distSq, float dt);
+        void updateSearching(GameState &gs, Enemy &e, HostileRuntimeState &st, const HostileProfile &p, float dt);
+        void updateAggro(GameState &gs, Enemy &e, HostileRuntimeState &st, const HostileProfile &p, const Vector3D &target, float dist, float dt);
+        void updateMelee(GameState &gs, Enemy &e, HostileRuntimeState &st, const HostileProfile &p, const Vector3D &target, float dist, float dt);
+        void updateRanged(GameState &gs, Enemy &e, HostileRuntimeState &st, const HostileProfile &p, const Vector3D &target, float dist, float dt);
         void performAttack(GameState &gs, HostileRuntimeState &st, const HostileProfile &p);
-        Vector3D findPreferredTarget(const GameState &gs, const Enemy &e) const;
+        Vector3D chooseTarget(const GameState &gs, const Enemy &e) const;
         void moveToward(GameState &gs, Enemy &e, const Vector3D &target, float speed, float dt) const;
         void moveAway(GameState &gs, Enemy &e, const Vector3D &target, float speed, float dt) const;
-        void strafeAround(GameState &gs, Enemy &e, const Vector3D &target, float speed, float &strafeSign, float &strafeTimer, float dt) const;
+        void strafeAround(GameState &gs, Enemy &e, const Vector3D &target, float speed, float sign, float dt) const;
         void tryMove(GameState &gs, Enemy &e, float dirX, float dirY, float speed, float dt) const;
-        static float distSq(const Vector3D &a, const Vector3D &b);
+        static float random01();
     };
 
 } // namespace bunker
