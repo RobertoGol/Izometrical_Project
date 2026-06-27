@@ -873,10 +873,20 @@ namespace bunker
             return paintErosion(gs, x, y);
         case ToolGunMode::Validate:
             m_LastValidation = validate(gs);
+            std::cout << "[TOOLGUN] " << m_LastValidation << std::endl;
             return true;
         case ToolGunMode::Export:
+        {
             m_LastExport = exportMap(gs);
+            std::ofstream out("saves/exported_map_level.cfg");
+            if (out.is_open())
+            {
+                out << m_LastExport;
+                out.close();
+                std::cout << "[TOOLGUN EXPORT] Карта уровня экспортирована в saves/exported_map_level.cfg!" << std::endl;
+            }
             return true;
+        }
         }
         return false;
     }
@@ -1004,8 +1014,16 @@ namespace bunker
             if (ex < 0 || ey < 0 || ex >= Config::MAP_WIDTH || ey >= Config::MAP_HEIGHT || gs.sectorMap[ex][ey] == 1)
                 ++invalidEnemies;
         }
+
+        bool playerBlocked = false;
+        int px = static_cast<int>(gs.playerPos.x);
+        int py = static_cast<int>(gs.playerPos.y);
+        if (px >= 0 && px < Config::MAP_WIDTH && py >= 0 && py < Config::MAP_HEIGHT)
+            playerBlocked = (gs.sectorMap[px][py] == 1);
+
         std::ostringstream out;
-        out << "VALIDATION: walls=" << walls << " brokenWallDurability=" << brokenWalls << " invalidEnemies=" << invalidEnemies;
+        out << "VALIDATION: walls=" << walls << " brokenDurability=" << brokenWalls
+            << " invalidEnemies=" << invalidEnemies << (playerBlocked ? " [CRITICAL: PLAYER STUCK IN WALL!]" : " [GRID OK]");
         return out.str();
     }
 
@@ -1085,8 +1103,11 @@ namespace bunker
         m_Chat.clear();
         m_Connected = true;
         m_LobbyId = ++m_NextLobbyId;
-        addPeer(playerName.empty() ? "Pilot" : playerName);
-        systemMessage("LANLINE lobby created.");
+        addPeer(playerName.empty() ? "Solo_Pilot" : playerName);
+        addPeer("Gunner_BT7274");
+        addPeer("Scout_LogHorizon");
+        addPeer("Vault17_Quartermaster");
+        systemMessage("LANLINE net #1001 connected. 4 squad combatants online.");
         return m_LobbyId;
     }
 
@@ -1152,6 +1173,14 @@ namespace bunker
                 systemMessage("Delivery arrived: " + d.payload);
             }
         }
+
+        static float s_ChatTimer = 15.0f;
+        s_ChatTimer -= dt;
+        if (s_ChatTimer <= 0.0f && m_Peers.size() > 1)
+        {
+            s_ChatTimer = 30.0f;
+            sendChat(m_Peers[1].id, "Сенсоры бастиона в норме. Готов прикрыть огнём.");
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -1208,6 +1237,14 @@ namespace bunker
         loot.normalizeWorldLoot(gs);
         profile.startSession(playerProfile);
         lanline.createLocalLobby(playerProfile.playerName);
+
+        ObjModel testModel = ObjModelLoader::load("assets/models/bastion.obj");
+        if (!testModel.empty())
+        {
+            std::cout << "[OBJ LOADER] Модель bastion.obj успешно загружена: "
+                      << testModel.vertices.size() << " вершин, "
+                      << testModel.faces.size() << " полигонов." << std::endl;
+        }
     }
 
     void AdvancedMechanics::update(GameState &gs, PlayerInventory &inv, const InputSnapshot &input, float dt)
