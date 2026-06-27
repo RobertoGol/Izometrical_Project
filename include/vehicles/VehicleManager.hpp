@@ -307,13 +307,6 @@ public:
     // ═══════════════════════════════════════════════
     bool isPlayerInVehicle() const { return m_ActiveVehicleIndex >= 0; }
 
-    float getCarPressurePercent() const {
-        if (m_ActiveVehicleIndex < 0) return 0.0f;
-        const auto& inst = m_Spawned[m_ActiveVehicleIndex];
-        if (!inst.config || inst.config->maxPressure <= 0.0f) return 0.0f;
-        return inst.currentPressure / inst.config->maxPressure;
-    }
-
     const VehicleConfig* getActiveConfig() const {
         if (m_ActiveVehicleIndex < 0) return nullptr;
         return m_Spawned[m_ActiveVehicleIndex].config;

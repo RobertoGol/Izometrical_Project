@@ -3,7 +3,6 @@
 #include "Types.hpp"
 #include "GameState.hpp"
 #include "Constants.hpp"
-#include "gameplay/DamageSystem.hpp"
 
 #include <SFML/Graphics.hpp>
 #include <algorithm>
@@ -14,17 +13,28 @@
 
 namespace bunker {
 
+// ══════════════════════════════════════════════════════════════════════
+// WeatherSystem
+// Перенос механик из GMyGameDoNotTouch, переписанный безопаснее:
+//   - Clear / EtherFog / AcidRain / EtherStorm
+//   - плавная интенсивность без сломанного перехода между погодами
+//   - EtherFog режет видимость, шумит сенсоры, усиливает эрозию
+//   - AcidRain наносит периодический урон и портит системы Титана
+//   - EtherStorm совмещает туман + кислоту + редкие вспышки
+//   - overlay и HUD без внешних ассетов
+//
+// Header-only: CMake менять не надо.
+// ══════════════════════════════════════════════════════════════════════
+
 enum class WeatherType {
     Clear,
     EtherFog,
     AcidRain,
-    AshStorm,
     EtherStorm
 };
 
 struct WeatherRuntimeState {
     WeatherType current = WeatherType::Clear;
-    WeatherType type    = WeatherType::Clear;
 
     float intensity       = 0.0f;  // 0..1 текущая сила
     float targetIntensity = 0.0f;  // 0..1 куда плавно идём
@@ -45,7 +55,6 @@ struct WeatherRuntimeState {
     float erosionBoost         = 0.0f; // усиление эфирной эрозии
     float acidDamagePerSecond  = 0.0f; // урон в секунду
     float floorSlickness       = 0.0f; // будущая физика скольжения
-    std::string banner         = "CLEAR";
 };
 
 class WeatherSystem {
@@ -75,15 +84,11 @@ public:
 
         if (type == WeatherType::Clear || targetIntensity <= 0.01f) {
             m_State.targetIntensity = 0.0f;
-            m_State.type = WeatherType::Clear;
-            m_State.banner = "CLEAR";
             return;
         }
 
         m_State.current = type;
-        m_State.type = type;
         m_State.targetIntensity = targetIntensity;
-        m_State.banner = label();
 
         if (type == WeatherType::EtherStorm) {
             m_State.thunderTimer = 0.8f + random01() * 2.0f;
@@ -115,8 +120,6 @@ public:
     }
 
     float visibilityMultiplier() const { return m_State.visibilityMultiplier; }
-    float enemyVisionMultiplier() const { return m_State.visibilityMultiplier; }
-    float bulletSpreadPenalty() const { return (m_State.current == WeatherType::AshStorm || m_State.current == WeatherType::EtherStorm) ? 0.12f * m_State.intensity : 0.0f; }
     float sensorNoise() const { return m_State.sensorNoise; }
     float erosionBoost() const { return m_State.erosionBoost; }
     float acidDamagePerSecond() const { return m_State.acidDamagePerSecond; }
@@ -127,7 +130,6 @@ public:
 
     bool isDangerous() const {
         return m_State.current == WeatherType::AcidRain ||
-               m_State.current == WeatherType::AshStorm ||
                m_State.current == WeatherType::EtherStorm;
     }
 
@@ -136,7 +138,6 @@ public:
             case WeatherType::Clear:      return "CLEAR";
             case WeatherType::EtherFog:   return "ETHER FOG";
             case WeatherType::AcidRain:   return "ACID RAIN";
-            case WeatherType::AshStorm:   return "ASH STORM";
             case WeatherType::EtherStorm: return "ETHER STORM";
         }
         return "UNKNOWN";
@@ -284,7 +285,6 @@ private:
                 m_State.floorSlickness = I * 0.55f;
                 break;
 
-            case WeatherType::AshStorm:
             case WeatherType::EtherStorm:
                 m_State.visibilityMultiplier = std::clamp(1.0f - I * 0.70f, 0.25f, 1.0f);
                 m_State.sensorNoise = I * 0.90f;
@@ -293,8 +293,6 @@ private:
                 m_State.floorSlickness = I * 0.35f;
                 break;
         }
-        m_State.type = m_State.current;
-        m_State.banner = label();
     }
 
     void applyWorldEffects(GameState& gs, float dt) {

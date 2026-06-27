@@ -10,6 +10,15 @@ find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 set(SOURCES
     src/main.cpp
     src/engine/GameApplication.cpp
+    src/engine/InputManager.cpp
+    src/engine/TimeShift.cpp
+    src/world/WorldSession.cpp
+    src/world/MapScreen.cpp
+    src/world/WeatherSystem.cpp
+    src/vehicles/VehicleManager.cpp
+    src/gameplay/Tactics.cpp
+    src/ai/EnemySpawner.cpp
+    src/ui/HUD.cpp
     src/render/GameRenderer.cpp
     src/entities/PlayerController.cpp
     src/entities/Camera.cpp
