@@ -104,12 +104,18 @@ public:
             return false;
         }
 
-        // 1. Заголовок — проверка магического числа
+        // 1. Заголовок — проверка магического числа и версии формата (Phase 2 schema validation)
         SaveFileHeader header;
         file.read(reinterpret_cast<char*>(&header), sizeof(SaveFileHeader));
         if (header.magic[0] != 'B' || header.magic[1] != 'S' ||
             header.magic[2] != 'A' || header.magic[3] != 'V') {
             std::cerr << "[SAVE] Повреждён файл: " << path << std::endl;
+            file.close();
+            return false;
+        }
+
+        if (header.version != 15) {
+            std::cerr << "[SAVE] Несовместимая версия формата сохранения: " << header.version << " (ожидалась 15)" << std::endl;
             file.close();
             return false;
         }

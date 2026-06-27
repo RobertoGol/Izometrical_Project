@@ -5,6 +5,8 @@
 #include "Inventory.hpp"
 #include "InputManager.hpp"
 #include "Constants.hpp"
+#include "gameplay/DamageSystem.hpp"
+#include "world/WeatherSystem.hpp"
 
 #include <algorithm>
 #include <array>
@@ -73,101 +75,6 @@ inline Vector3D advNormalize2D(Vector3D v) {
     if (len < 0.0001f) return {0.0f, 0.0f, 0.0f};
     return {v.x / len, v.y / len, 0.0f};
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// 1) WEATHER SYSTEM
-// ═══════════════════════════════════════════════════════════════════════════════
-
-enum class WeatherType {
-    Clear,
-    EtherFog,
-    AcidRain,
-    AshStorm
-};
-
-struct WeatherState {
-    WeatherType type = WeatherType::Clear;
-    float intensity = 0.0f;          // 0..1
-    float timeLeft = 35.0f;
-    float visibilityMultiplier = 1.0f;
-    float corrosionDps = 0.0f;
-    std::string banner = "CLEAR";
-};
-
-class WeatherSystem {
-public:
-    WeatherSystem() : m_Rng(0xB017u), m_Chance(0.0f, 1.0f) {}
-
-    void force(WeatherType type, float intensity, float duration) {
-        m_State.type = type;
-        m_State.intensity = advClamp(intensity, 0.0f, 1.0f);
-        m_State.timeLeft = std::max(1.0f, duration);
-        recalc();
-    }
-
-    void update(GameState& gs, float dt) {
-        m_State.timeLeft -= dt;
-        if (m_State.timeLeft <= 0.0f) rollNextWeather();
-
-        // AcidRain переносит механику кислотного дождя: накапливает эрозию и
-        // понемногу бьёт игрока вне кабины/транспорта.
-        if (m_State.type == WeatherType::AcidRain && gs.playerMode == UnitMode::Scout) {
-            gs.playerErosionLevel = advClamp(gs.playerErosionLevel + m_State.corrosionDps * dt, 0.0f, 100.0f);
-            if (gs.playerErosionLevel > 60.0f) {
-                gs.playerHealth = std::max(1.0f, gs.playerHealth - (0.35f * m_State.intensity) * dt);
-            }
-        }
-
-        // EtherFog подавляет сенсоры танка/роботов и делает бой ближе.
-        if (m_State.type == WeatherType::EtherFog) {
-            gs.titan.systems.sensorLink = advClamp(gs.titan.systems.sensorLink - 1.5f * m_State.intensity * dt, 18.0f, 100.0f);
-        } else {
-            gs.titan.systems.sensorLink = advClamp(gs.titan.systems.sensorLink + 2.0f * dt, 0.0f, 100.0f);
-        }
-    }
-
-    float enemyVisionMultiplier() const { return m_State.visibilityMultiplier; }
-    float bulletSpreadPenalty() const { return (m_State.type == WeatherType::AshStorm) ? 0.12f * m_State.intensity : 0.0f; }
-    const WeatherState& state() const { return m_State; }
-
-private:
-    WeatherState m_State;
-    std::mt19937 m_Rng;
-    std::uniform_real_distribution<float> m_Chance;
-
-    void rollNextWeather() {
-        const float r = m_Chance(m_Rng);
-        if (r < 0.50f) force(WeatherType::Clear, 0.0f, 30.0f + m_Chance(m_Rng) * 45.0f);
-        else if (r < 0.73f) force(WeatherType::EtherFog, 0.35f + m_Chance(m_Rng) * 0.55f, 22.0f + m_Chance(m_Rng) * 35.0f);
-        else if (r < 0.92f) force(WeatherType::AcidRain, 0.30f + m_Chance(m_Rng) * 0.60f, 18.0f + m_Chance(m_Rng) * 30.0f);
-        else force(WeatherType::AshStorm, 0.45f + m_Chance(m_Rng) * 0.50f, 18.0f + m_Chance(m_Rng) * 26.0f);
-    }
-
-    void recalc() {
-        switch (m_State.type) {
-            case WeatherType::Clear:
-                m_State.visibilityMultiplier = 1.0f;
-                m_State.corrosionDps = 0.0f;
-                m_State.banner = "CLEAR";
-                break;
-            case WeatherType::EtherFog:
-                m_State.visibilityMultiplier = 1.0f - 0.55f * m_State.intensity;
-                m_State.corrosionDps = 0.05f * m_State.intensity;
-                m_State.banner = "ETHER FOG";
-                break;
-            case WeatherType::AcidRain:
-                m_State.visibilityMultiplier = 1.0f - 0.25f * m_State.intensity;
-                m_State.corrosionDps = 1.75f * m_State.intensity;
-                m_State.banner = "ACID RAIN";
-                break;
-            case WeatherType::AshStorm:
-                m_State.visibilityMultiplier = 1.0f - 0.40f * m_State.intensity;
-                m_State.corrosionDps = 0.20f * m_State.intensity;
-                m_State.banner = "ASH STORM";
-                break;
-        }
-    }
-};
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 2) RADIO / TAPE SYSTEM
@@ -475,8 +382,9 @@ public:
                 gs.titan.health = advClamp(gs.titan.health + 10.0f, 0.0f, gs.titan.maxHealth);
                 for (auto& e : gs.enemies) {
                     if (e.isAlive && advDistSq(e.position, gs.titan.position) < 2.0f * 2.0f) {
-                        e.health -= 60.0f;
-                        if (e.health <= 0.0f) { e.isAlive = false; gs.score += 120; }
+                        if (DamageSystem::applyEnemyDamage(gs, e, 60.0f, DamageType::Kinetic)) {
+                            gs.score += 20;
+                        }
                     }
                 }
                 m_Runtime.utilityCooldown = 3.0f;
@@ -628,8 +536,9 @@ private:
         damageAt(gs, b.position, 2.8f, 75.0f, 5.5f);
         for (auto& e : gs.enemies) {
             if (e.isAlive && advDistSq(e.position, b.position) < 2.8f * 2.8f) {
-                e.health -= 90.0f;
-                if (e.health <= 0.0f) { e.isAlive = false; gs.score += 150; }
+                if (DamageSystem::applyEnemyDamage(gs, e, 90.0f, DamageType::Explosive)) {
+                    gs.score += 50;
+                }
             }
         }
     }
@@ -959,8 +868,7 @@ public:
                 if (d < bestD) { bestD = d; best = &e; }
             }
             if (best) {
-                best->health -= 12.0f * gs.deltaTime;
-                if (best->health <= 0.0f) { best->isAlive = false; gs.score += 100; }
+                DamageSystem::applyEnemyDamage(gs, *best, 12.0f * gs.deltaTime, DamageType::Kinetic);
             }
         }
     }

@@ -17,6 +17,7 @@ set(SOURCES
     src/world/WeatherSystem.cpp
     src/vehicles/VehicleManager.cpp
     src/gameplay/Tactics.cpp
+    src/gameplay/BulletSystem.cpp
     src/ai/EnemySpawner.cpp
     src/ui/HUD.cpp
     src/render/GameRenderer.cpp
