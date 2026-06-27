@@ -38,6 +38,7 @@ namespace bunker
     struct EnemyExtended
     {
         const EnemyConfig *config = nullptr;
+
         Vector3D position;
         float health = 35.0f;
         float speed = 2.4f;
