@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/include/ai",
+                "${workspaceFolder}/include/content",
+                "${workspaceFolder}/include/core",
+                "${workspaceFolder}/include/engine",
+                "${workspaceFolder}/include/entities",
+                "${workspaceFolder}/include/gameplay",
+                "${workspaceFolder}/include/persistence",
+                "${workspaceFolder}/include/render",
+                "${workspaceFolder}/include/ui",
+                "${workspaceFolder}/include/vehicles",
+                "${workspaceFolder}/include/world"
+            ],
+            "defines": [],
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}

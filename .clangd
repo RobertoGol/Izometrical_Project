@@ -1,0 +1,16 @@
+CompileFlags:
+  Add: [
+    -std=c++17,
+    -Iinclude,
+    -Iinclude/ai,
+    -Iinclude/content,
+    -Iinclude/core,
+    -Iinclude/engine,
+    -Iinclude/entities,
+    -Iinclude/gameplay,
+    -Iinclude/persistence,
+    -Iinclude/render,
+    -Iinclude/ui,
+    -Iinclude/vehicles,
+    -Iinclude/world
+  ]
