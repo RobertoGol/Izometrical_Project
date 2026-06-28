@@ -1,4 +1,5 @@
 #include "ai/HostileAISystem.hpp"
+#include "ai/PerceptionSystem.hpp"
 #include "gameplay/DamageSystem.hpp"
 #include <algorithm>
 #include <cmath>
@@ -79,7 +80,8 @@ namespace bunker
             float distSq = dx * dx + dy * dy;
             float dist = std::sqrt(std::max(distSq, 0.0001f));
 
-            updateAwareness(st, p, target, dist, dt, gs.worldVisibilityModifier);
+            bool hasLOS = PerceptionSystem::hasLineOfSight(gs, e.position, target);
+            updateAwareness(st, p, target, dist, dt, gs.worldVisibilityModifier, hasLOS);
 
             switch (st.alert)
             {
@@ -285,10 +287,10 @@ namespace bunker
     }
 
     void HostileAISystem::updateAwareness(HostileRuntimeState &st, const HostileProfile &p,
-                                          const Vector3D &target, float dist, float dt, float visModifier) const
+                                          const Vector3D &target, float dist, float dt, float visModifier, bool hasLOS) const
     {
         float effRadius = p.detectRadius * std::clamp(visModifier, 0.2f, 1.0f);
-        bool canSense = dist <= effRadius;
+        bool canSense = (dist <= effRadius) && hasLOS;
         bool tooFar = dist > p.loseRadius;
 
         if (canSense)

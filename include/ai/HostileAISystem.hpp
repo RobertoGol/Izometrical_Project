@@ -88,7 +88,7 @@ namespace bunker
         void ensureStateSize(const GameState &gs);
         HostileRuntimeState makeRuntimeState(HostileKind kind) const;
         void applyMechanicalDegradation(HostileProfile &p, const HostileRuntimeState &st, Enemy &e) const;
-        void updateAwareness(HostileRuntimeState &st, const HostileProfile &p, const Vector3D &target, float dist, float dt, float visModifier = 1.0f) const;
+        void updateAwareness(HostileRuntimeState &st, const HostileProfile &p, const Vector3D &target, float dist, float dt, float visModifier = 1.0f, bool hasLOS = true) const;
         void updateIdle(Enemy &e, float dt) const;
         void updateSearching(GameState &gs, Enemy &e, HostileRuntimeState &st, const HostileProfile &p, float dt);
         void updateAggro(GameState &gs, Enemy &e, HostileRuntimeState &st, const HostileProfile &p, const Vector3D &target, float dist, float dt);
