@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SFML/Graphics.hpp>
 #include "core/Types.hpp"
 #include "gameplay/GameState.hpp"
 #include "entities/Collisions.hpp"
@@ -41,6 +42,9 @@ namespace bunker
         float aggroThreshold = 100.0f;
         bool isMechanical = false;
         bool usesRangedAttack = false;
+        sf::Color bodyColor = sf::Color(255, 50, 50);
+        int shapePoints = 3;
+        std::string textureAssetPath = "";
     };
 
     struct MechanicalDamageState

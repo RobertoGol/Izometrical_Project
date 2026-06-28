@@ -27,6 +27,7 @@ set(SOURCES
     src/ai/TitanAI.cpp
     src/persistence/Inventory.cpp
     src/persistence/Progression.cpp
+    src/persistence/CharacterManager.cpp
     src/persistence/SaveSystem.cpp
     src/ui/HUD.cpp
     src/ui/TerminalUI.cpp

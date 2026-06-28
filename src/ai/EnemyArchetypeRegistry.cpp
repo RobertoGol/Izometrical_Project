@@ -1,3 +1,4 @@
+#include <SFML/Graphics.hpp>
 #include "ai/EnemyArchetypeRegistry.hpp"
 #include "core/Constants.hpp"
 
@@ -13,60 +14,72 @@ namespace bunker
         // 1. Биомасса Роя (Vermin Rush / Органический рой RoY)
         HostileProfile vermin;
         vermin.kind = HostileKind::VerminRush;
-        vermin.archetype = "Vermin Rush (RoY Swarm)";
-        vermin.speed = Config::ENEMY_WALK_SPEED * 1.35f;
         vermin.detectRadius = 5.5f;
         vermin.loseRadius = 8.0f;
-        vermin.aggroThreshold = 60.0f;
-        vermin.awarenessGain = 65.0f;
-        vermin.attackRange = 0.95f;
-        vermin.attackCooldown = 0.80f;
-        vermin.damage = 6.0f;
-        vermin.swarmRush = true;
+        vermin.attackRadius = 0.55f;
+        vermin.preferredRange = 0.45f;
+        vermin.speed = 3.15f;
+        vermin.damage = 4.0f;
+        vermin.attackCooldown = 0.55f;
+        vermin.awarenessGain = 75.0f;
+        vermin.awarenessDecay = 26.0f;
+        vermin.bodyColor = sf::Color(210, 45, 45);
+        vermin.shapePoints = 3;
+        vermin.textureAssetPath = "assets/enemies/vermin_swarm.png";
         s_Profiles.push_back(vermin);
 
         // 2. Бешеные Гули (Ghoul Rush)
         HostileProfile ghoul;
         ghoul.kind = HostileKind::GhoulRush;
-        ghoul.archetype = "Feral Ghoul Rush";
-        ghoul.speed = Config::ENEMY_WALK_SPEED * 1.15f;
         ghoul.detectRadius = 6.5f;
         ghoul.loseRadius = 10.0f;
-        ghoul.aggroThreshold = 80.0f;
-        ghoul.awarenessGain = 50.0f;
-        ghoul.attackRange = 1.20f;
-        ghoul.attackCooldown = 1.10f;
-        ghoul.damage = 14.0f;
+        ghoul.attackRadius = 0.75f;
+        ghoul.preferredRange = 0.60f;
+        ghoul.speed = 2.35f;
+        ghoul.damage = 10.0f;
+        ghoul.attackCooldown = 1.05f;
+        ghoul.awarenessGain = 58.0f;
+        ghoul.awarenessDecay = 16.0f;
+        ghoul.bodyColor = sf::Color(150, 230, 80);
+        ghoul.shapePoints = 8;
+        ghoul.textureAssetPath = "assets/enemies/feral_ghoul.png";
         s_Profiles.push_back(ghoul);
 
         // 3. Тактические мутанты (Human Tactical / SuperMutants)
         HostileProfile tactical;
         tactical.kind = HostileKind::HumanTactical;
-        tactical.archetype = "Tactical SuperMutant Vanguard";
-        tactical.speed = Config::ENEMY_WALK_SPEED * 0.90f;
         tactical.detectRadius = 8.5f;
         tactical.loseRadius = 12.0f;
-        tactical.aggroThreshold = 100.0f;
-        tactical.awarenessGain = 40.0f;
-        tactical.attackRange = 6.50f;
-        tactical.attackCooldown = 1.80f;
-        tactical.damage = 18.0f;
-        tactical.usesCover = true;
+        tactical.attackRadius = 6.0f;
+        tactical.preferredRange = 4.5f;
+        tactical.speed = 2.15f;
+        tactical.damage = 8.0f;
+        tactical.attackCooldown = 1.15f;
+        tactical.awarenessGain = 48.0f;
+        tactical.awarenessDecay = 14.0f;
+        tactical.usesRangedAttack = true;
+        tactical.bodyColor = sf::Color(235, 170, 70);
+        tactical.shapePoints = 4;
+        tactical.textureAssetPath = "assets/enemies/supermutant.png";
         s_Profiles.push_back(tactical);
 
         // 4. Тяжёлые роботы-боссы (Robot Control / Вражеский Аналог Титана)
         HostileProfile robot;
         robot.kind = HostileKind::RobotControl;
-        robot.archetype = "Hostile Titan Mech Combatant";
-        robot.speed = Config::ENEMY_WALK_SPEED * 0.70f;
         robot.detectRadius = 9.0f;
-        robot.loseRadius = 14.0f;
-        robot.aggroThreshold = 100.0f;
-        robot.awarenessGain = 35.0f;
-        robot.attackRange = 7.50f;
-        robot.attackCooldown = 2.20f;
-        robot.damage = 32.0f;
-        robot.partCrippling = true;
+        robot.loseRadius = 13.5f;
+        robot.attackRadius = 5.5f;
+        robot.preferredRange = 4.0f;
+        robot.speed = 1.85f;
+        robot.damage = 12.0f;
+        robot.attackCooldown = 1.35f;
+        robot.awarenessGain = 62.0f;
+        robot.awarenessDecay = 10.0f;
+        robot.isMechanical = true;
+        robot.usesRangedAttack = true;
+        robot.bodyColor = sf::Color(135, 170, 230);
+        robot.shapePoints = 6;
+        robot.textureAssetPath = "assets/enemies/hostile_titan_mech.png";
         s_Profiles.push_back(robot);
     }
 

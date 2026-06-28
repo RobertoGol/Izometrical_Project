@@ -62,6 +62,8 @@ namespace bunker
         file.write(reinterpret_cast<const char *>(&gs.characterProg.level), sizeof(int));
         file.write(reinterpret_cast<const char *>(&gs.characterProg.experience), sizeof(int));
         file.write(reinterpret_cast<const char *>(&gs.characterProg.unusedPoints), sizeof(int));
+        file.write(reinterpret_cast<const char *>(&gs.characterProg.sanityLine), sizeof(float));
+        file.write(reinterpret_cast<const char *>(&gs.characterProg.soulLine), sizeof(float));
 
         file.write(reinterpret_cast<const char *>(&gs.mapMeta.isBaseCleared), sizeof(bool));
         file.write(reinterpret_cast<const char *>(&gs.mapMeta.baseSuppliesLevel), sizeof(float));
@@ -150,6 +152,8 @@ namespace bunker
         file.read(reinterpret_cast<char *>(&gs.characterProg.level), sizeof(int));
         file.read(reinterpret_cast<char *>(&gs.characterProg.experience), sizeof(int));
         file.read(reinterpret_cast<char *>(&gs.characterProg.unusedPoints), sizeof(int));
+        file.read(reinterpret_cast<char *>(&gs.characterProg.sanityLine), sizeof(float));
+        file.read(reinterpret_cast<char *>(&gs.characterProg.soulLine), sizeof(float));
 
         file.read(reinterpret_cast<char *>(&gs.mapMeta.isBaseCleared), sizeof(bool));
         file.read(reinterpret_cast<char *>(&gs.mapMeta.baseSuppliesLevel), sizeof(float));

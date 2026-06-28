@@ -399,6 +399,8 @@ namespace bunker
         float maxHp = Config::PLAYER_START_HP;
         float mp = 50.0f;
         float maxMp = 50.0f;
+        float sanityLine = 100.0f; // Линия Разума (Резервный предохранитель сознания)
+        float soulLine = 100.0f;   // Линия Души (Система безопасности воспоминаний)
         std::vector<InventoryItem> inventory;
     };
 

@@ -9,6 +9,7 @@
 #include "Constants.hpp"
 #include "GameState.hpp"
 #include "HostileAISystem.hpp"
+#include "ai/EnemyArchetypeRegistry.hpp"
 #include "IsoMath.hpp"
 #include "TimeShift.hpp"
 #include "Types.hpp"
@@ -142,28 +143,9 @@ namespace bunker
 
             renderQueue.push_back({ex + ey, [&, ex, ey, er, isPast, kind, alert]()
                                    {
-                                       sf::Color body = sf::Color(255, 50, 50);
-                                       int points = 3;
-
-                                       switch (kind)
-                                       {
-                                       case HostileKind::VerminRush:
-                                           body = sf::Color(210, 45, 45);
-                                           points = 3;
-                                           break;
-                                       case HostileKind::GhoulRush:
-                                           body = sf::Color(150, 230, 80);
-                                           points = 8;
-                                           break;
-                                       case HostileKind::HumanTactical:
-                                           body = sf::Color(235, 170, 70);
-                                           points = 4;
-                                           break;
-                                       case HostileKind::RobotControl:
-                                           body = sf::Color(135, 170, 230);
-                                           points = 6;
-                                           break;
-                                       }
+                                       const auto &profile = EnemyArchetypeRegistry::getProfile(kind);
+                                       sf::Color body = profile.bodyColor;
+                                       int points = profile.shapePoints;
 
                                        if (isPast)
                                        {
