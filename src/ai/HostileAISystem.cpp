@@ -1,5 +1,6 @@
 #include "ai/HostileAISystem.hpp"
 #include "ai/PerceptionSystem.hpp"
+#include "ai/EnemyArchetypeRegistry.hpp"
 #include "gameplay/DamageSystem.hpp"
 #include <algorithm>
 #include <cmath>
@@ -145,64 +146,7 @@ namespace bunker
 
     HostileProfile HostileAISystem::profileFor(HostileKind kind)
     {
-        HostileProfile p;
-        p.kind = kind;
-
-        switch (kind)
-        {
-        case HostileKind::VerminRush:
-            p.detectRadius = 5.5f;
-            p.loseRadius = 8.0f;
-            p.attackRadius = 0.55f;
-            p.preferredRange = 0.45f;
-            p.speed = 3.15f;
-            p.damage = 4.0f;
-            p.attackCooldown = 0.55f;
-            p.awarenessGain = 75.0f;
-            p.awarenessDecay = 26.0f;
-            break;
-
-        case HostileKind::GhoulRush:
-            p.detectRadius = 6.5f;
-            p.loseRadius = 10.0f;
-            p.attackRadius = 0.75f;
-            p.preferredRange = 0.60f;
-            p.speed = 2.35f;
-            p.damage = 10.0f;
-            p.attackCooldown = 1.05f;
-            p.awarenessGain = 58.0f;
-            p.awarenessDecay = 16.0f;
-            break;
-
-        case HostileKind::HumanTactical:
-            p.detectRadius = 8.5f;
-            p.loseRadius = 12.0f;
-            p.attackRadius = 6.0f;
-            p.preferredRange = 4.5f;
-            p.speed = 2.15f;
-            p.damage = 8.0f;
-            p.attackCooldown = 1.15f;
-            p.awarenessGain = 48.0f;
-            p.awarenessDecay = 14.0f;
-            p.usesRangedAttack = true;
-            break;
-
-        case HostileKind::RobotControl:
-            p.detectRadius = 9.0f;
-            p.loseRadius = 13.5f;
-            p.attackRadius = 5.5f;
-            p.preferredRange = 4.0f;
-            p.speed = 1.85f;
-            p.damage = 12.0f;
-            p.attackCooldown = 1.35f;
-            p.awarenessGain = 62.0f;
-            p.awarenessDecay = 10.0f;
-            p.isMechanical = true;
-            p.usesRangedAttack = true;
-            break;
-        }
-
-        return p;
+        return EnemyArchetypeRegistry::getProfile(kind);
     }
 
     float HostileAISystem::healthFor(HostileKind kind)

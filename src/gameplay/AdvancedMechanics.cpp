@@ -696,6 +696,12 @@ namespace bunker
         c.containsItems.clear();
         for (int i = 0; i < rolls; ++i)
             c.containsItems.push_back(roll(tier));
+
+        // Гарантированный специальный предмет: Аналог ядра Титана в легендарных хранилищах
+        if (c.type == LootContainerType::DevVault)
+        {
+            c.containsItems.push_back({1001, ItemType::Quest, 1, 15.0f, "ТАНКОВОЕ ЯДРО БТ (ANALOG TITAN CORE)"});
+        }
     }
 
     void LootGenerator::normalizeWorldLoot(GameState &gs)

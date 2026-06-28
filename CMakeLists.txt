@@ -21,6 +21,7 @@ set(SOURCES
     src/gameplay/AdvancedMechanics.cpp
     src/gameplay/DamageSystem.cpp
     src/ai/EnemySpawner.cpp
+    src/ai/EnemyArchetypeRegistry.cpp
     src/ai/HostileAISystem.cpp
     src/ai/PerceptionSystem.cpp
     src/ai/TitanAI.cpp
