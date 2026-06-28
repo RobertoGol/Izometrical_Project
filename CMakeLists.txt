@@ -22,6 +22,7 @@ set(SOURCES
     src/gameplay/DamageSystem.cpp
     src/ai/EnemySpawner.cpp
     src/ai/HostileAISystem.cpp
+    src/ai/PerceptionSystem.cpp
     src/ai/TitanAI.cpp
     src/persistence/Inventory.cpp
     src/persistence/Progression.cpp

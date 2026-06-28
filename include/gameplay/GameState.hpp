@@ -10,14 +10,13 @@ namespace bunker
 
     class HostileAISystem;
 
-    // Единый объект состояния игры — никаких глобальных extern!
+    // ═══════════════════════════════════════════════════════════════════════
+    // Доменные стейт-контроллеры движка (TARGET_ARCHITECTURE.md §7)
+    // ═══════════════════════════════════════════════════════════════════════
 
-    // Передаётся по ссылке во все системы.
-
-    struct GameState
+    // ── 1. Домен состояния Пилота ──
+    struct PlayerRuntimeState
     {
-        HostileAISystem *hostileAI = nullptr;
-        // ── Игрок ──
         UnitMode playerMode = UnitMode::Scout;
         Vector3D playerPos = {5.0f, 5.0f, 0.0f};
         float playerHealth = Config::PLAYER_START_HP;
@@ -27,6 +26,41 @@ namespace bunker
         float playerErosionLevel = 0.0f;
         float worldVisibilityModifier = 1.0f;
         int score = 0;
+    };
+
+    // ── 2. Домен тайловой сетки Убежища 17 ──
+    struct WorldGridState
+    {
+        // 0 = пол, 1 = стена, 2 = вода, 3 = эрозия
+        std::array<std::array<int, Config::MAP_HEIGHT>, Config::MAP_WIDTH> sectorMap{};
+        std::array<std::array<int, Config::MAP_HEIGHT>, Config::MAP_WIDTH> wallDurability{};
+        std::array<std::array<float, Config::MAP_HEIGHT>, Config::MAP_WIDTH> etherErosionMap{};
+        Vault17GridState regionalGrid;
+        Vector3D towerPosition = {Config::TOWER_X, Config::TOWER_Y, 0.0f};
+    };
+
+    // ── 3. Домен сессионных данных и прогрессии ──
+    struct SessionPersistenceData
+    {
+        std::vector<LootContainer> lootContainers;
+        SessionMapMetaData mapMeta;
+        Vault17Progression bunkerProgression;
+        CharacterProgression characterProg;
+        StoryState story;
+        bool isRunning = true;
+        float deltaTime = 0.0f;
+        float windowWidth = static_cast<float>(Config::SCREEN_WIDTH);
+        float windowHeight = static_cast<float>(Config::SCREEN_HEIGHT);
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Единый агрегированный объект состояния игры
+    // Наследует домены для 100% обратной совместимости со старым кодом!
+    // ═══════════════════════════════════════════════════════════════════════
+
+    struct GameState : public PlayerRuntimeState, public WorldGridState, public SessionPersistenceData
+    {
+        HostileAISystem *hostileAI = nullptr;
 
         // ── Прицеливание ──
         bool isAiming = false;
@@ -45,37 +79,6 @@ namespace bunker
 
         // ── Титан / БТ-7274 ──
         TitanAlly titan;
-
-        // ── Регион / Убежище ──
-        Vault17GridState regionalGrid;
-        Vault17Progression bunkerProgression;
-        Vector3D towerPosition = {Config::TOWER_X, Config::TOWER_Y, 0.0f};
-
-        // ── Карта (тайлы 20x20) ──
-        // 0 = пол, 1 = стена, 2 = вода, 3 = эрозия
-        std::array<std::array<int, Config::MAP_HEIGHT>, Config::MAP_WIDTH> sectorMap{};
-        std::array<std::array<int, Config::MAP_HEIGHT>, Config::MAP_WIDTH> wallDurability{};
-        std::array<std::array<float, Config::MAP_HEIGHT>, Config::MAP_WIDTH> etherErosionMap{};
-
-        // ── Лут-контейнеры на карте ──
-        std::vector<LootContainer> lootContainers;
-
-        // ── Метаданные сессии карты ──
-        SessionMapMetaData mapMeta;
-
-        // ── Прогрессия персонажа ──
-        CharacterProgression characterProg;
-        StoryState story;
-
-        // ── Флаг работы игры ──
-        bool isRunning = true;
-
-        // ── DeltaTime текущего кадра ──
-        float deltaTime = 0.0f;
-
-        // ── Размер окна ──
-        float windowWidth = static_cast<float>(Config::SCREEN_WIDTH);
-        float windowHeight = static_cast<float>(Config::SCREEN_HEIGHT);
     };
 
 } // namespace bunker
