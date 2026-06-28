@@ -9,6 +9,7 @@
 #include "GameState.hpp"
 #include "HUD.hpp"
 #include "ui/TerminalUI.hpp"
+#include "ui/PipPadUI.hpp"
 #include "HostileAISystem.hpp"
 #include "InputManager.hpp"
 #include "Inventory.hpp"
@@ -69,6 +70,7 @@ namespace bunker
         PlayerInventory m_Inventory;
         HUD m_Hud;
         TerminalManager m_TerminalUI;
+        PipPadUI m_PipPad;
         MapScreen m_MapScreen;
         TimeShift m_TimeShift;
         TextureGenerator m_TextureGenerator;

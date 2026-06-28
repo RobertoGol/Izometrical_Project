@@ -352,19 +352,53 @@ namespace bunker
             }
         }
 
-        // Превью строительства
+        // Превью строительства (Объёмный 3D снаппинг-бокс в духе Fallout 76)
         if (adv.camp.enabled())
         {
             const auto &p = adv.camp.preview();
-            sf::ConvexShape tile(4);
-            tile.setPoint(0, IsoMath::worldToScreen(static_cast<float>(p.tileX), static_cast<float>(p.tileY)));
-            tile.setPoint(1, IsoMath::worldToScreen(static_cast<float>(p.tileX + 1), static_cast<float>(p.tileY)));
-            tile.setPoint(2, IsoMath::worldToScreen(static_cast<float>(p.tileX + 1), static_cast<float>(p.tileY + 1)));
-            tile.setPoint(3, IsoMath::worldToScreen(static_cast<float>(p.tileX), static_cast<float>(p.tileY + 1)));
-            tile.setFillColor(p.isPlacementValid ? sf::Color(60, 220, 90, 75) : sf::Color(220, 60, 60, 75));
-            tile.setOutlineThickness(2.0f);
-            tile.setOutlineColor(p.isPlacementValid ? sf::Color(90, 255, 120) : sf::Color(255, 90, 90));
-            window.draw(tile);
+            sf::Color fillCol = p.isPlacementValid ? sf::Color(50, 240, 90, 85) : sf::Color(240, 50, 50, 85);
+            sf::Color lineCol = p.isPlacementValid ? sf::Color(90, 255, 120) : sf::Color(255, 90, 90);
+
+            sf::Vector2f b0 = IsoMath::worldToScreen(static_cast<float>(p.tileX), static_cast<float>(p.tileY));
+            sf::Vector2f b1 = IsoMath::worldToScreen(static_cast<float>(p.tileX + 1), static_cast<float>(p.tileY));
+            sf::Vector2f b2 = IsoMath::worldToScreen(static_cast<float>(p.tileX + 1), static_cast<float>(p.tileY + 1));
+            sf::Vector2f b3 = IsoMath::worldToScreen(static_cast<float>(p.tileX), static_cast<float>(p.tileY + 1));
+
+            sf::ConvexShape bottomFace(4);
+            bottomFace.setPoint(0, b0);
+            bottomFace.setPoint(1, b1);
+            bottomFace.setPoint(2, b2);
+            bottomFace.setPoint(3, b3);
+            bottomFace.setFillColor(fillCol);
+            bottomFace.setOutlineThickness(2.0f);
+            bottomFace.setOutlineColor(lineCol);
+            window.draw(bottomFace);
+
+            float heightOffset = 38.0f;
+            sf::Vector2f t0{b0.x, b0.y - heightOffset};
+            sf::Vector2f t1{b1.x, b1.y - heightOffset};
+            sf::Vector2f t2{b2.x, b2.y - heightOffset};
+            sf::Vector2f t3{b3.x, b3.y - heightOffset};
+
+            sf::ConvexShape topFace(4);
+            topFace.setPoint(0, t0);
+            topFace.setPoint(1, t1);
+            topFace.setPoint(2, t2);
+            topFace.setPoint(3, t3);
+            topFace.setFillColor(sf::Color::Transparent);
+            topFace.setOutlineThickness(1.5f);
+            topFace.setOutlineColor(lineCol);
+            window.draw(topFace);
+
+            auto drawWire = [&](sf::Vector2f from, sf::Vector2f to)
+            {
+                sf::Vertex line[] = {sf::Vertex(from, lineCol), sf::Vertex(to, lineCol)};
+                window.draw(line, 2, sf::Lines);
+            };
+            drawWire(b0, t0);
+            drawWire(b1, t1);
+            drawWire(b2, t2);
+            drawWire(b3, t3);
         }
     }
 
@@ -372,11 +406,99 @@ namespace bunker
                                          const AdvancedMechanics &adv,
                                          const sf::Font *font)
     {
-        // Погодный экранный фильтр
+        // Погодный экранный фильтр (Внедрён GLSL-шейдер гибридной атмосферы: Эфирный Туман + Кислотный Дождь)
         const auto &weather = adv.weather.state();
         if (weather.type != WeatherType::Clear)
         {
             sf::RectangleShape overlay({static_cast<float>(Config::SCREEN_WIDTH), static_cast<float>(Config::SCREEN_HEIGHT)});
+
+            static sf::Shader s_AtmosphericShader;
+            static bool s_ShaderLoaded = false;
+            static sf::Clock s_HazardClock;
+
+            if (sf::Shader::isAvailable())
+            {
+                if (!s_ShaderLoaded)
+                {
+                    const char *ATMOSPHERIC_HAZARD_SHADER = R"(
+                        uniform float u_time;
+                        uniform float u_fogIntensity;
+                        uniform float u_rainIntensity;
+                        uniform vec2 u_resolution;
+
+                        float hash(vec2 p) {
+                            p = fract(p * vec3(.1031, .1030, .0973).xy);
+                            p += dot(p, p.yx + 33.33);
+                            return fract((p.x + p.y) * p.x);
+                        }
+
+                        float noise(vec2 p) {
+                            vec2 i = floor(p);
+                            vec2 f = fract(p);
+                            f = f * f * (3.0 - 2.0 * f);
+                            return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
+                                       mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+                        }
+
+                        float fbm(vec2 p) {
+                            float v = 0.0;
+                            float a = 0.5;
+                            for (int i = 0; i < 4; ++i) {
+                                v += a * noise(p);
+                                p = p * 2.0 + vec2(u_time * 0.15, u_time * 0.05);
+                                a *= 0.5;
+                            }
+                            return v;
+                        }
+
+                        void main() {
+                            vec2 uv = gl_FragCoord.xy / u_resolution;
+                            vec4 finalColor = vec4(0.0);
+
+                            if (u_fogIntensity > 0.01) {
+                                float n = fbm(uv * 3.5 + vec2(u_time * 0.08, -u_time * 0.03));
+                                vec3 fogTint = vec3(0.35, 0.65, 0.85);
+                                float fogAlpha = clamp(n * u_fogIntensity * 0.85, 0.0, 0.75);
+                                finalColor = mix(finalColor, vec4(fogTint, fogAlpha), fogAlpha);
+                            }
+
+                            if (u_rainIntensity > 0.01) {
+                                vec2 rainUV = uv * vec2(80.0, 15.0);
+                                rainUV.y += u_time * 18.0;
+                                float r = noise(rainUV);
+                                if (r > 0.88) {
+                                    float rainStreak = clamp((r - 0.88) * 8.3 * u_rainIntensity, 0.0, 0.85);
+                                    vec3 acidTint = vec3(0.25, 0.95, 0.35);
+                                    finalColor = mix(finalColor, vec4(acidTint, rainStreak), rainStreak);
+                                }
+                            }
+
+                            gl_FragColor = finalColor;
+                        }
+                    )";
+                    s_ShaderLoaded = s_AtmosphericShader.loadFromMemory(ATMOSPHERIC_HAZARD_SHADER, sf::Shader::Fragment);
+                }
+
+                if (s_ShaderLoaded)
+                {
+                    float fogInt = (weather.type == WeatherType::EtherFog || weather.type == WeatherType::EtherStorm) ? weather.intensity : 0.0f;
+                    float rainInt = (weather.type == WeatherType::AcidRain || weather.type == WeatherType::EtherStorm) ? weather.intensity : 0.0f;
+                    if (weather.type == WeatherType::AshStorm)
+                    {
+                        fogInt = weather.intensity * 0.8f;
+                    }
+
+                    s_AtmosphericShader.setUniform("u_time", s_HazardClock.getElapsedTime().asSeconds());
+                    s_AtmosphericShader.setUniform("u_fogIntensity", fogInt);
+                    s_AtmosphericShader.setUniform("u_rainIntensity", rainInt);
+                    s_AtmosphericShader.setUniform("u_resolution", sf::Glsl::Vec2(static_cast<float>(Config::SCREEN_WIDTH), static_cast<float>(Config::SCREEN_HEIGHT)));
+
+                    window.draw(overlay, &s_AtmosphericShader);
+                    return;
+                }
+            }
+
+            // Fallback для старых видеокарт без поддержки GLSL:
             if (weather.type == WeatherType::EtherFog)
             {
                 overlay.setFillColor(sf::Color(80, 120, 180, static_cast<sf::Uint8>(45 + 60 * weather.intensity)));

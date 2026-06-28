@@ -253,6 +253,15 @@ namespace bunker
 
     void TankUtilitySystem::update(GameState &gs, float dt)
     {
+        for (auto &s : m_Sparks)
+        {
+            s.pos += s.vel * dt;
+            s.ttl -= dt;
+        }
+        m_Sparks.erase(std::remove_if(m_Sparks.begin(), m_Sparks.end(), [](const MuzzleSpark &s)
+                                      { return s.ttl <= 0.0f; }),
+                       m_Sparks.end());
+
         m_Runtime.utilityCooldown = std::max(0.0f, m_Runtime.utilityCooldown - dt);
         m_Runtime.cannonThermalLoad = advClamp(m_Runtime.cannonThermalLoad - 18.0f * dt, 0.0f, 100.0f);
         if (m_Runtime.cannonThermalLoad < 62.0f)
@@ -331,6 +340,14 @@ namespace bunker
         {
             m_Runtime.overheated = true;
             gs.titan.systems.turretStatus = advClamp(gs.titan.systems.turretStatus - 4.0f, 0.0f, 100.0f);
+        }
+
+        // Спавн 4 лёгких процедурных искр дульного пламени (Оптимизировано O(1)):
+        for (int i = 0; i < 4; ++i)
+        {
+            float ang = static_cast<float>(i) * 1.57f;
+            Vector3D vel{std::cos(ang) * 6.5f, std::sin(ang) * 6.5f, 2.0f};
+            m_Sparks.push_back({gs.titan.position, vel, 0.12f});
         }
         return true;
     }
@@ -714,6 +731,13 @@ namespace bunker
         add(LootTier::Epic, 777, ItemType::Weapon, "GMOD TOOLGUN", 1, 1, 1.0f, 0.0f);
         add(LootTier::Legendary, 999, ItemType::Quest, "DEV DEBUG BACKPACK", 1, 1, 1.0f, 0.0f);
         add(LootTier::Legendary, 888, ItemType::Weapon, "DEBUGGUN CHAIN LIGHTNING", 1, 1, 1.0f, 0.0f);
+
+        // Внедрение внутриигровых предметов из Fallout 76 UI Art Collection (Jake Raymor):
+        add(LootTier::Uncommon, 520, ItemType::Medicine, "SUGAR FREE NUKA SHINE", 1, 2, 4.0f, 0.20f);
+        add(LootTier::Rare, 521, ItemType::Medicine, "WEIGHT BE-GONE POTION", 1, 1, 3.0f, 0.10f);
+        add(LootTier::Epic, 710, ItemType::Weapon, "SHEEPSQUATCH QUILL CLUB", 1, 1, 2.0f, 4.5f);
+        add(LootTier::Legendary, 810, ItemType::Quest, "SPACE EXPLORER BACKPACK", 1, 1, 1.0f, 1.0f);
+        add(LootTier::Rare, 811, ItemType::Resource, "PIONEER SCOUT BADGE", 1, 1, 4.0f, 0.01f);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -833,6 +857,11 @@ namespace bunker
         m_Prefabs.push_back({"small_bunker_room", {"#####", "#...#", "#.c.#", "#...#", "#####"}});
         m_Prefabs.push_back({"garage_checkpoint", {"#######", "#.....#", "#..c..#", "#.....#", "###.###"}});
         m_Prefabs.push_back({"defense_corner", {"###", "#t.", "#.."}});
+
+        // Внутриигровые рекламные постеры и вывески из Fallout 76 UI Art Collection:
+        m_Prefabs.push_back({"big_freds_bbq_shack", {"######", "#....#", "#.c..#", "######"}});
+        m_Prefabs.push_back({"nuka_speedway_hotrod", {"####", "#..#", "####"}});
+        m_Prefabs.push_back({"big_als_tattoo_parlor", {"#####", "#...#", "#####"}});
     }
 
     const PrefabDef *PrefabLibrary::get(const std::string &name) const

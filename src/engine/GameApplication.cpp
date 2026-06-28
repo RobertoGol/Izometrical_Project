@@ -20,6 +20,7 @@ namespace bunker
               sf::Style::Close | sf::Style::Titlebar)
     {
         m_Window.setFramerateLimit(60);
+        m_GameState.hostileAI = &m_HostileAI;
     }
 
     int GameApplication::run()
@@ -425,6 +426,7 @@ namespace bunker
 
         // Мир: эрозия, осада, Pip-Pad.
         m_WorldSession.update(m_GameState, dt);
+        m_PipPad.update(m_GameState, dt);
 
         // Advanced переносы из двух старых репозиториев.
         m_Advanced.update(m_GameState, m_Inventory, input, dt);
@@ -445,6 +447,7 @@ namespace bunker
         GameRenderer::renderFloor(m_Window, m_GameState, m_TimeShift);
         GameRenderer::renderEntities(m_Window, m_GameState, m_TimeShift, m_HostileAI);
         GameRenderer::renderAdvancedWorld(m_Window, m_Advanced);
+        m_PipPad.renderFlashlight(m_Window, m_GameState);
 
         m_BulletSystem.render(m_GameState, m_Window, m_Camera.getView());
 

@@ -190,6 +190,13 @@ namespace bunker
         Gunner
     };
 
+    struct MuzzleSpark
+    {
+        Vector3D pos;
+        Vector3D vel;
+        float ttl = 0.15f;
+    };
+
     struct TankUtilityRuntime
     {
         TankUtilityMode utility = TankUtilityMode::BucketRig;
@@ -215,9 +222,11 @@ namespace bunker
 
         bool isInsideHangar(const Vector3D &p) const { return p.x >= 1.5f && p.x <= 6.5f && p.y >= 1.5f && p.y <= 6.5f; }
         const TankUtilityRuntime &runtime() const { return m_Runtime; }
+        const std::vector<MuzzleSpark> &sparks() const { return m_Sparks; }
 
     private:
         TankUtilityRuntime m_Runtime;
+        std::vector<MuzzleSpark> m_Sparks;
 
         void carveFront(GameState &gs, int radius, int damage);
     };
