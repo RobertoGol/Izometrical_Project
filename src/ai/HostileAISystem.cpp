@@ -79,7 +79,7 @@ namespace bunker
             float distSq = dx * dx + dy * dy;
             float dist = std::sqrt(std::max(distSq, 0.0001f));
 
-            updateAwareness(st, p, target, dist, dt);
+            updateAwareness(st, p, target, dist, dt, gs.worldVisibilityModifier);
 
             switch (st.alert)
             {
@@ -285,9 +285,10 @@ namespace bunker
     }
 
     void HostileAISystem::updateAwareness(HostileRuntimeState &st, const HostileProfile &p,
-                                          const Vector3D &target, float dist, float dt) const
+                                          const Vector3D &target, float dist, float dt, float visModifier) const
     {
-        bool canSense = dist <= p.detectRadius;
+        float effRadius = p.detectRadius * std::clamp(visModifier, 0.2f, 1.0f);
+        bool canSense = dist <= effRadius;
         bool tooFar = dist > p.loseRadius;
 
         if (canSense)

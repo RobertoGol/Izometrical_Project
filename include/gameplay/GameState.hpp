@@ -25,6 +25,7 @@ namespace bunker
         float playerSpeed = Config::PLAYER_WALK_SPEED;
         float fireCooldown = 0.0f;
         float playerErosionLevel = 0.0f;
+        float worldVisibilityModifier = 1.0f;
         int score = 0;
 
         // ── Прицеливание ──

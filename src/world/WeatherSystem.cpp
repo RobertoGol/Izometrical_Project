@@ -274,6 +274,8 @@ namespace bunker
 
     void WeatherSystem::applyWorldEffects(GameState &gs, float dt)
     {
+        gs.worldVisibilityModifier = m_State.visibilityMultiplier;
+
         if (m_State.erosionBoost <= 0.001f)
             return;
 
@@ -300,13 +302,27 @@ namespace bunker
         if (gs.playerMode == UnitMode::Titan || gs.titan.isPiloted)
         {
             DamageSystem::applyTitanDamage(gs, dmg * 0.45f, DamageType::Acid);
-            gs.titan.systems.tracksCondition = std::max(0.0f, gs.titan.systems.tracksCondition - dmg * 0.08f);
-            gs.titan.systems.sensorLink = std::max(0.0f, gs.titan.systems.sensorLink - dmg * 0.06f);
-            gs.titan.systems.turretStatus = std::max(0.0f, gs.titan.systems.turretStatus - dmg * 0.03f);
         }
         else
         {
             DamageSystem::applyPlayerDamage(gs, dmg, DamageType::Acid);
+        }
+
+        // ── Разъедание кислотным дождём баррикад базового лагеря C.A.M.P. ──
+        int erosionTick = std::max(1, static_cast<int>(dmg * 2.0f));
+        for (int x = 0; x < Config::MAP_WIDTH; ++x)
+        {
+            for (int y = 0; y < Config::MAP_HEIGHT; ++y)
+            {
+                if (gs.sectorMap[x][y] == 1 && gs.wallDurability[x][y] > 0)
+                {
+                    gs.wallDurability[x][y] = std::max(0, gs.wallDurability[x][y] - erosionTick);
+                    if (gs.wallDurability[x][y] <= 0)
+                    {
+                        gs.sectorMap[x][y] = 0; // Баррикада разрушена кислотной средой
+                    }
+                }
+            }
         }
     }
 

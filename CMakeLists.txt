@@ -19,6 +19,7 @@ set(SOURCES
     src/gameplay/Tactics.cpp
     src/gameplay/BulletSystem.cpp
     src/gameplay/AdvancedMechanics.cpp
+    src/gameplay/DamageSystem.cpp
     src/ai/EnemySpawner.cpp
     src/ai/HostileAISystem.cpp
     src/ai/TitanAI.cpp

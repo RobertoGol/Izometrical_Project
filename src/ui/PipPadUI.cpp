@@ -1,4 +1,4 @@
-#include "ui/PipPadUI.hpp"
+#include "ui/PipPad.hpp"
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -80,6 +80,7 @@ namespace bunker
 
     void PipPadUI::renderTablet(sf::RenderWindow &window, const GameState &gs, const PlayerInventory &inv, const AdvancedMechanics &adv, const sf::Font *font) const
     {
+        (void)inv;
         (void)adv;
         if (!m_TabletOpen || !gs.bunkerProgression.hasFoundPipPad)
             return;

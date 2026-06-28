@@ -96,9 +96,9 @@ namespace bunker
             return false;
         }
 
-        if (header.version != 15)
+        if (header.version != 16)
         {
-            std::cerr << "[SAVE] Несовместимая версия формата сохранения: " << header.version << " (ожидалась 15)" << std::endl;
+            std::cerr << "[SAVE] Несовместимая версия формата сохранения: " << header.version << " (ожидалась 16)" << std::endl;
             file.close();
             return false;
         }
