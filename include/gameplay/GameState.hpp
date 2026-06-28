@@ -11,6 +11,7 @@ namespace bunker
     class HostileAISystem;
 
     // Единый объект состояния игры — никаких глобальных extern!
+
     // Передаётся по ссылке во все системы.
 
     struct GameState
