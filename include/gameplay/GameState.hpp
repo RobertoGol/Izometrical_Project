@@ -8,11 +8,14 @@
 namespace bunker
 {
 
+    class HostileAISystem;
+
     // Единый объект состояния игры — никаких глобальных extern!
     // Передаётся по ссылке во все системы.
 
     struct GameState
     {
+        HostileAISystem *hostileAI = nullptr;
         // ── Игрок ──
         UnitMode playerMode = UnitMode::Scout;
         Vector3D playerPos = {5.0f, 5.0f, 0.0f};

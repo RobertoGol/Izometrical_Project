@@ -18,6 +18,7 @@ set(SOURCES
     src/vehicles/VehicleManager.cpp
     src/gameplay/Tactics.cpp
     src/gameplay/BulletSystem.cpp
+    src/gameplay/AdvancedMechanics.cpp
     src/ai/EnemySpawner.cpp
     src/ai/HostileAISystem.cpp
     src/ai/TitanAI.cpp
@@ -26,6 +27,7 @@ set(SOURCES
     src/persistence/SaveSystem.cpp
     src/ui/HUD.cpp
     src/ui/TerminalUI.cpp
+    src/ui/PipPadUI.cpp
     src/render/GameRenderer.cpp
     src/entities/PlayerController.cpp
     src/entities/Camera.cpp
