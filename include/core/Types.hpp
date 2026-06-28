@@ -350,7 +350,7 @@ namespace bunker
     struct SaveFileHeader
     {
         char magic[4] = {'B', 'S', 'A', 'V'};
-        unsigned int version = 16;
+        unsigned int version = 17; // BSAV v17 (Конгресс ИИ — без CRC32)
         unsigned int slotIndex = 0;
     };
 

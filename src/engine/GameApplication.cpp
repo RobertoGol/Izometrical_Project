@@ -47,6 +47,8 @@ namespace bunker
         restoreSaveIfAvailable();
         loadFonts();
         spawnInitialVehicles();
+
+        m_Audio.playVoiceEvent(VoiceEvent::PipBoyBoot);
     }
 
     void GameApplication::shutdown()
@@ -428,6 +430,14 @@ namespace bunker
         m_WorldSession.update(m_GameState, dt);
         m_PipPad.update(m_GameState, dt);
 
+        m_Audio.update(dt);
+        m_ThermalLoad.updateThermodynamics(m_GameState, dt);
+        StoryEventManager::evaluateZoneTriggers(m_GameState, m_StoryFlags);
+
+        // Broadphase регистрация сетки
+        m_SpatialGrid.clearBuckets();
+        m_SpatialGrid.registerEntity(0, m_GameState.playerPos);
+
         // Advanced переносы из двух старых репозиториев.
         m_Advanced.update(m_GameState, m_Inventory, input, dt);
 
@@ -463,6 +473,7 @@ namespace bunker
         }
 
         GameRenderer::renderAdvancedHUD(m_Window, m_Advanced, m_FontLoaded ? &m_GlobalFont : nullptr);
+        m_Audio.renderSubtitlesHUD(m_Window, m_FontLoaded ? &m_GlobalFont : nullptr);
 
         m_Window.display();
     }

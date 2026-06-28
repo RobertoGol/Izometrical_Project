@@ -15,11 +15,16 @@ set(SOURCES
     src/world/WorldSession.cpp
     src/world/MapScreen.cpp
     src/world/WeatherSystem.cpp
+    src/world/CampPlacementValidator.cpp
+    src/world/StoryEventManager.cpp
     src/vehicles/VehicleManager.cpp
+    src/vehicles/VehicleSeatController.cpp
+    src/vehicles/ThermalLoadSystem.cpp
     src/gameplay/Tactics.cpp
     src/gameplay/BulletSystem.cpp
     src/gameplay/AdvancedMechanics.cpp
     src/gameplay/DamageSystem.cpp
+    src/gameplay/SpatialGrid.cpp
     src/ai/EnemySpawner.cpp
     src/ai/EnemyArchetypeRegistry.cpp
     src/ai/HostileAISystem.cpp
@@ -28,6 +33,7 @@ set(SOURCES
     src/persistence/Inventory.cpp
     src/persistence/Progression.cpp
     src/persistence/CharacterManager.cpp
+    src/persistence/StoryFlagRegistry.cpp
     src/persistence/SaveSystem.cpp
     src/ui/HUD.cpp
     src/ui/TerminalUI.cpp

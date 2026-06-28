@@ -23,6 +23,13 @@
 #include "TitanAI.hpp"
 #include "VehicleManager.hpp"
 #include "WorldSession.hpp"
+#include "engine/AudioController.hpp"
+#include "vehicles/ThermalLoadSystem.hpp"
+#include "vehicles/VehicleSeatController.hpp"
+#include "world/CampPlacementValidator.hpp"
+#include "persistence/StoryFlagRegistry.hpp"
+#include "world/StoryEventManager.hpp"
+#include "gameplay/SpatialGrid.hpp"
 
 namespace bunker
 {
@@ -76,6 +83,12 @@ namespace bunker
         TextureGenerator m_TextureGenerator;
         HostileAISystem m_HostileAI;
         AdvancedMechanics m_Advanced;
+        AudioController m_Audio;
+        ThermalLoadSystem m_ThermalLoad;
+        VehicleSeatController m_SeatController;
+        CampPlacementValidator m_CampValidator;
+        StoryFlagRegistry m_StoryFlags;
+        SpatialGrid m_SpatialGrid;
 
         sf::Clock m_Clock;
         sf::Font m_GlobalFont;
