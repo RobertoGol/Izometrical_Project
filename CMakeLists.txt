@@ -10,6 +10,8 @@ find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 set(SOURCES
     src/main.cpp
     src/engine/GameApplication.cpp
+    src/engine/AudioController.cpp
+    src/engine/ProceduralSoundEffects.cpp
     src/engine/InputManager.cpp
     src/engine/TimeShift.cpp
     src/world/WorldSession.cpp
@@ -17,6 +19,7 @@ set(SOURCES
     src/world/WeatherSystem.cpp
     src/world/CampPlacementValidator.cpp
     src/world/StoryEventManager.cpp
+    src/world/DestructibleEnvironment.cpp
     src/vehicles/VehicleManager.cpp
     src/vehicles/VehicleSeatController.cpp
     src/vehicles/ThermalLoadSystem.cpp
@@ -25,6 +28,8 @@ set(SOURCES
     src/gameplay/AdvancedMechanics.cpp
     src/gameplay/DamageSystem.cpp
     src/gameplay/SpatialGrid.cpp
+    src/gameplay/StatefulActionsController.cpp
+    src/gameplay/AdvancedPilotMovement.cpp
     src/ai/EnemySpawner.cpp
     src/ai/EnemyArchetypeRegistry.cpp
     src/ai/HostileAISystem.cpp
@@ -34,6 +39,7 @@ set(SOURCES
     src/persistence/Progression.cpp
     src/persistence/CharacterManager.cpp
     src/persistence/StoryFlagRegistry.cpp
+    src/persistence/ActiveBuffsController.cpp
     src/persistence/SaveSystem.cpp
     src/ui/HUD.cpp
     src/ui/TerminalUI.cpp
@@ -65,6 +71,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     sfml-graphics
     sfml-window
     sfml-system
+    sfml-audio
 )
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
