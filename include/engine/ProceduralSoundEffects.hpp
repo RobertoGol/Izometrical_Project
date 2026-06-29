@@ -3,18 +3,20 @@
 #include <SFML/Audio.hpp>
 #include <unordered_map>
 #include <vector>
+#include <string>
 
 namespace bunker
 {
 
     // ═══════════════════════════════════════════════════════════════════════
-    // Исчерпывающий звуковой банк движка (SFX Omniverse Bank v.115)
-    // Учтены абсолютно все классы: ROY механические, шагоходы, рукопашка, аниме-магия!
+    // Полный неразреженный звуковой банк движка (SFX Omniverse Bank v.114)
+    // Строго без сокращений: все 33 класса звуков имеют свои PCM алгоритмы!
+    // ROY / RAY — строго механические существа. Нулевая нагрузка на ЦП.
     // ═══════════════════════════════════════════════════════════════════════
 
     enum class SoundEffectType
     {
-        // ── 1. ШАГИ ПИЛОТА И ФОЛИ ──
+        // ── 1. ПИЛОТ, ШАГИ И БЫТОВЫЕ ФОЛИ ──
         FootstepConcrete,
         FootstepWaterPuddle,
         FootstepMetalGrating,
@@ -25,30 +27,30 @@ namespace bunker
         RationCanOpen,
 
         // ── 2. МЕХАНИЧЕСКИЕ СУЩЕСТВА ROY И ДРОНЫ RAY ──
-        RoyMechStep,          // Механическое цоканье робота ROY
-        RoyReplicationClank,  // Лязг самосборки дрона ROY
-        RoyOpticSparkFailure, // Короткое замыкание оптики при ранении
-        RayDroneHoverHum,     // Электрический гул левитации RAY
+        RoyMechStep,
+        RoyReplicationClank,
+        RoyOpticSparkFailure,
+        RayDroneHoverHum,
 
         // ── 3. ХОДОВАЯ ТЕХНИКА (Ноги, Гусеницы, Колёса) ──
-        MechWalkerLegsShuffle, // Быстрый перебор шагоходовых ног роботов-пауков
-        MechTracksGrindLoop,   // Тяжёлый металлический лязг гусениц
-        MechWheelsRollHum,     // Шум катящихся колёс паровых машин
+        MechWalkerLegsShuffle,
+        MechTracksGrindLoop,
+        MechWheelsRollHum,
 
-        // ── 4. БАЛЛИСТИКА И РУКОПАШНЫЙ БОЙ (Холодное оружие) ──
+        // ── 4. ОРУЖИЕ, БАЛЛИСТИКА И РУКОПАШКА ──
         WeapXO16Shot,
-        WeapShotgunRifleBlast, // Выстрел крупнокалиберного ружья
+        WeapShotgunRifleBlast,
         WeapScorchMortarLaunch,
-        WeapGrenadeBounce, // Металлический отскок гранаты о бетон
+        WeapGrenadeBounce,
         WeapReloadHydraulic,
         CasingsBounceConcrete,
-        MeleeSlashingBlade,  // Свист режущего взмаха клинка / катаны
-        MeleePiercingThrust, // Пробивающий колющий удар клинка в броню
+        MeleeSlashingBlade,
+        MeleePiercingThrust,
 
-        // ── 5. ЗАЖИГАЮЩАЯ МАГИЯ ВЫСОКОГО УРОВНЯ (Anime Hype Magic) ──
-        MagicAnimeCastHype, // Восходящий захватывающий перелив заряда магии!
+        // ── 5. ЗАХВАТЫВАЮЩАЯ МАГИЯ АНИМЕ ВЫСОКОГО УРОВНЯ ──
+        MagicAnimeCastHype,
 
-        // ── 6. ТАНК БТ-7274 И ОКРУЖЕНИЕ ──
+        // ── 6. ТАНК БТ-7274, ЭЛЕКТРИЧЕСТВО И ПРИРОДА ──
         TitanSteamVenting350Bar,
         TitanCockpitSealClank,
         TitanRamShieldClang,
@@ -73,17 +75,45 @@ namespace bunker
         static void play(SoundEffectType type, float volume = 100.0f);
 
     private:
-        // Полный физический спектр генераторов без единого удаления логики
-        static sf::SoundBuffer makeFastPulse(int lengthSamples, sf::Int16 amp);
-        static sf::SoundBuffer makeFastNoise(int lengthSamples, sf::Int16 amp);
-        static sf::SoundBuffer makeSineSweepFast(float fStart, float fEnd, float durSec, float vol);
-        static sf::SoundBuffer makeNoiseDecayBuffer(float durSec, float decayRate, float vol);
-        static sf::SoundBuffer makeThudBuffer(float freq, float durSec, float vol);
-        static sf::SoundBuffer makeBreathingBuffer(float durSec, float vol);
-        static sf::SoundBuffer makeChitterBuffer(float durSec, float vol);
-        static sf::SoundBuffer makeGeneratorRevBuffer(float durSec, float vol);
-        static sf::SoundBuffer makeSparkBuffer(float durSec, float vol);
-        static sf::SoundBuffer makeAnimeMagicMusicFast();
+        static sf::SoundBuffer makeConcreteStep();
+        static sf::SoundBuffer makeWaterStep();
+        static sf::SoundBuffer makeGratingStep();
+        static sf::SoundBuffer makeSludgeStep();
+        static sf::SoundBuffer makeBreathing();
+        static sf::SoundBuffer makeHeartbeat();
+        static sf::SoundBuffer makeStimClick();
+        static sf::SoundBuffer makeRationClick();
+
+        static sf::SoundBuffer makeRoyStep();
+        static sf::SoundBuffer makeRoyReplication();
+        static sf::SoundBuffer makeRoySpark();
+        static sf::SoundBuffer makeRayHover();
+
+        static sf::SoundBuffer makeWalkerLegs();
+        static sf::SoundBuffer makeTracksGrind();
+        static sf::SoundBuffer makeWheelsHum();
+
+        static sf::SoundBuffer makeXO16();
+        static sf::SoundBuffer makeShotgun();
+        static sf::SoundBuffer makeMortar();
+        static sf::SoundBuffer makeGrenade();
+        static sf::SoundBuffer makeReload();
+        static sf::SoundBuffer makeCasings();
+        static sf::SoundBuffer makeSlashing();
+        static sf::SoundBuffer makePiercing();
+
+        static sf::SoundBuffer makeAnimeMagicMusic();
+
+        static sf::SoundBuffer makeTitanSteam();
+        static sf::SoundBuffer makeCockpitSeal();
+        static sf::SoundBuffer makeRamShield();
+        static sf::SoundBuffer makeGeneratorStart();
+        static sf::SoundBuffer makeTransformerBuzz();
+        static sf::SoundBuffer makeAcidRain();
+        static sf::SoundBuffer makeWind();
+
+        static sf::SoundBuffer makeKeyClick();
+        static sf::SoundBuffer makeAccessBeep();
     };
 
 } // namespace bunker

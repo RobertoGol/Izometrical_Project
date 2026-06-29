@@ -11,7 +11,9 @@ namespace bunker
     {
         PipBoyBoot,
         PipPadBoot,
-        TitanActivation
+        TitanActivation,
+        RaySwarmAlert,
+        RaySwarmDestroy
     };
 
     // ── Языковые пакеты озвучки и титров (Волна 7 / Settings Localization) ──
