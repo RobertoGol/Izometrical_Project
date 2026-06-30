@@ -33,6 +33,7 @@ set(SOURCES
     src/ai/EnemySpawner.cpp
     src/ai/EnemyArchetypeRegistry.cpp
     src/ai/HostileAISystem.cpp
+    src/ai/BossAISystem.cpp
     src/ai/PerceptionSystem.cpp
     src/ai/TitanAI.cpp
     src/persistence/Inventory.cpp

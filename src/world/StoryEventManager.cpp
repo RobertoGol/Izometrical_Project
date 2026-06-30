@@ -20,7 +20,7 @@ namespace bunker
             }
         }
 
-        // Триггер сектора CryoLocker (Крио-камеры консервации)
+        // Триггер сектора CryoLocker (Крио-камеры)
         if (!flags.getFlag(StoryQuestFlag::EnteredCryoLocker))
         {
             if (gs.playerPos.x < 4.0f && gs.playerPos.y < 4.0f)

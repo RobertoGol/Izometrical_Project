@@ -9,8 +9,10 @@
 #include "GameState.hpp"
 #include "HUD.hpp"
 #include "ui/TerminalUI.hpp"
-#include "ui/PipPadUI.hpp"
+#include "ui/PipPad.hpp"
 #include "HostileAISystem.hpp"
+#include "ai/BossAISystem.hpp"
+#include "ai/PerceptionSystem.hpp"
 #include "InputManager.hpp"
 #include "Inventory.hpp"
 #include "MapScreen.hpp"
@@ -60,6 +62,9 @@ namespace bunker
             bool redo = false;
             bool delivery = false;
             bool seatSwap = false;
+            bool pipTabInv = false;
+            bool pipTabMap = false;
+            bool pipTabTapes = false;
         };
 
         sf::RenderWindow m_Window;
@@ -82,13 +87,14 @@ namespace bunker
         TimeShift m_TimeShift;
         TextureGenerator m_TextureGenerator;
         HostileAISystem m_HostileAI;
+        BossAISystem m_BossAI;
         AdvancedMechanics m_Advanced;
         AudioController m_Audio;
         ThermalLoadSystem m_ThermalLoad;
         VehicleSeatController m_SeatController;
         CampPlacementValidator m_CampValidator;
         StoryFlagRegistry m_StoryFlags;
-        SpatialGrid m_SpatialGrid;
+        class SpatialGrid m_SpatialGrid;
 
         sf::Clock m_Clock;
         sf::Font m_GlobalFont;

@@ -16,7 +16,9 @@ namespace bunker
         EtherFog,
         AcidRain,
         AshStorm,
-        EtherStorm
+        EtherStorm,
+        AutumnBreeze,  // Лёгкий осенний ветерок с шуршанием листвы
+        WinterBlizzard // Ледяной зимний буран со снежной крошкой
     };
 
     struct WeatherRuntimeState

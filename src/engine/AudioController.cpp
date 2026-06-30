@@ -9,6 +9,13 @@ namespace bunker
 
     static std::string resolveAudioPath(const std::string &name)
     {
+        std::string oggName = name;
+        if (oggName.size() >= 4 && oggName.substr(oggName.size() - 4) == ".mp3")
+        {
+            oggName.replace(oggName.size() - 4, 4, ".ogg");
+        }
+        if (std::filesystem::exists("assets/audio/" + oggName))
+            return "assets/audio/" + oggName;
         if (std::filesystem::exists("assets/audio/" + name))
             return "assets/audio/" + name;
         return "assets/audio/legacy_archive/" + name;
@@ -76,15 +83,15 @@ namespace bunker
             switch (m_VoiceLang)
             {
             case VoiceLanguage::EnglishUS:
-                return resolveAudioPath("bt_activation_en_us.mp3");
+                return resolveAudioPath("bt_activation_en_us.ogg");
             case VoiceLanguage::Russian:
-                return resolveAudioPath("bt_activation_ru_ru.mp3");
+                return resolveAudioPath("bt_activation_ru_ru.ogg");
             case VoiceLanguage::German:
-                return resolveAudioPath("bt_activation_de_de.mp3");
+                return resolveAudioPath("bt_activation_de_de.ogg");
             case VoiceLanguage::EnglishAU:
                 return resolveAudioPath("bt_activation_en_au.ogg");
             case VoiceLanguage::EnglishGB:
-                return resolveAudioPath("bt_activation_en_gb.mp3");
+                return resolveAudioPath("bt_activation_en_gb.ogg");
             }
         }
         else if (ev == VoiceEvent::PipBoyBoot)
@@ -92,15 +99,15 @@ namespace bunker
             switch (m_VoiceLang)
             {
             case VoiceLanguage::EnglishUS:
-                return resolveAudioPath("pipboy_boot_en_us.mp3");
+                return resolveAudioPath("pipboy_boot_en_us.ogg");
             case VoiceLanguage::Russian:
-                return resolveAudioPath("pipboy_boot_ru_ru.mp3");
+                return resolveAudioPath("pipboy_boot_ru_ru.ogg");
             case VoiceLanguage::German:
-                return resolveAudioPath("pipboy_boot_de_de.mp3");
+                return resolveAudioPath("pipboy_boot_de_de.ogg");
             case VoiceLanguage::EnglishAU:
-                return resolveAudioPath("pipboy_boot_en_au.mp3");
+                return resolveAudioPath("pipboy_boot_en_au.ogg");
             case VoiceLanguage::EnglishGB:
-                return resolveAudioPath("pipboy_boot_ru_ru.mp3");
+                return resolveAudioPath("pipboy_boot_ru_ru.ogg");
             }
         }
         else if (ev == VoiceEvent::RaySwarmAlert)
@@ -135,7 +142,7 @@ namespace bunker
                 return resolveAudioPath("ray_destroy_en_gb.ogg");
             }
         }
-        return resolveAudioPath("pippad_boot.mp3");
+        return resolveAudioPath("pippad_boot.ogg");
     }
 
     std::string AudioController::getSubtitleText(VoiceEvent ev) const

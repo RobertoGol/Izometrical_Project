@@ -16,6 +16,10 @@ namespace bunker
         m_Tapes.push_back({"CRYO_00", "Cryo Locker 00", "Если ты слышишь это — Убежище уже проснулось не по протоколу.", false, false});
         m_Tapes.push_back({"GARAGE_BT", "Garage: BT-7274", "Котёл танка холодный. Нужен ручной запуск и синхронизация пилота.", false, false});
         m_Tapes.push_back({"SURFACE_17", "Surface weather", "На поверхности эфирный туман режет дальность сенсоров почти вдвое.", false, false});
+        m_Tapes.push_back({"LAB_60S", "RobCo Lab 60s Archive (v.97.A.V)", "Диагностика главного фрейма Убежища 17. Синхронизация аудиобанка Vorbis завершена.", false, false});
+        m_Tapes.push_back({"MECH_WAR", "ROY/RAY Swarm War Log", "ROY и RAY — 100% механические самореплицирующиеся дроны. Органика и гнезда исключены.", false, false});
+        m_Tapes.push_back({"PORT_16", "Space Port Sector 16", "Шлюз бастиона 16 запечатан. Давление гидравлики БТ-7274 стабильно: 350 Бар.", false, false});
+        m_Tapes.push_back({"BATTLE_215", "Orbital Battle Log 215", "Температура хладагента танка 180°C. При пороге в 250°C сработает аварийный сброс пара.", false, false});
 
         m_Radio.push_back({4.0f, "V17", "...приём... Башня молчит. Найдите Pip-Pad и синхронизируйтесь.", false});
         m_Radio.push_back({18.0f, "BT", "Пилот, корпус повреждён. Ангарные ремкомплекты восстановят подсистемы.", false});
@@ -572,6 +576,11 @@ namespace bunker
         case ZoneEventId::Archive:
             gs.story.archiveRecovered = true;
             m_LastEvent = "Архив восстановлен. Получен допуск к гаражу.";
+            if (radio)
+            {
+                radio->discoverTape("LAB_60S");
+                radio->discoverTape("MECH_WAR");
+            }
             break;
         case ZoneEventId::Garage:
             gs.story.tankLinked = true;
@@ -593,6 +602,11 @@ namespace bunker
             break;
         case ZoneEventId::SurfaceClearance:
             m_LastEvent = "Допуск поверхности подтверждён.";
+            if (radio)
+            {
+                radio->discoverTape("PORT_16");
+                radio->discoverTape("BATTLE_215");
+            }
             break;
         }
     }
@@ -1079,6 +1093,78 @@ namespace bunker
     // 12) OBJ MODEL LOADER
     // ═══════════════════════════════════════════════════════════════════════════════
 
+    void ObjModel::computeFlatNormalsIfMissing()
+    {
+        if (!normals.empty() || vertices.empty() || faces.empty())
+            return;
+        for (auto &f : faces)
+        {
+            int i0 = f.v[0];
+            int i1 = f.v[1];
+            int i2 = f.v[2];
+            if (i0 < 0 || i0 >= static_cast<int>(vertices.size()) ||
+                i1 < 0 || i1 >= static_cast<int>(vertices.size()) ||
+                i2 < 0 || i2 >= static_cast<int>(vertices.size()))
+                continue;
+            const auto &v0 = vertices[i0];
+            const auto &v1 = vertices[i1];
+            const auto &v2 = vertices[i2];
+            float ux = v1.x - v0.x, uy = v1.y - v0.y, uz = v1.z - v0.z;
+            float vx = v2.x - v0.x, vy = v2.y - v0.y, vz = v2.z - v0.z;
+            float nx = uy * vz - uz * vy;
+            float ny = uz * vx - ux * vz;
+            float nz = ux * vy - uy * vx;
+            float len = std::sqrt(nx * nx + ny * ny + nz * nz);
+            if (len > 0.0001f)
+            {
+                nx /= len;
+                ny /= len;
+                nz /= len;
+            }
+            else
+            {
+                nz = 1.0f;
+            }
+            int normIdx = static_cast<int>(normals.size());
+            normals.push_back({nx, ny, nz});
+            f.vn = {{normIdx, normIdx, normIdx}};
+        }
+    }
+
+    void ObjModelLoader::parseFullFaceTriplet(const std::string &token, int &v_idx, int &vt_idx, int &vn_idx)
+    {
+        v_idx = -1;
+        vt_idx = -1;
+        vn_idx = -1;
+        if (token.empty())
+            return;
+
+        std::size_t p1 = token.find('/');
+        if (p1 == std::string::npos)
+        {
+            v_idx = std::atoi(token.c_str()) - 1;
+            return;
+        }
+
+        v_idx = std::atoi(token.substr(0, p1).c_str()) - 1;
+        std::size_t p2 = token.find('/', p1 + 1);
+        if (p2 == std::string::npos)
+        {
+            std::string t = token.substr(p1 + 1);
+            if (!t.empty())
+                vt_idx = std::atoi(t.c_str()) - 1;
+            return;
+        }
+
+        std::string t1 = token.substr(p1 + 1, p2 - (p1 + 1));
+        if (!t1.empty())
+            vt_idx = std::atoi(t1.c_str()) - 1;
+
+        std::string t2 = token.substr(p2 + 1);
+        if (!t2.empty())
+            vn_idx = std::atoi(t2.c_str()) - 1;
+    }
+
     ObjModel ObjModelLoader::load(const std::string &path)
     {
         ObjModel model;
@@ -1097,19 +1183,42 @@ namespace bunker
                 ss >> v.x >> v.y >> v.z;
                 model.vertices.push_back(v);
             }
+            else if (tag == "vt")
+            {
+                ObjTexCoord tc;
+                ss >> tc.u >> tc.v;
+                model.texCoords.push_back(tc);
+            }
+            else if (tag == "vn")
+            {
+                ObjNormal n;
+                ss >> n.nx >> n.ny >> n.nz;
+                model.normals.push_back(n);
+            }
             else if (tag == "f")
             {
-                std::array<int, 3> idx{{0, 0, 0}};
+                std::array<int, 3> v_idx{{-1, -1, -1}};
+                std::array<int, 3> vt_idx{{-1, -1, -1}};
+                std::array<int, 3> vn_idx{{-1, -1, -1}};
                 for (int i = 0; i < 3; ++i)
                 {
                     std::string token;
                     ss >> token;
-                    idx[i] = parseFaceIndex(token) - 1;
+                    parseFullFaceTriplet(token, v_idx[i], vt_idx[i], vn_idx[i]);
+                    if (v_idx[i] < 0)
+                        v_idx[i] = parseFaceIndex(token) - 1;
                 }
-                if (idx[0] >= 0 && idx[1] >= 0 && idx[2] >= 0)
-                    model.faces.push_back({idx});
+                if (v_idx[0] >= 0 && v_idx[1] >= 0 && v_idx[2] >= 0)
+                {
+                    ObjFace face;
+                    face.v = v_idx;
+                    face.vt = vt_idx;
+                    face.vn = vn_idx;
+                    model.faces.push_back(face);
+                }
             }
         }
+        model.computeFlatNormalsIfMissing();
         return model;
     }
 
@@ -1138,21 +1247,70 @@ namespace bunker
         m_Chat.clear();
         m_Connected = true;
         m_LobbyId = ++m_NextLobbyId;
-        addPeer(playerName.empty() ? "Solo_Pilot" : playerName);
-        addPeer("Gunner_BT7274");
-        addPeer("Scout_LogHorizon");
-        addPeer("Vault17_Quartermaster");
-        systemMessage("LANLINE net #1001 connected. 4 squad combatants online.");
+        addPeerWithSocket(playerName.empty() ? "Solo_Pilot" : playerName, {10.0f, 10.0f, 0.0f}, ++m_NextSocketFd);
+        addPeerWithSocket("Gunner_BT7274", {11.0f, 10.0f, 0.0f}, ++m_NextSocketFd);
+        addPeerWithSocket("Scout_LogHorizon", {12.0f, 12.0f, 0.0f}, ++m_NextSocketFd);
+        addPeerWithSocket("Vault17_Quartermaster", {15.0f, 8.0f, 0.0f}, ++m_NextSocketFd);
+
+        const char *coopNames[] = {
+            "Ranger_Kodiak", "Tech_Valerie", "Heavy_Goliath", "Medic_Mercy",
+            "Sniper_Ghost", "Engineer_Spark", "Recon_Viper", "Trooper_Blaze",
+            "Sapper_Boom", "Sentinel_Apex", "Commando_Rex", "Guardian_Shield",
+            "Warden_Frost", "Striker_Bolt", "Vanguard_Storm", "Overseer_Vault17"};
+        for (int i = 0; i < 16 && static_cast<int>(m_Peers.size()) < MAX_COOP_PLAYERS; ++i)
+        {
+            float px = 8.0f + static_cast<float>((i * 5) % 40);
+            float py = 8.0f + static_cast<float>((i * 7) % 35);
+            addPeerWithSocket(coopNames[i], {px, py, 0.0f}, ++m_NextSocketFd);
+        }
+
+        systemMessage("LANLINE Winsock net #1001 connected. " + std::to_string(m_Peers.size()) + " squad combatants online.");
         return m_LobbyId;
     }
 
     int LanlineServices::addPeer(const std::string &name)
     {
+        return addPeerWithSocket(name, {10.0f, 10.0f, 0.0f}, ++m_NextSocketFd);
+    }
+
+    int LanlineServices::addPeerWithSocket(const std::string &name, Vector3D pos, unsigned int sockFd)
+    {
         LanlinePeer p;
         p.id = ++m_NextPeerId;
         p.name = name;
+        p.lastKnownPos = pos;
+        p.simulatedSocketFd = sockFd;
+        p.inInterestArea = true;
         m_Peers.push_back(p);
         return p.id;
+    }
+
+    void LanlineServices::cullInactiveOrDistantPeers(const Vector3D &localPlayerPos, float interestRadius)
+    {
+        float rSq = interestRadius * interestRadius;
+        for (auto &p : m_Peers)
+        {
+            float dx = p.lastKnownPos.x - localPlayerPos.x;
+            float dy = p.lastKnownPos.y - localPlayerPos.y;
+            p.inInterestArea = (dx * dx + dy * dy <= rSq);
+        }
+    }
+
+    void LanlineServices::simulateWinsockUdpHeartbeat(float dt)
+    {
+        m_HeartbeatTimer += dt;
+        if (m_HeartbeatTimer >= 1.0f)
+        {
+            m_HeartbeatTimer = 0.0f;
+            for (auto &p : m_Peers)
+            {
+                if (p.simulatedSocketFd > 0)
+                {
+                    p.lastKnownPos.x += (std::rand() % 3 - 1) * 0.1f;
+                    p.lastKnownPos.y += (std::rand() % 3 - 1) * 0.1f;
+                }
+            }
+        }
     }
 
     void LanlineServices::sendChat(int fromPeer, const std::string &text)
@@ -1184,6 +1342,9 @@ namespace bunker
 
     void LanlineServices::update(GameState &gs, PlayerInventory &inv, float dt)
     {
+        simulateWinsockUdpHeartbeat(dt);
+        cullInactiveOrDistantPeers(gs.playerPos, 40.0f);
+
         for (auto &c : m_Chat)
             c.ttl -= dt;
         m_Chat.erase(std::remove_if(m_Chat.begin(), m_Chat.end(), [](const LanlineChatMessage &c)

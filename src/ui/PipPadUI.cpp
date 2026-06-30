@@ -19,7 +19,7 @@ namespace bunker
             m_TabletOpen = true;
             m_ActiveTab = tabIndex;
             std::cout << "[PIP-BOY] Активирован наручный планшет (Вкладка: "
-                      << (tabIndex == 0 ? "TACTICAL INVENTORY & BUFFS" : "VAULT 17 MAP ARCHIVE") << ")." << std::endl;
+                      << (tabIndex == 0 ? "TACTICAL INVENTORY & BUFFS" : (tabIndex == 1 ? "VAULT 17 MAP ARCHIVE" : "ROBCO COLLECTIBLE TAPES LOG")) << ")." << std::endl;
         }
         else
         {
@@ -176,6 +176,25 @@ namespace bunker
             window.draw(pm);
 
             drawTxt("[M] Сложить карту прибора в тактический походный режим", sx, H - 120.0f, 13, textColor);
+        }
+        else if (m_ActiveTab == 2)
+        {
+            drawTxt("PIP-BOY WEARABLE — ROBCO COLLECTIBLE TAPES LOG", sx, sy, 16, sf::Color(255, 220, 80));
+            drawTxt("==================================================", sx, sy + 22, 16, sf::Color(200, 180, 50));
+
+            int row = 0;
+            for (const auto &t : adv.radio.tapes())
+            {
+                std::string st = t.found ? (t.played ? "[PLAYED]" : "[FOUND - UNPLAYED]") : "[UNKNOWN DATA ENCRYPTION]";
+                std::string l = "> " + t.id + ": " + (t.found ? t.title : "???") + " " + st;
+                drawTxt(l, sx, sy + 60 + row * 45, 14, t.found ? sf::Color(255, 240, 150) : sf::Color(100, 100, 100));
+                if (t.found)
+                {
+                    drawTxt("  \"" + t.transcript + "\"", sx + 15, sy + 78 + row * 45, 13, sf::Color(180, 220, 200));
+                }
+                row++;
+            }
+            drawTxt("[O] Закрыть архив аудиозаписей РобКо | На основном экране миникарты нет", sx, H - 120.0f, 13, sf::Color(200, 200, 100));
         }
     }
 

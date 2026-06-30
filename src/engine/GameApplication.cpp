@@ -89,7 +89,13 @@ namespace bunker
             if (i % 4 == 2)
                 kind = HostileKind::HumanTactical;
             if (i % 4 == 3)
+            {
                 kind = HostileKind::RobotControl;
+                if (i == 3)
+                {
+                    m_BossAI.registerBoss(static_cast<int>(i), BossArchetype::RoySwarmPrime, {15.0f, 15.0f, 0.0f});
+                }
+            }
             m_HostileAI.assignKind(m_GameState, i, kind);
         }
     }
@@ -161,6 +167,19 @@ namespace bunker
 
     void GameApplication::processEdgeHotkeys(const InputSnapshot &input)
     {
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::I), m_EdgeKeys.pipTabInv))
+        {
+            m_PipPad.toggleTab(m_GameState, 0);
+        }
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::J), m_EdgeKeys.pipTabMap))
+        {
+            m_PipPad.toggleTab(m_GameState, 1);
+        }
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::O), m_EdgeKeys.pipTabTapes))
+        {
+            m_PipPad.toggleTab(m_GameState, 2);
+        }
+
         // Доп. клавиши, которые раньше терялись из-за двойного pollEvent.
         if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::M), m_EdgeKeys.map))
         {
@@ -423,6 +442,8 @@ namespace bunker
         // Враги: спавнер отвечает за волны, поведение врагов ведёт HostileAISystem.
         m_EnemySpawner.updateWaveSpawning(m_GameState, dt);
         m_HostileAI.update(m_GameState, dt);
+        m_BossAI.updateBosses(m_GameState, dt);
+        PerceptionSystem::updateStimuli(dt);
 
         Collisions::resolveAllCollisions(m_GameState);
 
@@ -474,6 +495,7 @@ namespace bunker
 
         GameRenderer::renderAdvancedHUD(m_Window, m_Advanced, m_FontLoaded ? &m_GlobalFont : nullptr);
         m_Audio.renderSubtitlesHUD(m_Window, m_FontLoaded ? &m_GlobalFont : nullptr);
+        m_PipPad.renderTablet(m_Window, m_GameState, m_Inventory, m_Advanced, m_FontLoaded ? &m_GlobalFont : nullptr);
 
         m_Window.display();
     }

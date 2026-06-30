@@ -18,47 +18,58 @@ namespace bunker
         for (std::size_t i = 0; i < gs.bullets.size();)
         {
             Bullet &b = gs.bullets[i];
-            const Vector3D previousPos = b.current;
             bool explodedThisFrame = false;
 
-            if (b.type == BulletType::ArtilleryMissile)
+            int numSubSteps = 1;
+            float stepDist = b.speed * dt;
+            if (stepDist > 0.2f)
             {
-                Vector3D toTarget = b.targetPos - b.current;
-                Vector3D dir = toTarget.normalized();
-                b.direction = dir;
-                b.current.x += dir.x * b.speed * dt;
-                b.current.y += dir.y * b.speed * dt;
+                numSubSteps = static_cast<int>(std::ceil(stepDist / 0.2f));
+            }
+            float sub_dt = dt / numSubSteps;
 
-                if (toTarget.lengthSq() <= 0.22f * 0.22f)
+            for (int step = 0; step < numSubSteps && b.isAlive; ++step)
+            {
+                const Vector3D previousPos = b.current;
+
+                if (b.type == BulletType::ArtilleryMissile)
                 {
+                    Vector3D toTarget = b.targetPos - b.current;
+                    Vector3D dir = toTarget.normalized();
+                    b.direction = dir;
+                    b.current.x += dir.x * b.speed * sub_dt;
+                    b.current.y += dir.y * b.speed * sub_dt;
+
+                    if (toTarget.lengthSq() <= 0.22f * 0.22f)
+                    {
+                        b.isAlive = false;
+                        explodedThisFrame = true;
+                        processSplashDamage(gs, b, adv);
+                        break;
+                    }
+                }
+                else
+                {
+                    b.current.x += b.direction.x * b.speed * sub_dt;
+                    b.current.y += b.direction.y * b.speed * sub_dt;
+                }
+
+                float tdx = b.current.x - b.start.x;
+                float tdy = b.current.y - b.start.y;
+                if ((tdx * tdx + tdy * tdy) >= (b.maxDistance * b.maxDistance))
+                {
+                    if (isExplosive(b) && !explodedThisFrame)
+                    {
+                        explodedThisFrame = true;
+                        processSplashDamage(gs, b, adv);
+                    }
                     b.isAlive = false;
-                    explodedThisFrame = true;
-                    processSplashDamage(gs, b, adv);
+                    break;
                 }
-            }
-            else
-            {
-                b.current.x += b.direction.x * b.speed * dt;
-                b.current.y += b.direction.y * b.speed * dt;
-            }
 
-            float tdx = b.current.x - b.start.x;
-            float tdy = b.current.y - b.start.y;
-            if ((tdx * tdx + tdy * tdy) >= (b.maxDistance * b.maxDistance))
-            {
-                if (isExplosive(b) && !explodedThisFrame)
-                {
-                    explodedThisFrame = true;
-                    processSplashDamage(gs, b, adv);
-                }
-                b.isAlive = false;
-            }
+                int tx = static_cast<int>(b.current.x);
+                int ty = static_cast<int>(b.current.y);
 
-            int tx = static_cast<int>(b.current.x);
-            int ty = static_cast<int>(b.current.y);
-
-            if (b.isAlive)
-            {
                 if (tx < 0 || tx >= Config::MAP_WIDTH || ty < 0 || ty >= Config::MAP_HEIGHT)
                 {
                     if (isExplosive(b) && !explodedThisFrame)
@@ -68,6 +79,7 @@ namespace bunker
                         processSplashDamage(gs, b, adv);
                     }
                     b.isAlive = false;
+                    break;
                 }
                 else if (gs.sectorMap[tx][ty] == 1)
                 {
@@ -100,28 +112,26 @@ namespace bunker
                     {
                         adv->reactive.damageAt(gs, b.current, 0.45f, 12.0f, 1.0f);
                     }
+                    break;
                 }
-            }
 
-            if (b.isAlive && adv)
-            {
-                float hitRadius = (b.type == BulletType::Pellet) ? 0.22f : 0.28f;
-                float hitDamage = (b.type == BulletType::Pellet) ? 10.0f : 18.0f;
-                if (isExplosive(b))
+                if (adv)
                 {
-                    hitRadius = b.splashRadius;
-                    hitDamage = 70.0f;
+                    float hitRadius = (b.type == BulletType::Pellet) ? 0.22f : 0.28f;
+                    float hitDamage = (b.type == BulletType::Pellet) ? 10.0f : 18.0f;
+                    if (isExplosive(b))
+                    {
+                        hitRadius = b.splashRadius;
+                        hitDamage = 70.0f;
+                    }
+
+                    adv->reactive.damageAt(gs, b.current, hitRadius, hitDamage, isExplosive(b) ? 4.5f : 0.75f);
+                    if (!isExplosive(b))
+                    {
+                        adv->reactive.damageAt(gs, previousPos, hitRadius * 0.75f, hitDamage * 0.35f, 0.35f);
+                    }
                 }
 
-                adv->reactive.damageAt(gs, b.current, hitRadius, hitDamage, isExplosive(b) ? 4.5f : 0.75f);
-                if (!isExplosive(b))
-                {
-                    adv->reactive.damageAt(gs, previousPos, hitRadius * 0.75f, hitDamage * 0.35f, 0.35f);
-                }
-            }
-
-            if (b.isAlive)
-            {
                 for (auto &e : gs.enemies)
                 {
                     if (!e.isAlive)
