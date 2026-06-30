@@ -42,6 +42,7 @@ set(SOURCES
     src/persistence/StoryFlagRegistry.cpp
     src/persistence/ActiveBuffsController.cpp
     src/persistence/SaveSystem.cpp
+    src/persistence/ModularEquipmentSystem.cpp
     src/ui/HUD.cpp
     src/ui/TerminalUI.cpp
     src/ui/PipPadUI.cpp

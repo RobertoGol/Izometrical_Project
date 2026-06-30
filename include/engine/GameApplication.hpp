@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "gameplay/SpatialGrid.hpp"
 
 #include "AdvancedMechanics.hpp"
 #include "BulletSystem.hpp"
@@ -19,6 +20,7 @@
 #include "PlayerController.hpp"
 #include "Progression.hpp"
 #include "SaveSystem.hpp"
+#include "persistence/ModularEquipmentSystem.hpp"
 #include "Tactics.hpp"
 #include "TextureGenerator.hpp"
 #include "TimeShift.hpp"
@@ -31,7 +33,6 @@
 #include "world/CampPlacementValidator.hpp"
 #include "persistence/StoryFlagRegistry.hpp"
 #include "world/StoryEventManager.hpp"
-#include "gameplay/SpatialGrid.hpp"
 
 namespace bunker
 {
@@ -89,12 +90,13 @@ namespace bunker
         HostileAISystem m_HostileAI;
         BossAISystem m_BossAI;
         AdvancedMechanics m_Advanced;
+        ModularEquipmentSystem m_ModularEquipment;
         AudioController m_Audio;
         ThermalLoadSystem m_ThermalLoad;
         VehicleSeatController m_SeatController;
         CampPlacementValidator m_CampValidator;
         StoryFlagRegistry m_StoryFlags;
-        class SpatialGrid m_SpatialGrid;
+        SpatialGrid m_SpatialGrid;
 
         sf::Clock m_Clock;
         sf::Font m_GlobalFont;

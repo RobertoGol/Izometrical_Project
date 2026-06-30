@@ -86,9 +86,11 @@ namespace bunker
                              const PlayerInventory &inventory,
                              float W, float H)
     {
-
+        sf::Color fo76Amber(255, 185, 40);
         float barX = 40.0f;
         float barBaseY = H - 110.0f;
+
+        drawText(window, "FO76 AMBER HUD — ON-FOOT PILOT", barX, barBaseY - 20, 11, fo76Amber);
 
         float xpRequired = static_cast<float>(Config::BASE_XP_PER_LEVEL +
                                               (gs.characterProg.level - 1) * Config::XP_INCREMENT);
@@ -203,6 +205,15 @@ namespace bunker
             wpn = "[3] ION LASER";
             break;
         }
+        // ── Модульная физическая диаграмма Танка БТ-7274 (Omniverse v.137) ──
+        drawText(window, ">> TITAN WIREFRAME CHASSIS <<", barX + 330, H - 100, 11, tankOrange);
+        drawText(window, "[FRONT SHIELD: 85% ABSORB]", barX + 330, H - 85, 10, sf::Color(100, 255, 100));
+        drawText(window, "[LEFT TRACK: OPTIMAL]", barX + 330, H - 70, 9, tankOrange);
+        drawText(window, "[CORE: 350 BAR / 180C]", barX + 460, H - 70, 9, sf::Color(255, 180, 50));
+        drawText(window, "[RIGHT TRACK: OPTIMAL]", barX + 610, H - 70, 9, tankOrange);
+        drawText(window, "[MAIN CANNON: READY]", barX + 330, H - 55, 9, tankOrange);
+        drawText(window, "[REAR ENGINE: SECURE]", barX + 480, H - 55, 9, sf::Color(180, 220, 180));
+
         drawText(window, wpn, W - 280, H - 30, 12, tankOrange);
 
         drawText(window, "[Q] Vortex  [Tab] Dismount", barX, H - 5, 10, sf::Color(100, 100, 100));
