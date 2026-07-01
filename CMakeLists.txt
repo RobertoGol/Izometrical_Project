@@ -47,6 +47,7 @@ set(SOURCES
  src/ui/HUD.cpp
  src/ui/TerminalUI.cpp
  src/ui/PipPadUI.cpp
+ src/ui/WorkstationUI.cpp
  src/render/GameRenderer.cpp
  src/entities/PlayerController.cpp
  src/entities/Camera.cpp

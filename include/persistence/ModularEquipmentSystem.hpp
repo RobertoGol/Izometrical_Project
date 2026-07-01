@@ -44,6 +44,7 @@ namespace bunker
 
     enum class TankModuleStatus
     {
+        Unbreakable,
         Optimal,
         Damaged,
         Crippled
@@ -105,6 +106,7 @@ namespace bunker
         bool craftItem(GameState &gs, PlayerInventory &inv, int recipeIndex);
         void applyPlatingDamage(ModularTankChassis &tank, const Vector3D &hitDir, float damage);
 
+        std::vector<CraftingRecipe> getRecipesForStation(WorkstationType stationType) const;
         const std::vector<ArmorItemDef> &armorDatabase() const { return m_ArmorRegistry; }
         const std::vector<CraftingRecipe> &recipes() const { return m_Recipes; }
         ModularTankChassis &titanRuntimeChassis() { return m_ActiveTank; }

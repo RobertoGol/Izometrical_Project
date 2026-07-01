@@ -76,4 +76,17 @@ namespace bunker
         }
     }
 
+    std::vector<CraftingRecipe> ModularEquipmentSystem::getRecipesForStation(WorkstationType stationType) const
+    {
+        std::vector<CraftingRecipe> filtered;
+
+        for (const auto &recipe : m_Recipes)
+        {
+            if (recipe.stationType == stationType)
+                filtered.push_back(recipe);
+        }
+
+        return filtered;
+    }
+
 } // namespace bunker
