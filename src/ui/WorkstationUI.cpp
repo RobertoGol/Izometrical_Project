@@ -15,4 +15,8 @@ namespace bunker
             std::cout << recipe.resultName << std::endl;
         }
     }
+
+    WorkstationUIState CreateWorkstationUIState(ModularEquipmentSystem &equipmentSystem,
+                                                WorkstationType stationType)
+
 }
