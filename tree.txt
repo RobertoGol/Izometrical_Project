@@ -1,0 +1,580 @@
+Структура папок тома __DFD_Disc__[White_SSD]
+Серийный номер тома: 000000F9 9EDF:EE2C
+F:\PROJECT\IZOMETRICAL_PROJECT
+|   .clangd
+|   CMakeCache.txt
+|   CMakeLists.txt
+|   README.md
+|   tree.txt
+|   
++---.vscode
+|       c_cpp_properties.json
+|       
++---assets
+|   +---audio
+|   |   |   16_Busy_Space_Port.ogg
+|   |   |   16_Busy_Space_Port_1.ogg
+|   |   |   16_Busy_Space_Port_2.ogg
+|   |   |   16_Busy_Space_Port_3.ogg
+|   |   |   215_Space_Battle.ogg
+|   |   |   215_Space_Battle_1.ogg
+|   |   |   226_60s_Computer_Lab.ogg
+|   |   |   226_60s_Computer_Lab_1.ogg
+|   |   |   232_Mech_War.ogg
+|   |   |   232_Mech_War_1.ogg
+|   |   |   312_Generation_Ship.ogg
+|   |   |   314_Shuttle_Crash.ogg
+|   |   |   346_Tinkertown.ogg
+|   |   |   355_Hydroponics_Bay.ogg
+|   |   |   363_Starship_Adrift.ogg
+|   |   |   370_Awakenings.ogg
+|   |   |   379_Terraforming.ogg
+|   |   |   387_Docking_Bay.ogg
+|   |   |   395_Launch_Day.ogg
+|   |   |   409_Docking_Procedure.ogg
+|   |   |   417_Mainframe.ogg
+|   |   |   429_Imperial_Pursuit.ogg
+|   |   |   434_Cryo_Pods.ogg
+|   |   |   438_Red_Sky_Mine.ogg
+|   |   |   441_Tech_Market.ogg
+|   |   |   443_Primate_Lab.ogg
+|   |   |   448_Checkpoint_Omega.ogg
+|   |   |   458_Deep_Blue.ogg
+|   |   |   459_Xenon_Refinery.ogg
+|   |   |   463_Listening_Post.ogg
+|   |   |   467_Battle_Stations.ogg
+|   |   |   468_Steampunk_Telescope.ogg
+|   |   |   475_Lost_Contact.ogg
+|   |   |   483_Ice_Harvester_Station.ogg
+|   |   |   487_High_Alert.ogg
+|   |   |   492_Maturation_Chamber.ogg
+|   |   |   502_Sentient_Eye.ogg
+|   |   |   507_Flux_Array.ogg
+|   |   |   509_Doors_and_Corners.ogg
+|   |   |   512_Robot_Caretaker.ogg
+|   |   |   ad_fatalTwistMix.ogg
+|   |   |   anime_magic_cast_hype.ogg
+|   |   |   anom_glitch_v2.ogg
+|   |   |   anom_scary_laugh.ogg
+|   |   |   anom_whisper_ru.ogg
+|   |   |   archive_sync_complete.ogg
+|   |   |   Arduous Task Number 37.ogg
+|   |   |   bt7274_activation.ogg
+|   |   |   bt7274_vanguard.ogg
+|   |   |   bt_activation_de_de.ogg
+|   |   |   bt_activation_en_au.ogg
+|   |   |   bt_activation_en_au_1.ogg
+|   |   |   bt_activation_en_gb.ogg
+|   |   |   bt_activation_en_us.ogg
+|   |   |   bt_activation_ru_ru.ogg
+|   |   |   Closed Area.ogg
+|   |   |   cryolocker_awakening.ogg
+|   |   |   death_roy_fail.ogg
+|   |   |   depths_1.ogg
+|   |   |   dev_vault_opened.ogg
+|   |   |   dirty_rain.ogg
+|   |   |   Egmont Overture Finale.ogg
+|   |   |   Egmont Overture.ogg
+|   |   |   EmptyCity.ogg
+|   |   |   env_acid_rain.ogg
+|   |   |   env_acid_warning.ogg
+|   |   |   env_mountain_en.ogg
+|   |   |   env_night_ru.ogg
+|   |   |   env_swamp_ru.ogg
+|   |   |   env_wind_ru.ogg
+|   |   |   Factory.ogg
+|   |   |   ger_magic_epic.ogg
+|   |   |   glitch_data_en.ogg
+|   |   |   Gothamlicious.ogg
+|   |   |   Hall of the Mountain King.ogg
+|   |   |   Industrial Cinematic.ogg
+|   |   |   jap_anime_shout.ogg
+|   |   |   magic_chant_rhythm.ogg
+|   |   |   magic_dark_de.ogg
+|   |   |   magic_final_judgment.ogg
+|   |   |   magic_frost.ogg
+|   |   |   magic_ignite.ogg
+|   |   |   magic_japanese_power.ogg
+|   |   |   magic_mega_ja.ogg
+|   |   |   magic_nature_spirit.ogg
+|   |   |   magic_summon_ja_v2.ogg
+|   |   |   magic_time.ogg
+|   |   |   magic_ultimate_ja.ogg
+|   |   |   mech_status_ru.ogg
+|   |   |   music_anime_hype.ogg
+|   |   |   music_boss_latin.ogg
+|   |   |   music_cult_chant.ogg
+|   |   |   music_cyber_beat.ogg
+|   |   |   music_forest_spirit.ogg
+|   |   |   music_radio_jingle.ogg
+|   |   |   music_radio_outro.ogg
+|   |   |   music_victory_theme.ogg
+|   |   |   Nice place in PA Wastland.ogg
+|   |   |   ObservingTheStar.ogg
+|   |   |   outpost.ogg
+|   |   |   pipboy_2000_mk6.ogg
+|   |   |   pipboy_3000_mk4.ogg
+|   |   |   pipboy_3000_nv.ogg
+|   |   |   pipboy_boot.ogg
+|   |   |   pipboy_boot_de_de.ogg
+|   |   |   pipboy_boot_en_au.ogg
+|   |   |   pipboy_boot_en_us.ogg
+|   |   |   pipboy_boot_ru_ru.ogg
+|   |   |   pipboy_proto_01.ogg
+|   |   |   pippad_boot.ogg
+|   |   |   pippad_model_2.ogg
+|   |   |   quest_sos_signal.ogg
+|   |   |   radio_anime_host_ja.ogg
+|   |   |   radio_commercial_ru.ogg
+|   |   |   radio_host_bunker.ogg
+|   |   |   radio_quest_hook_ru.ogg
+|   |   |   ray_alert.ogg
+|   |   |   ray_alert_de.ogg
+|   |   |   ray_alert_en_au.ogg
+|   |   |   ray_alert_en_gb.ogg
+|   |   |   ray_alert_en_us.ogg
+|   |   |   ray_alert_ru.ogg
+|   |   |   ray_attack.ogg
+|   |   |   ray_damage.ogg
+|   |   |   ray_destroy.ogg
+|   |   |   ray_destroy_de.ogg
+|   |   |   ray_destroy_en_au.ogg
+|   |   |   ray_destroy_en_gb.ogg
+|   |   |   ray_destroy_en_us.ogg
+|   |   |   ray_destroy_ru.ogg
+|   |   |   roy_ammo_low.ogg
+|   |   |   roy_confirm.ogg
+|   |   |   roy_critical.ogg
+|   |   |   roy_damage_ru.ogg
+|   |   |   roy_denied.ogg
+|   |   |   roy_enemy_lost.ogg
+|   |   |   roy_grenade.ogg
+|   |   |   roy_kill_taunt.ogg
+|   |   |   roy_online.ogg
+|   |   |   roy_protocol.ogg
+|   |   |   roy_reloading.ogg
+|   |   |   roy_repair_ru_v2.ogg
+|   |   |   roy_scanning.ogg
+|   |   |   roy_stealth.ogg
+|   |   |   roy_target.ogg
+|   |   |   roy_victory.ogg
+|   |   |   roy_welcome_ru.ogg
+|   |   |   rus_aggressive_push.ogg
+|   |   |   rus_combat_v3.ogg
+|   |   |   rus_miss_reaction.ogg
+|   |   |   rus_reload_profane.ogg
+|   |   |   rus_summon_casual.ogg
+|   |   |   rus_summon_rise.ogg
+|   |   |   rus_summon_wow.ogg
+|   |   |   sfx_mechanical_click.ogg
+|   |   |   sfx_plasma_pulse.ogg
+|   |   |   shadowdrone.ogg
+|   |   |   Sindwiller - Snow May Never End v1 - ccbysa3.ogg
+|   |   |   Sindwiller - Snow May Never End v2 - ccbysa3.ogg
+|   |   |   Socapex - Dark Ambiance - Mastered.ogg
+|   |   |   solitude_1.ogg
+|   |   |   sys_bunker_alert.ogg
+|   |   |   sys_danger_ru.ogg
+|   |   |   sys_health_ru.ogg
+|   |   |   sys_objective.ogg
+|   |   |   sys_radio_noise.ogg
+|   |   |   sys_reality_tear.ogg
+|   |   |   terminal_security_warning.ogg
+|   |   |   the_world_fell_silent.ogg
+|   |   |   tower_restored.ogg
+|   |   |   turret_online.ogg
+|   |   |   Undaunted.ogg
+|   |   |   wpn_dual_gb.ogg
+|   |   |   wpn_energy_low.ogg
+|   |   |   wpn_overdrive.ogg
+|   |   |   wpn_overheat_de_v2.ogg
+|   |   |   wpn_plasma_de.ogg
+|   |   |   wpn_shot_ja.ogg
+|   |   |   wpn_shot_ru.ogg
+|   |   |   wpn_smart_pistol.ogg
+|   |   |   wpn_talk_sniper.ogg
+|   |   |   
+|   |   +---legacy_archive
+|   |   |       bt7274_activation.mp3
+|   |   |       bt7274_activation.ogg
+|   |   |       bt7274_vanguard.mp3
+|   |   |       bt7274_vanguard.ogg
+|   |   |       bt_activation_de_de.mp3
+|   |   |       bt_activation_de_de.ogg
+|   |   |       bt_activation_en_au.mp3
+|   |   |       bt_activation_en_au.ogg
+|   |   |       bt_activation_en_gb.mp3
+|   |   |       bt_activation_en_gb.ogg
+|   |   |       bt_activation_en_us.mp3
+|   |   |       bt_activation_en_us.ogg
+|   |   |       bt_activation_ru_ru.mp3
+|   |   |       bt_activation_ru_ru.ogg
+|   |   |       pipboy_2000_mk6.mp3
+|   |   |       pipboy_2000_mk6.ogg
+|   |   |       pipboy_3000_mk4.mp3
+|   |   |       pipboy_3000_mk4.ogg
+|   |   |       pipboy_3000_nv.mp3
+|   |   |       pipboy_3000_nv.ogg
+|   |   |       pipboy_boot.mp3
+|   |   |       pipboy_boot.ogg
+|   |   |       pipboy_boot_de_de.mp3
+|   |   |       pipboy_boot_de_de.ogg
+|   |   |       pipboy_boot_en_au.mp3
+|   |   |       pipboy_boot_en_au.ogg
+|   |   |       pipboy_boot_en_us.mp3
+|   |   |       pipboy_boot_en_us.ogg
+|   |   |       pipboy_boot_ru_ru.mp3
+|   |   |       pipboy_boot_ru_ru.ogg
+|   |   |       pipboy_proto_01.mp3
+|   |   |       pipboy_proto_01.ogg
+|   |   |       pippad_boot.mp3
+|   |   |       pippad_boot.ogg
+|   |   |       pippad_model_2.mp3
+|   |   |       pippad_model_2.ogg
+|   |   |       
+|   |   \---music
+|   |           bach_air_g_string.ogg
+|   |           beethoven_moonlight_sonata.ogg
+|   |           chopin_nocturne_op32.ogg
+|   |           erik_satie_gymnopedie_1.ogg
+|   |           
+|   +---camp
+|   +---enemies
+|   |   +---punching_bag
+|   |   |       enemy.cfg
+|   |   |       
+|   |   +---static_base
+|   |   |       enemy.cfg
+|   |   |       
+|   |   +---target_dummy
+|   |   |       enemy.cfg
+|   |   |       
+|   |   +---vermin_heavy
+|   |   |       enemy.cfg
+|   |   |       
+|   |   \---vermin_soldier
+|   |           .txt
+|   |           death.wav
+|   |           enemy.cfg
+|   |           sprite.png
+|   |           
+|   +---items
+|   |   +---ammo
+|   |   +---armor
+|   |   +---food
+|   |   +---general
+|   |   +---keys
+|   |   +---medicine
+|   |   +---misc
+|   |   +---quest_items
+|   |   +---resource
+|   |   +---tank_details
+|   |   |   +---Armor
+|   |   |   +---Fire Control System
+|   |   |   +---Main Gun
+|   |   |   +---Secondary Gun
+|   |   |   +---Suspension
+|   |   |   +---Tracks
+|   |   |   +---Turret
+|   |   |   \---Weaponry
+|   |   +---utility
+|   |   \---weapon
+|   +---models
+|   |       bastion.obj
+|   |       
+|   +---vehicles
+|   |   +---airplane
+|   |   |       vehicle.cfg
+|   |   |       
+|   |   +---helicopter
+|   |   |       vehicle.cfg
+|   |   |       
+|   |   +---motorcycle
+|   |   |       vehicle.cfg
+|   |   |       
+|   |   \---steamcar
+|   |           vehicle.cfg
+|   |           
+|   \---workstations
+|       +---armor
+|       |   |   armor_workbench_01.obj
+|       |   |   armor_workbench_01.png
+|       |   |   armor_workbench_config.conf
+|       |   |   
+|       |   \---variants
+|       +---chem
+|       |       chem_station_01.png
+|       |       
+|       +---storage
+|       |       supply_locker_01.png
+|       |       
+|       +---tank
+|       |       tank_bay_01.png
+|       |       
+|       +---terminal
+|       |       vault_terminal_01.png
+|       |       
+|       +---tinker
+|       |       tinker_workbench_01.png
+|       |       
+|       \---weapons
+|               weapons_workbench_01.png
+|               
++---build
+|   |   CMakeCache.txt
+|   |   
+|   \---CMakeFiles
+|       |   cmake.check_cache
+|       |   CMakeConfigureLog.yaml
+|       |   
+|       +---4.3.0
+|       |   |   CMakeCXXCompiler.cmake
+|       |   |   CMakeDetermineCompilerABI_CXX.bin
+|       |   |   CMakeRCCompiler.cmake
+|       |   |   CMakeSystem.cmake
+|       |   |   VCTargetsPath.txt
+|       |   |   VCTargetsPath.vcxproj
+|       |   |   
+|       |   +---CompilerIdCXX
+|       |   |   |   CMakeCXXCompilerId.cpp
+|       |   |   |   CompilerIdCXX.exe
+|       |   |   |   CompilerIdCXX.vcxproj
+|       |   |   |   
+|       |   |   +---Debug
+|       |   |   |   |   CMakeCXXCompilerId.obj
+|       |   |   |   |   CompilerIdCXX.exe.recipe
+|       |   |   |   |   vcpkg.applocal.log
+|       |   |   |   |   
+|       |   |   |   \---CompilerIdCXX.tlog
+|       |   |   |           CL.command.1.tlog
+|       |   |   |           Cl.items.tlog
+|       |   |   |           CL.read.1.tlog
+|       |   |   |           CL.write.1.tlog
+|       |   |   |           CompilerIdCXX.lastbuildstate
+|       |   |   |           CompilerIdCXX.write.1u.tlog
+|       |   |   |           link.command.1.tlog
+|       |   |   |           link.read.1.tlog
+|       |   |   |           link.secondary.1.tlog
+|       |   |   |           link.write.1.tlog
+|       |   |   |           
+|       |   |   \---tmp
+|       |   +---VCTargetsPath
+|       |   |   \---x64
+|       |   |       \---Debug
+|       |   |           |   VCTargetsPath.recipe
+|       |   |           |   
+|       |   |           \---VCTargetsPath.tlog
+|       |   |                   VCTargetsPath.lastbuildstate
+|       |   |                   
+|       |   \---x64
+|       |       \---Debug
+|       +---CMakeScratch
+|       \---pkgRedirects
++---CMakeFiles
+|   |   cmake.check_cache
+|   |   CMakeConfigureLog.yaml
+|   |   
+|   +---4.3.0
+|   |   |   CMakeCXXCompiler.cmake
+|   |   |   CMakeDetermineCompilerABI_CXX.bin
+|   |   |   CMakeRCCompiler.cmake
+|   |   |   CMakeSystem.cmake
+|   |   |   VCTargetsPath.txt
+|   |   |   VCTargetsPath.vcxproj
+|   |   |   
+|   |   +---CompilerIdCXX
+|   |   |   |   CMakeCXXCompilerId.cpp
+|   |   |   |   CompilerIdCXX.exe
+|   |   |   |   CompilerIdCXX.vcxproj
+|   |   |   |   
+|   |   |   +---Debug
+|   |   |   |   |   CMakeCXXCompilerId.obj
+|   |   |   |   |   CompilerIdCXX.exe.recipe
+|   |   |   |   |   vcpkg.applocal.log
+|   |   |   |   |   
+|   |   |   |   \---CompilerIdCXX.tlog
+|   |   |   |           CL.command.1.tlog
+|   |   |   |           Cl.items.tlog
+|   |   |   |           CL.read.1.tlog
+|   |   |   |           CL.write.1.tlog
+|   |   |   |           CompilerIdCXX.lastbuildstate
+|   |   |   |           CompilerIdCXX.write.1u.tlog
+|   |   |   |           link.command.1.tlog
+|   |   |   |           link.read.1.tlog
+|   |   |   |           link.secondary.1.tlog
+|   |   |   |           link.write.1.tlog
+|   |   |   |           
+|   |   |   \---tmp
+|   |   +---VCTargetsPath
+|   |   |   \---x64
+|   |   |       \---Debug
+|   |   |           |   VCTargetsPath.recipe
+|   |   |           |   
+|   |   |           \---VCTargetsPath.tlog
+|   |   |                   VCTargetsPath.lastbuildstate
+|   |   |                   
+|   |   \---x64
+|   |       \---Debug
+|   \---pkgRedirects
++---include
+|   +---ai
+|   |       BossAISystem.hpp
+|   |       EnemyArchetypeRegistry.hpp
+|   |       EnemySpawner.hpp
+|   |       HostileAISystem.hpp
+|   |       PerceptionSystem.hpp
+|   |       TitanAI.hpp
+|   |       
+|   +---content
+|   |       AssetPaths.hpp
+|   |       TextureGenerator.hpp
+|   |       Workstations.hpp
+|   |       
+|   +---core
+|   |       Constants.hpp
+|   |       IsoMath.hpp
+|   |       Types.hpp
+|   |       
+|   +---engine
+|   |       AudioController.hpp
+|   |       GameApplication.hpp
+|   |       InputManager.hpp
+|   |       ProceduralSoundEffects.hpp
+|   |       TimeShift.hpp
+|   |       
+|   +---entities
+|   |       Camera.hpp
+|   |       Collisions.hpp
+|   |       PlayerController.hpp
+|   |       
+|   +---gameplay
+|   |       AdvancedMechanics.hpp
+|   |       AdvancedPilotMovement.hpp
+|   |       BulletSystem.hpp
+|   |       DamageSystem.hpp
+|   |       GameState.hpp
+|   |       SpatialGrid.hpp
+|   |       StatefulActionsController.hpp
+|   |       Tactics.hpp
+|   |       
+|   +---persistence
+|   |       ActiveBuffsController.hpp
+|   |       CharacterManager.hpp
+|   |       Inventory.hpp
+|   |       ModularEquipmentSystem.hpp
+|   |       Progression.hpp
+|   |       SaveSystem.hpp
+|   |       StoryFlagRegistry.hpp
+|   |       
+|   +---render
+|   |       GameRenderer.hpp
+|   |       
+|   +---ui
+|   |       HUD.hpp
+|   |       PipPad.hpp
+|   |       PipPadUI.hpp
+|   |       TerminalUI.hpp
+|   |       WorkstationUI.hpp
+|   |       
+|   +---vehicles
+|   |       ThermalLoadSystem.hpp
+|   |       VehicleManager.hpp
+|   |       VehicleSeatController.hpp
+|   |       
+|   \---world
+|           CampPlacementValidator.hpp
+|           DestructibleEnvironment.hpp
+|           MapScreen.hpp
+|           StoryEventManager.hpp
+|           WeatherSystem.hpp
+|           WorldSession.hpp
+|           
++---manuals
+|       ASSET_PATH_NORMALIZATION.md
+|       BATCH_1_CORE_CLEANUP_LOG.md
+|       BATCH_2_FOLDER_RESTRUCTURING_LOG.md
+|       BUG_RISK_REGISTER.md
+|       Data_Tree.md
+|       Doc1.pdf
+|       Doc2.pdf
+|       Doc3.pdf
+|       FILE_BY_FILE_MIGRATION_PLAN.md
+|       INTEGRATION_PHASES.md
+|       Izometrical Project - Master Execution Plan.md
+|       MASTER_MIGRATION_PLAN.md
+|       MECHANICS_TRANSFER_MATRIX.md
+|       MERGE_EXECUTION_CHECKLIST.md
+|       MERGE_MASTER_PLAN.md
+|       PLAN.md
+|       REPOSITORY_AUDIT_CHECKLIST.md
+|       SAVE_COMPATIBILITY_PLAN.md
+|       SYSTEM_OWNERSHIP_MAP.md
+|       TARGET_ARCHITECTURE.md
+|       это мешок с материалами.pdf
+|       
+\---src
+    |   main.cpp
+    |   
+    +---ai
+    |       BossAISystem.cpp
+    |       EnemyArchetypeRegistry.cpp
+    |       EnemySpawner.cpp
+    |       HostileAISystem.cpp
+    |       PerceptionSystem.cpp
+    |       TitanAI.cpp
+    |       
+    +---content
+    |       Workstations.cpp
+    |       
+    +---engine
+    |       AudioController.cpp
+    |       GameApplication.cpp
+    |       InputManager.cpp
+    |       ProceduralSoundEffects.cpp
+    |       TimeShift.cpp
+    |       
+    +---entities
+    |       Camera.cpp
+    |       Collisions.cpp
+    |       PlayerController.cpp
+    |       
+    +---gameplay
+    |       AdvancedMechanics.cpp
+    |       AdvancedPilotMovement.cpp
+    |       BulletSystem.cpp
+    |       DamageSystem.cpp
+    |       SpatialGrid.cpp
+    |       StatefulActionsController.cpp
+    |       Tactics.cpp
+    |       
+    +---persistence
+    |       ActiveBuffsController.cpp
+    |       CharacterManager.cpp
+    |       Inventory.cpp
+    |       ModularEquipmentSystem.cpp
+    |       Progression.cpp
+    |       SaveSystem.cpp
+    |       StoryFlagRegistry.cpp
+    |       
+    +---render
+    |       GameRenderer.cpp
+    |       
+    +---ui
+    |       HUD.cpp
+    |       PipPadUI.cpp
+    |       TerminalUI.cpp
+    |       WorkstationUI.cpp
+    |       
+    +---vehicles
+    |       ThermalLoadSystem.cpp
+    |       VehicleManager.cpp
+    |       VehicleSeatController.cpp
+    |       
+    \---world
+            CampPlacementValidator.cpp
+            DestructibleEnvironment.cpp
+            MapScreen.cpp
+            StoryEventManager.cpp
+            WeatherSystem.cpp
+            WorldSession.cpp
+            
