@@ -1,4 +1,5 @@
 #include "persistence/ModularEquipmentSystem.hpp"
+#include "core/Types.hpp"
 
 namespace bunker
 {

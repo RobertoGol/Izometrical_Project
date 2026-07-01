@@ -67,11 +67,14 @@ namespace bunker
     enum class ItemType
     {
         Weapon,
-        Ammo,
+        Armor,
         Medicine,
-        Resource,
-        Quest
+        Ammo,
+        Things,
+        Quest,
+        Resource
     };
+
     enum class CampObjectType
     {
         ConcreteWall,
