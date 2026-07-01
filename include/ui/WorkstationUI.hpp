@@ -2,12 +2,11 @@
 
 #include "content/Workstations.hpp"
 #include "persistence/ModularEquipmentSystem.hpp"
+#include <string>
+#include <vector>
 
 namespace bunker
 {
-    void OpenWorkstationUI(ModularEquipmentSystem &equipmentSystem,
-                           WorkstationType stationType);
-
     struct WorkstationUIState
     {
         WorkstationType stationType = WorkstationType::ArmorWorkbench;
@@ -22,5 +21,4 @@ namespace bunker
 
     void OpenWorkstationUI(ModularEquipmentSystem &equipmentSystem,
                            WorkstationType stationType);
-
 }
