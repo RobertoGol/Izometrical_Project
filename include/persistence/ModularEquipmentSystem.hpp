@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/Types.hpp"
+#include "content/Workstations.hpp"
 #include "gameplay/GameState.hpp"
 #include "persistence/Inventory.hpp"
 #include <string>
@@ -86,6 +87,10 @@ namespace bunker
     {
         int resultItemID = 0;
         std::string resultName;
+        ItemType resultType = ItemType::Armor;
+        WorkstationType stationType = WorkstationType::ArmorWorkbench;
+        float resultWeight = 4.5f;
+
         int requiredScrap = 10;
         int requiredCircuits = 2;
         int requiredCoreEnergy = 0;
