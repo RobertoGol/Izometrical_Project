@@ -50,6 +50,7 @@ set(SOURCES
     src/entities/PlayerController.cpp
     src/entities/Camera.cpp
     src/entities/Collisions.cpp
+    src/content/Workstations.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
