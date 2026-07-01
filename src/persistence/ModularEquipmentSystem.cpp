@@ -19,13 +19,12 @@ namespace bunker
         m_ArmorRegistry.push_back({1005, "FO76_SECRET", "Fallout 76: Secret Service Jet Plating Torso", ArmorClassSlot::Chest, 65.0f, 65.0f, 0.80f, 1.15f, "Pre-War Appalachia Wastelanders Jetpack Mod"});
         m_ArmorRegistry.push_back({1006, "FONV_DRAGOON", "Fallout NV: Chinese Crimson Dragoon Stealth Suit", ArmorClassSlot::Chest, 25.0f, 40.0f, 0.40f, 1.15f, "Sub-level 1C Hoover Infiltrator (+5 Sneak)"});
         m_ArmorRegistry.push_back({1007, "FONV_GHOST", "Fallout NV: Ranger Vest Red Scarf Outfit", ArmorClassSlot::Chest, 38.0f, 42.0f, 0.35f, 1.08f, "Mojave Outpost Sniper Ghost Patrol Tier"});
-
         // 2) Рецепты верстака крафта РобКо
-        m_Recipes.push_back({1001, "Adventurer Mana Cloak", 25, 4, 10});
-        m_Recipes.push_back({1002, "Pulse Pilot Parkour Rig", 40, 8, 25});
-        m_Recipes.push_back({1003, "Vault 17 Combat Plating", 50, 10, 0});
-        m_Recipes.push_back({1004, "Ranger Recon Duster", 35, 6, 15});
-        m_Recipes.push_back({1005, "Secret Service Jet Rig", 100, 20, 50});
+        m_Recipes.push_back({1001, "Adventurer Mana Cloak", ItemType::Armor, WorkstationType::ArmorWorkbench, 4.5f, 25, 4, 10});
+        m_Recipes.push_back({1002, "Pulse Pilot Parkour Rig", ItemType::Armor, WorkstationType::ArmorWorkbench, 5.0f, 40, 8, 25});
+        m_Recipes.push_back({1003, "Vault 17 Combat Plating", ItemType::Armor, WorkstationType::ArmorWorkbench, 6.0f, 50, 10, 0});
+        m_Recipes.push_back({1004, "Ranger Recon Duster", ItemType::Armor, WorkstationType::ArmorWorkbench, 4.8f, 35, 6, 15});
+        m_Recipes.push_back({1005, "Secret Service Jet Rig", ItemType::Armor, WorkstationType::ArmorWorkbench, 8.5f, 100, 20, 50});
     }
 
     bool ModularEquipmentSystem::craftItem(GameState &gs, PlayerInventory &inv, int recipeIndex)
@@ -40,7 +39,7 @@ namespace bunker
             return false;
         }
 
-        inv.addItem(r.resultItemID, ItemType::Armor, 1, 4.5f, r.resultName);
+        inv.addItem(r.resultItemID, r.resultType, 1, r.resultWeight, r.resultName);
         std::cout << "[CRAFT BENCH] Выкован легендарный предмет: " << r.resultName << "!" << std::endl;
         return true;
     }
