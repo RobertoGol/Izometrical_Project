@@ -27,21 +27,35 @@ namespace bunker
         m_Recipes.push_back({1005, "Secret Service Jet Rig", ItemType::Armor, WorkstationType::ArmorWorkbench, 8.5f, 100, 20, 50});
     }
 
-    bool ModularEquipmentSystem::craftItem(GameState &gs, PlayerInventory &inv, int recipeIndex)
+    CraftResult ModularEquipmentSystem::craftItem(PlayerInventory &inv, int recipeIndex)
     {
         if (recipeIndex < 0 || recipeIndex >= static_cast<int>(m_Recipes.size()))
-            return false;
+            return CraftResult::InvalidRecipeIndex;
 
         const auto &r = m_Recipes[recipeIndex];
-        if (!inv.hasItem(201)) // ID 201 = Scrap Metal
-        {
-            std::cout << "[CRAFT BENCH] Недостаточно металлолома РобКо для синтеза: " << r.resultName << std::endl;
-            return false;
-        }
+
+        // ── Фаза 1: только проверка, никаких списаний ──
+        if (r.requiredScrap > 0 && !inv.hasItem(CraftItemIDs::ScrapMetal, r.requiredScrap))
+            return CraftResult::InsufficientScrap;
+
+        if (r.requiredCircuits > 0 && !inv.hasItem(CraftItemIDs::Circuits, r.requiredCircuits))
+            return CraftResult::InsufficientCircuits;
+
+        if (r.requiredCoreEnergy > 0 && !inv.hasItem(CraftItemIDs::CoreEnergyCell, r.requiredCoreEnergy))
+            return CraftResult::InsufficientCoreEnergy;
+
+        // ── Фаза 2: все проверки прошли — теперь безопасно списывать ──
+        if (r.requiredScrap > 0)
+            inv.removeItem(CraftItemIDs::ScrapMetal, r.requiredScrap);
+
+        if (r.requiredCircuits > 0)
+            inv.removeItem(CraftItemIDs::Circuits, r.requiredCircuits);
+
+        if (r.requiredCoreEnergy > 0)
+            inv.removeItem(CraftItemIDs::CoreEnergyCell, r.requiredCoreEnergy);
 
         inv.addItem(r.resultItemID, r.resultType, 1, r.resultWeight, r.resultName);
-        std::cout << "[CRAFT BENCH] Выкован легендарный предмет: " << r.resultName << "!" << std::endl;
-        return true;
+        return CraftResult::Success;
     }
 
     void ModularEquipmentSystem::applyPlatingDamage(ModularTankChassis &tank, const Vector3D &hitDir, float damage)

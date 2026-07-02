@@ -168,4 +168,14 @@ namespace bunker
         }
         return nullptr;
     }
+
+    const WorkstationDef *WorkstationDatabase::findByType(WorkstationType stationType) const
+    {
+        for (const auto &ws : m_Workstations)
+        {
+            if (ws.stationType == stationType)
+                return &ws;
+        }
+        return nullptr;
+    }
 }

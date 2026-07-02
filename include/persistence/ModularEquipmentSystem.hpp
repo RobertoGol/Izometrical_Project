@@ -97,13 +97,34 @@ namespace bunker
         int requiredCoreEnergy = 0;
     };
 
+    // ID предметов-ресурсов, используемых крафт-системой станций.
+    namespace CraftItemIDs
+    {
+        inline constexpr unsigned int ScrapMetal = 201;
+        inline constexpr unsigned int Circuits = 202;
+        inline constexpr unsigned int CoreEnergyCell = 203;
+    }
+
+    enum class CraftResult
+    {
+        Success,
+        InvalidRecipeIndex,
+        InsufficientScrap,
+        InsufficientCircuits,
+        InsufficientCoreEnergy
+    };
+
     class ModularEquipmentSystem
     {
     public:
         ModularEquipmentSystem();
 
         void initializeDatabase();
-        bool craftItem(GameState &gs, PlayerInventory &inv, int recipeIndex);
+
+        // Полная проверка ресурсов (Scrap/Circuits/CoreEnergy) выполняется ДО
+        // любого списания. Списание начинается только если все проверки прошли,
+        // поэтому частичное/поломанное состояние инвентаря невозможно.
+        CraftResult craftItem(PlayerInventory &inv, int recipeIndex);
         void applyPlatingDamage(ModularTankChassis &tank, const Vector3D &hitDir, float damage);
 
         std::vector<CraftingRecipe> getRecipesForStation(WorkstationType stationType) const;
