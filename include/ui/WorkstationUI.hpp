@@ -3,6 +3,7 @@
 #include "content/Workstations.hpp"
 #include "persistence/ModularEquipmentSystem.hpp"
 #include "persistence/Inventory.hpp"
+#include "WorkstationTypes.hpp"
 #include <string>
 #include <vector>
 
@@ -15,17 +16,12 @@ namespace bunker
     {
         WorkstationType stationType = WorkstationType::ArmorWorkbench;
         int objectID = 0;
-
         std::string title;
-
         std::vector<StationActionType> supportedActions;
-        int selectedActionIndex = -1; // -1 = действие ещё не выбрано
-
+        int selectedActionIndex = -1;               // -1 = действие ещё не выбрано
         std::vector<CraftingRecipe> visibleRecipes; // только рецепты этой станции
         int selectedRecipeIndex = -1;               // -1 = рецепт ещё не выбран
-
-        std::string statusMessage; // результат последнего действия/попытки
-
+        std::string statusMessage;                  // результат последнего действия/попытки
         bool isOpen = false;
         StationAvailability availability = StationAvailability::Available;
     };
