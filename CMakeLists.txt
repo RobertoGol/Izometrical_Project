@@ -5,7 +5,15 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-cmake .. -DDEV_BUILD=ON
+
+# === DEV BUILD OPTION ===
+option(DEV_BUILD "Enable Dev Menu and debug tools" OFF)
+
+if(DEV_BUILD)
+    add_definitions(-DDEV_BUILD)
+    message(STATUS "[CMake] DEV_BUILD is ENABLED")
+endif()
+# ========================
 
 find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 
@@ -56,12 +64,11 @@ set(SOURCES
  src/entities/Collisions.cpp
 )
 
-# Dev build
-option(DEV_BUILD "Enable Dev Menu and debug tools" OFF)
-
+# Добавляем DevMenu только в dev-сборке
 if(DEV_BUILD)
-    add_definitions(-DDEV_BUILD)
-    message(STATUS "DEV_BUILD is ENABLED")
+    list(APPEND SOURCES
+        src/DevMenu.cpp
+    )
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -87,6 +94,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     sfml-system
     sfml-audio
 )
+
+if(DEV_BUILD)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE DEV_BUILD)
+endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
     target_link_libraries(${PROJECT_NAME} PRIVATE stdc++fs)
