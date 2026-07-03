@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+cmake .. -DDEV_BUILD=ON
+
 find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 
 set(SOURCES
@@ -54,6 +56,13 @@ set(SOURCES
  src/entities/Collisions.cpp
 )
 
+# Dev build
+option(DEV_BUILD "Enable Dev Menu and debug tools" OFF)
+
+if(DEV_BUILD)
+    add_definitions(-DDEV_BUILD)
+    message(STATUS "DEV_BUILD is ENABLED")
+endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
