@@ -1,0 +1,10 @@
+^F:\PROJECT\IZOMETRICAL_PROJECT\TOOLS\MAPEDITOR\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SF:/Project/Izometrical_Project/tools/MapEditor -BF:/Project/Izometrical_Project/tools/MapEditor/build --check-stamp-file F:/Project/Izometrical_Project/tools/MapEditor/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
