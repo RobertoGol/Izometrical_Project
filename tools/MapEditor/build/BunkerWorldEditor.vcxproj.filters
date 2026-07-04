@@ -4,9 +4,6 @@
     <ClCompile Include="F:\Project\Izometrical_Project\tools\MapEditor\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="F:\Project\Izometrical_Project\tools\MapEditor\src\PlacementSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="F:\Project\Izometrical_Project\tools\MapEditor\CMakeLists.txt" />
