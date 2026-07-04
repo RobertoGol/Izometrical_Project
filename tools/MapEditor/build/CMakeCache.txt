@@ -216,7 +216,7 @@ DEV_BUILD:BOOL=OFF
 ImGui-SFML_DIR:PATH=F:/vcpkg/installed/x64-windows/share/imgui-sfml
 
 //The directory containing a CMake configuration file for SFML.
-SFML_DIR:PATH=F:/vcpkg/installed/x64-windows/share/sfml
+SFML_DIR:PATH=SFML_DIR-NOTFOUND
 
 //Path to a file.
 SFML_DOC_DIR:PATH=SFML_DOC_DIR-NOTFOUND

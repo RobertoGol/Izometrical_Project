@@ -7057,3 +7057,1301 @@ events:
         - "C:/Program Files (x86)/BunkerProtocolISO"
       CMAKE_FIND_ROOT_PATH: "F:/vcpkg/installed/x64-windows/debug;F:/vcpkg/installed/x64-windows"
 ...
+
+---
+events:
+  -
+    kind: "find_package-v1"
+    backtrace:
+      - "F:/vcpkg/scripts/buildsystems/vcpkg.cmake:939 (_find_package)"
+      - "CMakeLists.txt:7 (find_package)"
+    name: "SFML"
+    components:
+      -
+        name: "graphics"
+        required: true
+        found: false
+      -
+        name: "window"
+        required: true
+        found: false
+      -
+        name: "system"
+        required: true
+        found: false
+    configs:
+      -
+        filename: "SFML.cps"
+        kind: "cps"
+      -
+        filename: "sfml.cps"
+        kind: "cps"
+      -
+        filename: "SFMLConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "sfml-config.cmake"
+        kind: "cmake"
+    version_request:
+      version: "2.5"
+      version_complete: "2.5"
+      exact: false
+    settings:
+      required: "required_explicit"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "SFML"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: "F:/vcpkg/installed/x64-windows/share/sfml/SFML.cps"
+        mode: "none?"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/share/sfml/sfml.cps"
+        mode: "none?"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/share/sfml/SFMLConfig.cmake"
+        mode: "none?"
+        reason: "insufficient_version"
+        message: "The version found is not compatible with the version requested."
+      -
+        path: "F:/vcpkg/installed/x64-windows/share/sfml/sfml-config.cmake"
+        mode: "none?"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/share/sfml/SFMLConfig.cmake"
+        mode: "config"
+        reason: "insufficient_version"
+        message: "The version found is not compatible with the version requested."
+      -
+        path: "F:/vcpkg/installed/x64-windows/share/sfml/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/Project/Izometrical_Project/tools/MapEditor/build/CMakeFiles/pkgRedirects/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/Project/Izometrical_Project/tools/MapEditor/build/CMakeFiles/pkgRedirects/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/Project/Izometrical_Project/tools/MapEditor/build/CMakeFiles/pkgRedirects/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/Project/Izometrical_Project/tools/MapEditor/build/CMakeFiles/pkgRedirects/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/Project/Izometrical_Project/tools/MapEditor/build/CMakeFiles/pkgRedirects/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/Project/Izometrical_Project/tools/MapEditor/build/CMakeFiles/pkgRedirects/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/debug/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/installed/x64-windows/share/sfml/SFMLConfig.cmake"
+        mode: "config"
+        reason: "insufficient_version"
+        message: "The version found is not compatible with the version requested."
+      -
+        path: "F:/vcpkg/installed/x64-windows/share/sfml/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/PowerShell/7/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/PowerShell/7/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/PowerShell/7/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/PowerShell/7/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/PowerShell/7/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/PowerShell/7/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Programs/Microsoft VS Code/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Programs/Microsoft VS Code/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Programs/Microsoft VS Code/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Programs/Microsoft VS Code/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Programs/Microsoft VS Code/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Programs/Microsoft VS Code/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/ProgramData/Oracle/Java/javapath/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/ProgramData/Oracle/Java/javapath/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/ProgramData/Oracle/Java/javapath/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/ProgramData/Oracle/Java/javapath/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/ProgramData/Oracle/Java/javapath/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/ProgramData/Oracle/Java/javapath/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "D:/Program Files (x86)/VMware/VMware Workstation/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/Program Files (x86)/VMware/VMware Workstation/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "D:/Program Files (x86)/VMware/VMware Workstation/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "D:/Program Files (x86)/VMware/VMware Workstation/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "D:/Program Files (x86)/VMware/VMware Workstation/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "D:/Program Files (x86)/VMware/VMware Workstation/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Common Files/Oracle/Java/java8path/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Common Files/Oracle/Java/java8path/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Common Files/Oracle/Java/java8path/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Common Files/Oracle/Java/java8path/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Common Files/Oracle/Java/java8path/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Common Files/Oracle/Java/java8path/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Python314/Scripts/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Python314/Scripts/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Python314/Scripts/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Python314/Scripts/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Python314/Scripts/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Python314/Scripts/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Python314/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Python314/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Python314/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Python314/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Python314/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Python314/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/wbem/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/wbem/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/wbem/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/wbem/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/wbem/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/wbem/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/WindowsPowerShell/v1.0/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/WindowsPowerShell/v1.0/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/WindowsPowerShell/v1.0/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/WindowsPowerShell/v1.0/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/WindowsPowerShell/v1.0/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/WindowsPowerShell/v1.0/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/OpenSSH/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/OpenSSH/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/OpenSSH/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/OpenSSH/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/OpenSSH/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Windows/System32/OpenSSH/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/NVIDIA Corporation/NVIDIA App/NvDLISR/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/NVIDIA Corporation/NVIDIA App/NvDLISR/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/NVIDIA Corporation/NVIDIA App/NvDLISR/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/NVIDIA Corporation/NVIDIA App/NvDLISR/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/NVIDIA Corporation/NVIDIA App/NvDLISR/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/NVIDIA Corporation/NVIDIA App/NvDLISR/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Intel/WiFi/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Intel/WiFi/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Intel/WiFi/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Intel/WiFi/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Intel/WiFi/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Intel/WiFi/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Common Files/Intel/WirelessCommon/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Common Files/Intel/WirelessCommon/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Common Files/Intel/WirelessCommon/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Common Files/Intel/WirelessCommon/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Common Files/Intel/WirelessCommon/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Common Files/Intel/WirelessCommon/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/dotnet/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/dotnet/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/dotnet/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/dotnet/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/dotnet/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/dotnet/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/nodejs/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/nodejs/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/nodejs/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/nodejs/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/nodejs/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/nodejs/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/ProgramData/chocolatey/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/ProgramData/chocolatey/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/ProgramData/chocolatey/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/ProgramData/chocolatey/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/ProgramData/chocolatey/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/ProgramData/chocolatey/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Git/cmd/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Git/cmd/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Git/cmd/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Git/cmd/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Git/cmd/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/Git/cmd/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/CMake/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/CMake/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/CMake/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/CMake/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/CMake/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/CMake/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Microsoft SQL Server/160/Tools/Binn/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Microsoft SQL Server/160/Tools/Binn/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Microsoft SQL Server/160/Tools/Binn/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Microsoft SQL Server/160/Tools/Binn/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Microsoft SQL Server/160/Tools/Binn/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/Microsoft SQL Server/160/Tools/Binn/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/usbipd-win/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/usbipd-win/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/usbipd-win/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/usbipd-win/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/usbipd-win/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/usbipd-win/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/cursor/resources/app/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/cursor/resources/app/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/cursor/resources/app/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/cursor/resources/app/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/cursor/resources/app/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/cursor/resources/app/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/.local/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/.local/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/.local/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/.local/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/.local/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/.local/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Microsoft/WindowsApps/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Microsoft/WindowsApps/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Microsoft/WindowsApps/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Microsoft/WindowsApps/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Microsoft/WindowsApps/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Microsoft/WindowsApps/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/npm/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/npm/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/npm/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/npm/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/npm/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Roaming/npm/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/Program Files/Windsurf/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/Program Files/Windsurf/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/Program Files/Windsurf/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/Program Files/Windsurf/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/Program Files/Windsurf/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/Program Files/Windsurf/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/.bun/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/.bun/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/.bun/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/.bun/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/.bun/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/.bun/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Programs/cursor/resources/app/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Programs/cursor/resources/app/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Programs/cursor/resources/app/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Programs/cursor/resources/app/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Programs/cursor/resources/app/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Programs/cursor/resources/app/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/.lmstudio/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/.lmstudio/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/.lmstudio/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/.lmstudio/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/.lmstudio/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/.lmstudio/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/AppData/Roaming/Python/Python314/Scripts/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/AppData/Roaming/Python/Python314/Scripts/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/AppData/Roaming/Python/Python314/Scripts/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/AppData/Roaming/Python/Python314/Scripts/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/AppData/Roaming/Python/Python314/Scripts/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/AppData/Roaming/Python/Python314/Scripts/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/.local/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/.local/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/.local/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/.local/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/.local/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "G:/Windows/RJ/.local/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "F:/vcpkg/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.2-full_build/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.2-full_build/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.2-full_build/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.2-full_build/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.2-full_build/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Users/RJ/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.2-full_build/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/CMake/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/CMake/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/SFMLConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/sfml-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/lib/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/lib/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/share/cps/SFML.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "C:/Program Files (x86)/share/cps/sfml.cps"
+        mode: "cps"
+        reason: "no_exist"
+    found: null
+    search_context:
+      CMAKE_PREFIX_PATH:
+        - "F:/vcpkg/installed/x64-windows/debug"
+        - "F:/vcpkg/installed/x64-windows"
+      ENV{PATH}:
+        - "C:\\Program Files\\PowerShell\\7"
+        - "c:\\Users\\RJ\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand"
+        - "c:\\Users\\RJ\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli"
+        - "C:\\Users\\RJ\\AppData\\Local\\Programs\\Microsoft VS Code"
+        - "C:\\ProgramData\\Oracle\\Java\\javapath"
+        - "D:\\Program Files (x86)\\VMware\\VMware Workstation\\bin\\"
+        - "C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\java8path"
+        - "C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath"
+        - "C:\\Python314\\Scripts\\"
+        - "C:\\Python314\\"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\NVIDIA Corporation\\NVIDIA App\\NvDLISR"
+        - "C:\\Program Files (x86)\\NVIDIA Corporation\\PhysX\\Common"
+        - "C:\\Program Files\\Intel\\WiFi\\bin\\"
+        - "C:\\Program Files\\Common Files\\Intel\\WirelessCommon\\"
+        - "C:\\Program Files\\dotnet\\"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Program Files\\CMake\\bin"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\PowerShell\\7\\"
+        - "C:\\Program Files (x86)\\Microsoft SQL Server\\160\\Tools\\Binn\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\160\\Tools\\Binn\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\Client SDK\\ODBC\\170\\Tools\\Binn\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\160\\DTS\\Binn\\"
+        - "C:\\Program Files\\usbipd-win\\"
+        - "C:\\Program Files\\cursor\\resources\\app\\bin"
+        - "C:\\Program Files\\PowerShell\\7"
+        - "C:\\ProgramData\\Oracle\\Java\\javapath"
+        - "D:\\Program Files (x86)\\VMware\\VMware Workstation\\bin\\"
+        - "C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\java8path"
+        - "C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath"
+        - "C:\\Python314\\Scripts\\"
+        - "C:\\Python314\\"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\NVIDIA Corporation\\NVIDIA App\\NvDLISR"
+        - "C:\\Program Files (x86)\\NVIDIA Corporation\\PhysX\\Common"
+        - "C:\\Program Files\\Intel\\WiFi\\bin\\"
+        - "C:\\Program Files\\Common Files\\Intel\\WirelessCommon\\"
+        - "C:\\Program Files\\dotnet\\"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Program Files\\CMake\\bin"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\PowerShell\\7\\"
+        - "C:\\Program Files (x86)\\Microsoft SQL Server\\160\\Tools\\Binn\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\160\\Tools\\Binn\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\Client SDK\\ODBC\\170\\Tools\\Binn\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\160\\DTS\\Binn\\"
+        - "C:\\Program Files\\usbipd-win\\"
+        - "C:\\Program Files\\cursor\\resources\\app\\bin"
+        - "C:\\Users\\RJ\\.local\\bin"
+        - "C:\\Users\\RJ\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Program Files\\Intel\\WiFi\\bin\\"
+        - "C:\\Program Files\\Common Files\\Intel\\WirelessCommon\\"
+        - "C:\\Users\\RJ\\.dotnet\\tools"
+        - "C:\\Users\\RJ\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\Users\\RJ\\AppData\\Roaming\\npm"
+        - "F:\\Program Files\\Windsurf\\bin"
+        - "C:\\Users\\RJ\\.bun\\bin"
+        - "C:\\Users\\RJ\\AppData\\Local\\Programs\\Ollama"
+        - "C:\\Users\\RJ\\AppData\\Local\\Programs\\cursor\\resources\\app\\bin"
+        - "G:\\Windows\\RJ\\.lmstudio\\bin"
+        - "g:\\windows\\rj\\appdata\\roaming\\python\\python314\\scripts"
+        - "g:\\windows\\rj\\.local\\bin"
+        - "F:\\vcpkg"
+        - "C:\\Users\\RJ\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/BunkerProtocolISO"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "C:/Program Files/CMake"
+        - "C:/Program Files (x86)/BunkerProtocolISO"
+      CMAKE_FIND_ROOT_PATH: "F:/vcpkg/installed/x64-windows/debug;F:/vcpkg/installed/x64-windows"
+...
