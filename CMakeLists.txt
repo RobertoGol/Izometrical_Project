@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-
 # === DEV BUILD OPTION ===
 option(DEV_BUILD "Enable Dev Menu and debug tools" OFF)
 
@@ -15,60 +14,58 @@ if(DEV_BUILD)
 endif()
 # ========================
 
-find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
+find_package(SFML 2.5 COMPONENTS graphics window system audio REQUIRED)
 
 set(SOURCES
- src/main.cpp
- src/engine/GameApplication.cpp
- src/engine/AudioController.cpp
- src/engine/ProceduralSoundEffects.cpp
- src/engine/InputManager.cpp
- src/engine/TimeShift.cpp
- src/world/WorldSession.cpp
- src/world/MapScreen.cpp
- src/world/WeatherSystem.cpp
- src/world/CampPlacementValidator.cpp
- src/world/StoryEventManager.cpp
- src/world/DestructibleEnvironment.cpp
- src/content/Workstations.cpp
- src/vehicles/VehicleManager.cpp
- src/vehicles/VehicleSeatController.cpp
- src/vehicles/ThermalLoadSystem.cpp
- src/gameplay/Tactics.cpp
- src/gameplay/BulletSystem.cpp
- src/gameplay/AdvancedMechanics.cpp
- src/gameplay/DamageSystem.cpp
- src/gameplay/SpatialGrid.cpp
- src/gameplay/StatefulActionsController.cpp
- src/gameplay/AdvancedPilotMovement.cpp
- src/ai/EnemySpawner.cpp
- src/ai/EnemyArchetypeRegistry.cpp
- src/ai/HostileAISystem.cpp
- src/ai/BossAISystem.cpp
- src/ai/PerceptionSystem.cpp
- src/ai/TitanAI.cpp
- src/persistence/Inventory.cpp
- src/persistence/Progression.cpp
- src/persistence/CharacterManager.cpp
- src/persistence/StoryFlagRegistry.cpp
- src/persistence/ActiveBuffsController.cpp
- src/persistence/SaveSystem.cpp
- src/persistence/ModularEquipmentSystem.cpp
- src/ui/HUD.cpp
- src/ui/TerminalUI.cpp
- src/ui/PipPadUI.cpp
- src/ui/WorkstationUI.cpp
- src/render/GameRenderer.cpp
- src/entities/PlayerController.cpp
- src/entities/Camera.cpp
- src/entities/Collisions.cpp
+    src/main.cpp
+    src/engine/GameApplication.cpp
+    src/engine/AudioController.cpp
+    src/engine/ProceduralSoundEffects.cpp
+    src/engine/InputManager.cpp
+    src/engine/TimeShift.cpp
+    src/world/WorldSession.cpp
+    src/world/MapScreen.cpp
+    src/world/WeatherSystem.cpp
+    src/world/CampPlacementValidator.cpp
+    src/world/StoryEventManager.cpp
+    src/world/DestructibleEnvironment.cpp
+    src/content/Workstations.cpp
+    src/vehicles/VehicleManager.cpp
+    src/vehicles/VehicleSeatController.cpp
+    src/vehicles/ThermalLoadSystem.cpp
+    src/gameplay/Tactics.cpp
+    src/gameplay/BulletSystem.cpp
+    src/gameplay/AdvancedMechanics.cpp
+    src/gameplay/DamageSystem.cpp
+    src/gameplay/SpatialGrid.cpp
+    src/gameplay/StatefulActionsController.cpp
+    src/gameplay/AdvancedPilotMovement.cpp
+    src/ai/EnemySpawner.cpp
+    src/ai/EnemyArchetypeRegistry.cpp
+    src/ai/HostileAISystem.cpp
+    src/ai/BossAISystem.cpp
+    src/ai/PerceptionSystem.cpp
+    src/ai/TitanAI.cpp
+    src/persistence/Inventory.cpp
+    src/persistence/Progression.cpp
+    src/persistence/CharacterManager.cpp
+    src/persistence/StoryFlagRegistry.cpp
+    src/persistence/ActiveBuffsController.cpp
+    src/persistence/SaveSystem.cpp
+    src/persistence/ModularEquipmentSystem.cpp
+    src/ui/HUD.cpp
+    src/ui/TerminalUI.cpp
+    src/ui/PipPadUI.cpp
+    src/ui/WorkstationUI.cpp
+    src/render/GameRenderer.cpp
+    src/entities/PlayerController.cpp
+    src/entities/Camera.cpp
+    src/entities/Collisions.cpp
 )
 
 # Добавляем DevMenu только в dev-сборке
 if(DEV_BUILD)
-    list(APPEND SOURCES
-        src/DevMenu.cpp
-    )
+    list(APPEND SOURCES src/DevMenu.cpp)
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})

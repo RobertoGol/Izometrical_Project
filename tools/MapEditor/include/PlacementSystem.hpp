@@ -16,12 +16,12 @@ struct PlacedObject
     std::string id;
     PlacementCategory category;
     int x, y;
+    int layer;
     float rotation = 0.0f;
     int height = 1;
     std::string material;
     std::vector<std::string> mods;
     int connectionMask = 0;
-    int layer = 0;
 };
 
 class PlacementSystem
@@ -29,7 +29,9 @@ class PlacementSystem
 public:
     PlacementSystem();
 
-    void PlaceWall(int x, int y, const std::string &material, int height, int layer, const std::vector<std::string> &mods = {});
+    void PlaceWall(int x, int y, const std::string &material, int height, int layer,
+                   const std::vector<std::string> &mods = {});
+
     void PlaceProp(int x, int y, const std::string &id, int layer, float rotation = 0.0f);
     void PlaceTile(int x, int y, const std::string &tileType, int layer);
 
@@ -42,7 +44,6 @@ public:
 
     PlacedObject *GetObjectAt(int x, int y, int layer = -1);
     const std::vector<PlacedObject> &GetAllObjects() const;
-
     void RemoveObject(int x, int y, int layer = -1);
 
     bool SaveToFile(const std::string &filename);

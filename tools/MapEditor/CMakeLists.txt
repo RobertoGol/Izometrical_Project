@@ -1,23 +1,29 @@
-cmake_minimum_required(VERSION 3.16)
-project(BunkerWorldEditor VERSION 1.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.15)
+project(MapEditor CXX)
 
+# ПРИНУДИТЕЛЬНО подключаем vcpkg (Добавьте эту строку!)
+set(CMAKE_TOOLCHAIN_FILE "F:/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "" FORCE)
+
+# Включаем современный стандарт C++
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
-find_package(ImGui-SFML REQUIRED)
+# Экспортируем команды для IntelliSense/Clangd
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(SOURCES
-    src/main.cpp
+# Поиск SFML 3 и ImGui
+find_package(SFML 3 COMPONENTS Graphics Window System REQUIRED)
+find_package(ImGui-SFML CONFIG REQUIRED)
+
+add_executable(${PROJECT_NAME}
+    src/main.cpp 
+    src/PlacementSystem.cpp
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES})
-
-target_include_directories(${PROJECT_NAME} PRIVATE include)
-
+# Передаем пути и библиотеки в проект
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    sfml-graphics
-    sfml-window
-    sfml-system
+    SFML::Graphics
+    SFML::Window
+    SFML::System
     ImGui-SFML::ImGui-SFML
 )

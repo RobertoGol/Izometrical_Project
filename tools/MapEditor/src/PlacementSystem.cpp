@@ -6,7 +6,8 @@
 
 PlacementSystem::PlacementSystem() {}
 
-void PlacementSystem::PlaceWall(int x, int y, const std::string &material, int height, int layer, const std::vector<std::string> &mods)
+void PlacementSystem::PlaceWall(int x, int y, const std::string &material, int height, int layer,
+                                const std::vector<std::string> &mods)
 {
     RemoveObject(x, y, layer);
 
@@ -57,15 +58,19 @@ void PlacementSystem::PlaceTile(int x, int y, const std::string &tileType, int l
 std::string PlacementSystem::GetWallTexture(const PlacedObject &wall) const
 {
     std::string texture = wall.id;
+
     if (!wall.material.empty())
         texture += "_" + wall.material;
+
     for (const auto &mod : wall.mods)
     {
         if (!mod.empty() && mod != "clean")
             texture += "_" + mod;
     }
+
     if (wall.connectionMask != 0)
         texture += "_connected";
+
     return texture + ".png";
 }
 
@@ -90,6 +95,7 @@ void PlacementSystem::SnapToWall(int x, int y, int &outX, int &outY)
 {
     outX = x;
     outY = y;
+
     for (const auto &obj : objects)
     {
         if (obj.category == PlacementCategory::Wall)
@@ -113,6 +119,7 @@ void PlacementSystem::UpdateWallConnections(int x, int y)
             if (obj.category == PlacementCategory::Wall && obj.x == cx && obj.y == cy)
             {
                 obj.connectionMask = 0;
+
                 for (const auto &other : objects)
                 {
                     if (other.category == PlacementCategory::Wall)
@@ -162,6 +169,7 @@ void PlacementSystem::RemoveObject(int x, int y, int layer)
                            return obj.x == x && obj.y == y && (layer == -1 || obj.layer == layer);
                        }),
         objects.end());
+
     UpdateWallConnections(x, y);
 }
 
