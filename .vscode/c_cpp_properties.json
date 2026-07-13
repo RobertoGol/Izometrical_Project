@@ -1,13 +1,13 @@
 {
     "configurations": [
         {
-            "name": "Linux",
+            "name": "Windows",
             "includePath": [
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/src",
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/include/ai",
                 "${workspaceFolder}/include/content",
-                "C:\\SFML\\include",
                 "${workspaceFolder}/include/core",
                 "${workspaceFolder}/include/engine",
                 "${workspaceFolder}/include/entities",
@@ -16,12 +16,15 @@
                 "${workspaceFolder}/include/render",
                 "${workspaceFolder}/include/ui",
                 "${workspaceFolder}/include/vehicles",
-                "${workspaceFolder}/include/world"
+                "${workspaceFolder}/include/world",
+                "C:\\SFML\\include",
+                "C:\\ПУТЬ\\К\\ТВОЕЙ\\ПАПКЕ\\imgui" 
             ],
             "defines": [],
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "linux-gcc-x64"
+            "intelliSenseMode": "windows-gcc-x64",
+            "compilerPath": ""
         }
     ],
     "version": 4

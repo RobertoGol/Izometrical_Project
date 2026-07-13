@@ -1,0 +1,4 @@
+-I/H:/Project/Izometrical_Project/src
+-I/H:/Project/Izometrical_Project/engine
+-I/путь/к/твоей/папке/SFML/include
+-I/путь/к/твоей/папке/imgui
