@@ -1,2 +1,9 @@
+# Ignore compiler toolchains
+source/mingw64/
+
+# Ignore all compiled object files and binaries
+*.o
+*.exe
+*.a
 
 manuals/
