@@ -1,0 +1,37 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "Build AIMP Engine",
+            "command": "H:\\Project\\Izometrical_Project\\source\\mingw64\\bin\\g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "${workspaceFolder}\\src\\*.cpp",
+                "${workspaceFolder}\\source\\ImGui\\*.cpp",
+                "-I${workspaceFolder}\\include",
+                "-I${workspaceFolder}\\source\\SFML-3.1.0\\include",
+                "-I${workspaceFolder}\\source\\ImGui",
+                "-L${workspaceFolder}\\source\\SFML-3.1.0\\lib",
+                "-lsfml-graphics",
+                "-lsfml-window",
+                "-lsfml-system",
+                "-lopengl32",
+                "-o",
+                "${workspaceFolder}\\AIMP_Engine.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Сборка движка A.I.M.P. с ImGui и SFML"
+        }
+    ]
+}
