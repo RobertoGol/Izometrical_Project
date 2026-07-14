@@ -16,10 +16,20 @@ const int MAP_WIDTH = 32;
 const int MAP_HEIGHT = 32;
 const float TILE_WIDTH = 64.f;
 const float TILE_HEIGHT = 32.f;
-
-sf::Vector2f isoToScreen(int x, int y) {
+sf::Vector2f isoToScreen(int x, int y, float z = 0.0f) {
+    // TILE_WIDTH обычно в 2 раза больше TILE_HEIGHT для классической изометрии (64x32).
+    // Чтобы сделать "камеру ниже к земле", нам нужно сплющить ось Y.
+    // Умножаем TILE_HEIGHT на коэффициент (например, 0.75f), чтобы угол стал острее.
+    
+    float ratio = 0.75f; // Чем меньше число, тем "ниже" камера к земле (ближе к 3-му лицу)
+    
     float screenX = (x - y) * (TILE_WIDTH / 2.f);
-    float screenY = (x + y) * (TILE_HEIGHT / 2.f);
+    float screenY = (x + y) * (TILE_HEIGHT / 2.f) * ratio;
+    
+    // Вычитаем Z (высоту слоя), чтобы объекты визуально "поднимались" вверх
+    // Константа 24.0f - это примерный сдвиг пикселей на один слой высоты
+    screenY -= (z * 24.0f); 
+
     return {screenX, screenY};
 }
 

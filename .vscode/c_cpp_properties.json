@@ -17,15 +17,15 @@
                 "${workspaceFolder}/include/ui",
                 "${workspaceFolder}/include/vehicles",
                 "${workspaceFolder}/include/world",
-                "C:\\SFML\\include",
+                "H:\\Project\\Izometrical_Project\\source\\SFML-3.1.0\\include",
                 "C:\\ПУТЬ\\К\\ТВОЕЙ\\ПАПКЕ\\imgui" 
             ],
             "defines": [],
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-gcc-x64",
-            "compilerPath": ""
-        }
+            "compilerPath": "H:\\Project\\Izometrical_Project\\source\\mingw64\\bin\\g++.exe"
+        }   
     ],
     "version": 4
 }
