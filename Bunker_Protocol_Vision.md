@@ -177,3 +177,82 @@ What needs checking:
 - Check that camera movement changes the 3D view.
 - Check that objects use their ECS transform positions and scale.
 - Full build/test is still blocked locally until the SFML package/build environment is fixed.
+
+## Deep Dive System Task List
+
+Этот список сделан после повторного обзора всей системы: application loop, 3D renderer, ECS, legacy 2D renderer, gameplay, input, save/load, content/assets, materials, build/dependencies. Отмечай пункты по мере закрытия.
+
+### P0 - runtime blockers
+
+- [ ] Убрать тестовый лимит `frameCount > 1000` из `GameApplication::run()`, чтобы игра не завершалась сама после demo-run.
+- [ ] Восстановить `updateMouseWorldPosition()`: экранная позиция мыши должна снова превращаться в world position для aim, toolgun, CAMP placement и interaction.
+- [ ] Восстановить `m_Camera.update(...)` или явно связать новую 3D camera с `GameState`, mouse aim и player/titan movement.
+- [ ] Вернуть рабочий UI/HUD слой в `renderGameplayFrame()`: сейчас HUD, PipPad, subtitles, terminal и ImGui временно отключены.
+- [ ] Убрать debug-magenta clear color из normal gameplay path и оставить его только как explicit debug mode.
+- [ ] Исправить `ResourceManager::ConsumeResources()`: параметр `circuits` скрывает поле класса, из-за чего списание circuits может работать неправильно.
+
+### P1 - 3D renderer and ECS integration
+
+- [x] `MeshBuilder::loadToGPU()` создает VAO/VBO/EBO и заполняет `MeshComponent::vaoID/indexCount`.
+- [x] `Renderer3D::renderScene()` применяет `TransformComponent` через model matrix.
+- [x] `Renderer3D::renderScene()` использует camera view/projection uniforms.
+- [x] Shader files `assets/shaders/base.vert` и `assets/shaders/base.frag` загружаются из assets.
+- [ ] Добавить ownership/lifetime для GPU buffers: сейчас VBO/EBO создаются, но не хранятся и не освобождаются.
+- [ ] Перестать связывать `transforms` и `meshes` только по индексу массива; использовать entity IDs из ECS, чтобы transform и mesh не расходились.
+- [ ] Добавить normal/tangent support для будущего normal mapping.
+- [ ] Сделать sky/weather/lighting реальной частью 3D renderer вместо пустого `renderSkyDome()`.
+- [ ] Добавить debug toggle для wireframe, normals, material IDs и camera frustum.
+
+### P1 - gameplay to 3D migration
+
+- [ ] Решить источник истины для мира: старый tile/grid `GameState` или новый ECS/3D world. Сейчас они существуют параллельно.
+- [ ] Связать player/titan/enemies/vehicles с 3D entities или ввести adapter layer между `GameState` и ECS.
+- [ ] Вернуть рендер существующих gameplay-сущностей после 3D pass: enemies, bullets, vehicles, loot, workstations, weather effects.
+- [ ] Проверить collision/interaction coordinates после перехода с isometric 2D на 3D camera.
+- [ ] Обновить `SpatialGrid`, CAMP validator и world containers так, чтобы они работали с теми же координатами, что и renderer.
+
+### P1 - save/load and persistence
+
+- [ ] Расширить save/load на ECS entities, transforms, mesh/material IDs и generated terrain/world metadata.
+- [ ] Добавить versioned migration для save files перед следующими изменениями формата.
+- [ ] Сохранять runtime content decisions: placed CAMP objects, destructible state, generated terrain seed, material IDs.
+- [ ] Проверять `read()` после каждого бинарного блока save file, чтобы corrupted/short saves не давали partially loaded state.
+
+### P2 - content, assets, and materials
+
+- [x] Добавлен быстрый catalog `materialID -> material definition`.
+- [x] Цвет материала хранится как hex (`grass -> 0x...`), а не как ручные RGB float values.
+- [x] `Renderer3D::bindMaterial()` отправляет material color в `base.frag` через `u_materialColor`.
+- [x] Ground/cube/terrain получают первые material IDs.
+- [ ] Убрать путаницу двух `TextureGenerator`: старый `include/TextureGenerator.hpp`/`src/TextureGenerator.cpp` и новый `include/content/TextureGeneratorCore.hpp`.
+- [ ] Добавить material categories: terrain, metal, concrete, organic, debug.
+- [ ] Добавить material properties: roughness, metallic, emissive/fallback values.
+- [ ] Добавить texture slots: albedo, normal, roughness, metallic; связать их с generated textures.
+- [ ] Добавить validation material catalog: duplicate IDs, unknown ID fallback logging.
+- [ ] Добавить editor/debug UI для выбора и просмотра material ID/name/hex.
+- [ ] Когда появятся texture bindings, вынести material binding из `Renderer3D` в dedicated material system.
+
+### P2 - architecture and code health
+
+- [ ] Уменьшить `GameApplication.cpp`: сейчас это главный orchestration bottleneck и самый крупный файл runtime.
+- [ ] Разделить старый 2D renderer и новый 3D renderer по clear ownership: кто рисует world, кто UI, кто debug.
+- [ ] Убрать закомментированные рабочие блоки из runtime path: заменить на feature flags/debug config.
+- [ ] Продолжить дробление крупных модулей: `AdvancedMechanicsSurvival`, `AdvancedMechanicsServices`, `VehicleManager`, `DevMenu`.
+- [ ] Очистить mojibake/битую кодировку русских комментариев, чтобы документация и комментарии были читаемыми в IDE.
+
+### P2 - build, dependencies, and verification
+
+- [x] GLM подключен как `SYSTEM` include, чтобы не шуметь внешними MSVC warning.
+- [ ] Заменить локально сгенерированные SFML import libs на нормальный воспроизводимый dependency setup.
+- [ ] Добавить documented build command для Visual Studio Build Tools/CMake на Windows.
+- [ ] Добавить smoke test или run-mode без ручного окна: build + shader file check + asset path check.
+- [ ] Проверить MapEditor после 3D/runtime изменений, чтобы editor branch не отстал от game assets.
+
+### What to test after next changes
+
+- [ ] Игра не закрывается сама через ~1000 кадров.
+- [ ] Камера двигается/следит за игроком в 3D.
+- [ ] Mouse aim/toolgun/CAMP placement используют правильную world position.
+- [ ] HUD/PipPad/Terminal снова видны поверх 3D.
+- [ ] Ground, terrain и cube имеют разные material colors.
+- [ ] Save/load сохраняет не только старый 2D state, но и новые 3D/ECS данные.

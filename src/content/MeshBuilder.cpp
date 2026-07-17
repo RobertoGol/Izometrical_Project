@@ -1,4 +1,5 @@
 #include "content/MeshBuilder.hpp"
+#include "content/MaterialCatalog.hpp"
 #include <glad/glad.h>
 #include <vector>
 #include <cmath>
@@ -111,7 +112,7 @@ namespace bunker {
             }
         }
 
-        return loadToGPU(vertices, indices);
+        return loadToGPU(vertices, indices, Material_Grass);
     } // <-- Теперь эта скобка на месте!
 
     MeshComponent MeshBuilder::createTestCube()
@@ -136,7 +137,7 @@ namespace bunker {
             3, 2, 6, 6, 7, 3
         };
 
-        return loadToGPU(vertices, indices);
+        return loadToGPU(vertices, indices, Material_RustMetal);
     } // <-- Эта скобка закрывает createTestCube
 
 } // namespace bunker

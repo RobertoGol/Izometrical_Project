@@ -16,7 +16,7 @@ find_package(OpenGL REQUIRED)
 add_library(glm INTERFACE)
 set(LOCAL_GLM_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.deps/glm-0.9.9.8")
 if(EXISTS "${LOCAL_GLM_SOURCE_DIR}/glm/glm.hpp")
-    target_include_directories(glm INTERFACE "${LOCAL_GLM_SOURCE_DIR}")
+    target_include_directories(glm SYSTEM INTERFACE "${LOCAL_GLM_SOURCE_DIR}")
 else()
     include(FetchContent)
     FetchContent_Declare(
@@ -28,7 +28,7 @@ else()
     if(NOT glm_POPULATED)
         FetchContent_Populate(glm)
     endif()
-    target_include_directories(glm INTERFACE "${glm_SOURCE_DIR}")
+    target_include_directories(glm SYSTEM INTERFACE "${glm_SOURCE_DIR}")
 endif()
 # --------------------
 

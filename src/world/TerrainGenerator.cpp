@@ -1,4 +1,5 @@
 #include "world/TerrainGenerator.hpp"
+#include "content/MaterialCatalog.hpp"
 #include <cmath>
 
 namespace bunker {
@@ -43,6 +44,6 @@ namespace bunker {
             }
         }
 
-        return MeshBuilder::loadToGPU(vertices, indices);
+        return MeshBuilder::loadToGPU(vertices, indices, Material_Dirt);
     }
 }

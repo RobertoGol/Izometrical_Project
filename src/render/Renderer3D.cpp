@@ -1,4 +1,5 @@
 #include "render/Renderer3D.hpp"
+#include "content/MaterialCatalog.hpp"
 #include "core/Constants.hpp"
 #include "engine/Log.hpp"
 #include <glad/glad.h>
@@ -139,7 +140,7 @@ namespace bunker {
                 glUniformMatrix4fv(m_locModel, 1, GL_FALSE, glm::value_ptr(model));
             }
 
-            // РАЗКОММЕНТИРУЙ ЭТИ СТРОКИ:
+            bindMaterial(mesh.materialID);
             glBindVertexArray(mesh.vaoID);
             glDrawElements(GL_TRIANGLES, mesh.indexCount, GL_UNSIGNED_INT, 0);
         }
@@ -204,13 +205,17 @@ namespace bunker {
         m_locView = glGetUniformLocation(m_shaderProgram, "u_view");
         m_locProjection = glGetUniformLocation(m_shaderProgram, "u_projection");
         m_locModel = glGetUniformLocation(m_shaderProgram, "u_model");
+        m_locMaterialColor = glGetUniformLocation(m_shaderProgram, "u_materialColor");
     }
 
     void Renderer3D::bindMaterial(std::uint32_t materialID) {
-        (void)materialID;
+        if (m_shaderProgram == 0 || m_locMaterialColor < 0) {
+            return;
+        }
 
-        // Тут будет glBindTexture для текстур (Diffuse, Normal, etc.)
-        // Material binding
+        const auto& material = getMaterial(materialID);
+        const glm::vec3 color = hexToLinearRgb(material.hex);
+        glUniform3fv(m_locMaterialColor, 1, glm::value_ptr(color));
     }
 
 } // namespace bunker

@@ -4,6 +4,8 @@ in vec3 v_worldPosition;
 in vec3 v_normal;
 in vec2 v_texCoord;
 
+uniform vec3 u_materialColor;
+
 out vec4 fragColor;
 
 void main()
@@ -14,7 +16,7 @@ void main()
     float diffuse = max(dot(normal, lightDirection), 0.0);
     float grime = 0.82 + 0.18 * sin(v_texCoord.x * 37.0 + v_texCoord.y * 19.0);
 
-    vec3 albedo = vec3(0.43, 0.40, 0.31) * grime;
+    vec3 albedo = u_materialColor * grime;
     vec3 ambient = vec3(0.055, 0.065, 0.075);
     vec3 lit = albedo * (ambient + diffuse * vec3(0.76, 0.68, 0.52));
 

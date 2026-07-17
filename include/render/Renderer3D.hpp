@@ -25,6 +25,7 @@ namespace bunker {
         int m_locView = -1;
         int m_locProjection = -1;
         int m_locModel = -1;
+        int m_locMaterialColor = -1;
         bool m_initialized = false;
         bool m_wireframeEnabled = false;
 
