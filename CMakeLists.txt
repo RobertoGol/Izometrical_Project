@@ -46,6 +46,10 @@ add_library(game_core STATIC
     src/engine/GameApplication.cpp
     src/engine/InputManager.cpp
     src/engine/ProceduralSoundEffects.cpp
+    src/engine/ProceduralSoundEffectsEnvironment.cpp
+    src/engine/ProceduralSoundEffectsMechanical.cpp
+    src/engine/ProceduralSoundEffectsPilot.cpp
+    src/engine/ProceduralSoundEffectsWeapons.cpp
     src/engine/TimeShift.cpp
     src/entities/Camera.cpp
     src/entities/Collisions.cpp

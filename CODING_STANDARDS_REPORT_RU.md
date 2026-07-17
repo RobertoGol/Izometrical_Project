@@ -360,3 +360,35 @@ cmake --build build-codex-mapeditor
 ```
 
 Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
+## Дополнительный проход: дробление ProceduralSoundEffects.cpp
+
+Разделен еще один крупный `.cpp` файл: `src/engine/ProceduralSoundEffects.cpp`.
+
+Оставлено в исходном файле:
+
+```text
+SoundEffectsBank::s_Buffers
+SoundEffectsBank::s_SoundPlayer
+SoundEffectsBank::initializeFast
+SoundEffectsBank::play
+```
+
+Добавлены файлы с генераторами PCM по категориям:
+
+```text
+src/engine/ProceduralSoundEffectsPilot.cpp
+src/engine/ProceduralSoundEffectsMechanical.cpp
+src/engine/ProceduralSoundEffectsWeapons.cpp
+src/engine/ProceduralSoundEffectsEnvironment.cpp
+```
+
+Разделение выполнено как перенос реализаций `make...()` без изменения алгоритмов генерации звука.
+
+Проверка:
+
+```text
+cmake --build build-codex-ninja
+cmake --build build-codex-mapeditor
+```
+
+Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
