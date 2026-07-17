@@ -248,9 +248,9 @@ What needs checking:
 
 - [x] GLM подключен как `SYSTEM` include, чтобы не шуметь внешними MSVC warning.
 - [ ] Заменить локально сгенерированные SFML import libs на нормальный воспроизводимый dependency setup.
-- [ ] Добавить documented build command для Visual Studio Build Tools/CMake на Windows.
-- [ ] Добавить smoke test или run-mode без ручного окна: build + shader file check + asset path check.
-- [ ] Проверить MapEditor после 3D/runtime изменений, чтобы editor branch не отстал от game assets.
+- [x] Добавить documented build command для Visual Studio Build Tools/CMake на Windows.
+- [x] Добавить smoke test или run-mode без ручного окна: build + shader file check + asset path check.
+- [x] Проверить MapEditor после 3D/runtime изменений, чтобы editor branch не отстал от game assets.
 
 ### What to test after next changes
 

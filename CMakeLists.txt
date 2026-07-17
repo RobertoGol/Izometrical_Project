@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+include(CTest)
 
 set(SFML_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/source/SFML-3.1.0" CACHE PATH "Bundled SFML root")
 set(SFML_DIR "${SFML_ROOT}/lib/cmake/SFML" CACHE PATH "SFML CMake package directory")
@@ -194,5 +195,14 @@ if(EXISTS "${SFML_ROOT}/bin")
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${SFML_ROOT}/bin"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+    )
+endif()
+
+if(BUILD_TESTING)
+    add_test(
+        NAME smoke_assets
+        COMMAND ${CMAKE_COMMAND}
+            -DAPP_PATH=$<TARGET_FILE:${PROJECT_NAME}>
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/SmokeTest.cmake"
     )
 endif()
