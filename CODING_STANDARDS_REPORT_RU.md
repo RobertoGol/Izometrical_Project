@@ -392,3 +392,33 @@ cmake --build build-codex-mapeditor
 ```
 
 Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
+## Дополнительный проход: дробление TitanAI.cpp
+
+Разделен `src/ai/TitanAI.cpp` без изменения поведения. Исходный файл оставлен для конструктора, посадки/высадки и верхнего `TitanAI::update`.
+
+Добавлены файлы:
+
+```text
+src/ai/TitanAICockpit.cpp
+src/ai/TitanAISystems.cpp
+src/ai/TitanAIMovement.cpp
+```
+
+Перенос по зонам ответственности:
+
+```text
+TitanAICockpit.cpp: режимы огня, fireFromCockpit, autoFire, стабилизация ввода
+TitanAISystems.cpp: loadout, boiler, pilot stress, vortex shield, core overdrive
+TitanAIMovement.cpp: autonomous movement, piloted movement, combat anchor
+```
+
+`CMakeLists.txt` обновлен для явного списка исходников `game_core`.
+
+Проверка:
+
+```text
+cmake --build build-codex-ninja
+cmake --build build-codex-mapeditor
+```
+
+Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.

@@ -40,6 +40,9 @@ add_library(game_core STATIC
     src/ai/HostileAISystem.cpp
     src/ai/PerceptionSystem.cpp
     src/ai/TitanAI.cpp
+    src/ai/TitanAICockpit.cpp
+    src/ai/TitanAIMovement.cpp
+    src/ai/TitanAISystems.cpp
     src/content/Workstations.cpp
     src/DevMenu.cpp
     src/engine/AudioController.cpp
