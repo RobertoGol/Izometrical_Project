@@ -1,0 +1,31 @@
+{
+    "configurations": [
+        {
+            "name": "Windows",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/include/ai",
+                "${workspaceFolder}/include/content",
+                "${workspaceFolder}/include/core",
+                "${workspaceFolder}/include/engine",
+                "${workspaceFolder}/include/entities",
+                "${workspaceFolder}/include/gameplay",
+                "${workspaceFolder}/include/persistence",
+                "${workspaceFolder}/include/render",
+                "${workspaceFolder}/include/ui",
+                "${workspaceFolder}/include/vehicles",
+                "${workspaceFolder}/include/world",
+                "H:\\Project\\Izometrical_Project\\source\\SFML-3.1.0\\include",
+                "H:\\Project\\Izometrical_Project\\source\\ImGui" 
+            ],
+            "defines": [],
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-x64",
+            "compilerPath": "H:\\Project\\Izometrical_Project\\source\\mingw64\\bin\\g++.exe"
+        }   
+    ],
+    "version": 4
+}
