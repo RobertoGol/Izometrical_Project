@@ -422,3 +422,27 @@ cmake --build build-codex-mapeditor
 ```
 
 Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
+## Дополнительный проход: дробление Types.hpp
+
+Самый маленький файл из оставшегося списка крупных кандидатов, `include/core/Types.hpp`, разделен на небольшие тематические заголовки. Старый файл оставлен как compatibility umbrella, поэтому существующие `#include "Types.hpp"` и `#include "core/Types.hpp"` продолжают работать.
+
+Добавлены файлы:
+
+```text
+include/core/types/Enums.hpp
+include/core/types/Vectors.hpp
+include/core/types/GameplayTypes.hpp
+include/core/types/PersistenceTypes.hpp
+include/core/types/RenderStoryTypes.hpp
+```
+
+После разделения `include/core/Types.hpp` содержит только подключения новых заголовков. Самый большой новый заголовок: `GameplayTypes.hpp`, примерно 9.5 KB вместо прежних примерно 18 KB в одном файле.
+
+Проверка:
+
+```text
+cmake --build build-codex-ninja
+cmake --build build-codex-mapeditor
+```
+
+Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
