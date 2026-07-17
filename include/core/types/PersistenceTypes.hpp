@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/Constants.hpp"
+#include "core/ECS.hpp"
 #include "core/types/Enums.hpp"
 #include "core/types/GameplayTypes.hpp"
 #include "core/types/Vectors.hpp"
@@ -8,6 +9,8 @@
 
 namespace bunker
 {
+    inline constexpr unsigned int SAVE_FORMAT_VERSION = 18;
+
     // ══════════════════════════════════════════════════════════════════════
     // Данные сохранения
     // ══════════════════════════════════════════════════════════════════════
@@ -15,7 +18,7 @@ namespace bunker
     struct SaveFileHeader
     {
         char magic[4] = {'B', 'S', 'A', 'V'};
-        unsigned int version = 17; // BSAV v17 (Конгресс ИИ — без CRC32)
+        unsigned int version = SAVE_FORMAT_VERSION; // BSAV v18
         unsigned int slotIndex = 0;
     };
 
@@ -41,5 +44,22 @@ namespace bunker
         unsigned int activeVerminNests = 0;
     };
 
+    struct RuntimeWorldSaveData
+    {
+        int terrainSeed = 0;
+        float terrainSize = 100.0f;
+        float terrainHeightScale = 3.0f;
+        float terrainFrequency = 0.15f;
+        std::uint32_t ecsEntityCount = 0;
+        std::uint32_t campObjectCount = 0;
+        std::uint32_t breakableStateCount = 0;
+    };
+
+    struct RenderEntitySaveData
+    {
+        EntityID entity = MAX_ENTITIES;
+        TransformComponent transform;
+        std::uint32_t materialID = 0;
+    };
 
 } // namespace bunker

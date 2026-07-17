@@ -217,10 +217,10 @@ What needs checking:
 
 ### P1 - save/load and persistence
 
-- [ ] Расширить save/load на ECS entities, transforms, mesh/material IDs и generated terrain/world metadata.
-- [ ] Добавить versioned migration для save files перед следующими изменениями формата.
-- [ ] Сохранять runtime content decisions: placed CAMP objects, destructible state, generated terrain seed, material IDs.
-- [ ] Проверять `read()` после каждого бинарного блока save file, чтобы corrupted/short saves не давали partially loaded state.
+- [x] Расширить save/load на ECS render entities, transforms, mesh material IDs и generated terrain metadata tail.
+- [x] Добавить versioned migration для save files перед следующими изменениями формата.
+- [x] Проверять `read()` после каждого бинарного блока save file, чтобы corrupted/short saves не давали partially loaded state.
+- [ ] Сохранять runtime content decisions: placed CAMP objects and destructible state.
 
 ### P2 - content, assets, and materials
 
