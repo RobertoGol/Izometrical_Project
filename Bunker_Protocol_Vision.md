@@ -150,3 +150,30 @@
 
 8. `src/render/Renderer3D.cpp`: wireframe включается всегда через `glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)`.
    Это полезно для отладки, но конфликтует с целью PBR/atmospheric rendering. Нужно вынести в debug flag.
+
+## Update v.146o - not built, needs test
+
+Status: code written, not built locally.
+
+Changed files:
+
+- `src/render/Renderer3D.cpp`
+- `assets/shaders/base.vert`
+- `assets/shaders/base.frag`
+
+What was added:
+
+- `Renderer3D::loadShaders()` now loads external shader files from `assets/shaders/base.vert` and `assets/shaders/base.frag`.
+- The renderer compiles and links an OpenGL shader program.
+- The renderer caches `u_model`, `u_view`, and `u_projection` uniform locations.
+- Added a basic vertex shader using mesh position, normal, UV, model, view, and projection matrices.
+- Added a basic fragment shader with simple directional lighting, dirty/grimy color variation, and light distance fog.
+
+What needs checking:
+
+- The game must be started from a working directory where `assets/shaders/base.vert` and `assets/shaders/base.frag` are reachable.
+- If the screen is black, check console output for `[Renderer3D] Shader files are missing` or shader compile errors.
+- Check that the cube/ground still render after shader loading.
+- Check that camera movement changes the 3D view.
+- Check that objects use their ECS transform positions and scale.
+- Full build/test is still blocked locally until the SFML package/build environment is fixed.

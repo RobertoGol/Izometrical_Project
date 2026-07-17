@@ -1,12 +1,73 @@
 #include "render/Renderer3D.hpp"
 #include "core/Constants.hpp"
+#include "engine/Log.hpp"
 #include <glad/glad.h>
 #include <algorithm>
+#include <fstream>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace bunker {
+
+    namespace {
+        std::string readTextFile(const char* path) {
+            std::ifstream file(path);
+            if (!file) {
+                return {};
+            }
+
+            std::ostringstream buffer;
+            buffer << file.rdbuf();
+            return buffer.str();
+        }
+
+        bool checkShaderStatus(GLuint shader, const char* label) {
+            GLint status = GL_FALSE;
+            glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+            if (status == GL_TRUE) {
+                return true;
+            }
+
+            GLint logLength = 0;
+            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+            std::vector<char> log(static_cast<size_t>(std::max(logLength, 1)));
+            glGetShaderInfoLog(shader, static_cast<GLsizei>(log.size()), nullptr, log.data());
+            logError() << "[Renderer3D] " << label << " failed: " << log.data() << std::endl;
+            return false;
+        }
+
+        bool checkProgramStatus(GLuint program, const char* label) {
+            GLint status = GL_FALSE;
+            glGetProgramiv(program, GL_LINK_STATUS, &status);
+            if (status == GL_TRUE) {
+                return true;
+            }
+
+            GLint logLength = 0;
+            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+            std::vector<char> log(static_cast<size_t>(std::max(logLength, 1)));
+            glGetProgramInfoLog(program, static_cast<GLsizei>(log.size()), nullptr, log.data());
+            logError() << "[Renderer3D] " << label << " failed: " << log.data() << std::endl;
+            return false;
+        }
+
+        GLuint compileShader(GLenum type, const char* source, const char* label) {
+            GLuint shader = glCreateShader(type);
+            glShaderSource(shader, 1, &source, nullptr);
+            glCompileShader(shader);
+
+            if (!checkShaderStatus(shader, label)) {
+                glDeleteShader(shader);
+                return 0;
+            }
+
+            return shader;
+        }
+    }
 
     void Renderer3D::initialize() {
         static bool gladLoaded = false;
@@ -107,8 +168,42 @@ namespace bunker {
     }
 
     void Renderer3D::loadShaders() {
-        // Тут будет загрузка шейдеров: glCreateShader, glCompileShader и т.д.
-        // Shader loading
+        const std::string vertexSource = readTextFile("assets/shaders/base.vert");
+        const std::string fragmentSource = readTextFile("assets/shaders/base.frag");
+        if (vertexSource.empty() || fragmentSource.empty()) {
+            logError() << "[Renderer3D] Shader files are missing: assets/shaders/base.vert/base.frag" << std::endl;
+            return;
+        }
+
+        GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexSource.c_str(), "Vertex shader");
+        GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentSource.c_str(), "Fragment shader");
+        if (vertexShader == 0 || fragmentShader == 0) {
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
+            return;
+        }
+
+        GLuint program = glCreateProgram();
+        glAttachShader(program, vertexShader);
+        glAttachShader(program, fragmentShader);
+        glLinkProgram(program);
+
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+
+        if (!checkProgramStatus(program, "Shader program")) {
+            glDeleteProgram(program);
+            return;
+        }
+
+        if (m_shaderProgram != 0) {
+            glDeleteProgram(m_shaderProgram);
+        }
+
+        m_shaderProgram = program;
+        m_locView = glGetUniformLocation(m_shaderProgram, "u_view");
+        m_locProjection = glGetUniformLocation(m_shaderProgram, "u_projection");
+        m_locModel = glGetUniformLocation(m_shaderProgram, "u_model");
     }
 
     void Renderer3D::bindMaterial(std::uint32_t materialID) {
