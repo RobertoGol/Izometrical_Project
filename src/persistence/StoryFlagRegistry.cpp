@@ -1,5 +1,5 @@
 #include "persistence/StoryFlagRegistry.hpp"
-#include <iostream>
+#include "engine/Log.hpp"
 
 namespace bunker
 {
@@ -14,7 +14,7 @@ namespace bunker
         m_Flags[flag] = value;
         if (value)
         {
-            std::cout << "[STORY REGISTRY] Сюжетный флаг активирован: квестовый этап пройден!" << std::endl;
+            bunker::logInfo() << "[STORY REGISTRY] Сюжетный флаг активирован: квестовый этап пройден!" << std::endl;
         }
     }
 

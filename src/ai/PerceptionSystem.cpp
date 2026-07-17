@@ -1,6 +1,6 @@
 #include "ai/PerceptionSystem.hpp"
 #include "core/Constants.hpp"
-#include <iostream>
+#include "engine/Log.hpp"
 
 namespace bunker
 {

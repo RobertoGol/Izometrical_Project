@@ -1,11 +1,11 @@
 #include "world/StoryEventManager.hpp"
 #include "core/Constants.hpp"
-#include <iostream>
+#include "engine/Log.hpp"
 
 namespace bunker
 {
 
-    void StoryEventManager::evaluateZoneTriggers(GameState &gs, StoryFlagRegistry &flags)
+    void StoryEventManager::evaluateZoneTriggers(GameState& gs, StoryFlagRegistry& flags)
     {
         // Триггер сектора Garage (Ангар техники Убежища 17)
         if (!flags.getFlag(StoryQuestFlag::GarageRepairUnlocked))
@@ -16,7 +16,9 @@ namespace bunker
             {
                 flags.setFlag(StoryQuestFlag::GarageRepairUnlocked, true);
                 gs.score += 500;
-                std::cout << "[STORY EVENT] !! АНГАР ТЕХНИКИ ОБНАРУЖЕН !! Разблокирован крафт 'BT REPAIR KIT' в терминале!" << std::endl;
+                bunker::logInfo()
+                    << "[STORY EVENT] !! АНГАР ТЕХНИКИ ОБНАРУЖЕН !! Разблокирован крафт 'BT REPAIR KIT' в терминале!"
+                    << std::endl;
             }
         }
 
@@ -26,7 +28,7 @@ namespace bunker
             if (gs.playerPos.x < 4.0f && gs.playerPos.y < 4.0f)
             {
                 flags.setFlag(StoryQuestFlag::EnteredCryoLocker, true);
-                std::cout << "[STORY EVENT] Пилот вошёл в отсек Крио-консервации." << std::endl;
+                bunker::logInfo() << "[STORY EVENT] Пилот вошёл в отсек Крио-консервации." << std::endl;
             }
         }
     }

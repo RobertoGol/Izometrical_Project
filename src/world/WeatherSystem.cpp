@@ -1,8 +1,9 @@
 #include "world/WeatherSystem.hpp"
+#include "engine/Log.hpp"
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
-#include <iostream>
 
 namespace bunker
 {
@@ -43,7 +44,7 @@ namespace bunker
         }
     }
 
-    void WeatherSystem::update(GameState &gs, float dt)
+    void WeatherSystem::update(GameState& gs, float dt)
     {
         if (dt <= 0.0f)
             return;
@@ -85,11 +86,13 @@ namespace bunker
             return "ASH STORM";
         case WeatherType::EtherStorm:
             return "ETHER STORM";
+        default:
+            break;
         }
         return "UNKNOWN";
     }
 
-    void WeatherSystem::renderWorldOverlay(sf::RenderWindow &window) const
+    void WeatherSystem::renderWorldOverlay(sf::RenderWindow& window) const
     {
         if (m_State.intensity <= 0.01f || m_State.current == WeatherType::Clear)
             return;
@@ -114,39 +117,39 @@ namespace bunker
         if (m_State.flashAlpha > 0.01f)
         {
             sf::RectangleShape flash({W, H});
-            flash.setFillColor(sf::Color(215, 190, 255, static_cast<sf::Uint8>(std::clamp(m_State.flashAlpha, 0.0f, 160.0f))));
+            flash.setFillColor(
+                sf::Color(215, 190, 255, static_cast<std::uint8_t>(std::clamp(m_State.flashAlpha, 0.0f, 160.0f))));
             window.draw(flash);
         }
 
         window.setView(oldView);
     }
 
-    void WeatherSystem::renderHUD(sf::RenderWindow &window, const sf::Font *font) const
+    void WeatherSystem::renderHUD(sf::RenderWindow& window, const sf::Font* font) const
     {
         if (!font)
             return;
 
-        sf::Text text;
-        text.setFont(*font);
-        text.setCharacterSize(13);
+        sf::Text text(*font, "", 13);
         text.setFillColor(hudColor());
-        text.setPosition(12.0f, 96.0f);
+        text.setPosition({12.0f, 96.0f});
 
-        std::string line = "WEATHER: " + label() +
-                           "  INT " + std::to_string(static_cast<int>(m_State.intensity * 100.0f)) + "%";
-
-        if (m_State.current == WeatherType::EtherFog)
+        std::string line =
+            "WEATHER: " + label() + "  INT " + std::to_string(static_cast<int>(m_State.intensity * 100.0f)) + "%";
+        switch (m_State.current)
         {
+        case WeatherType::EtherFog:
             line += "  VIS -" + std::to_string(static_cast<int>((1.0f - m_State.visibilityMultiplier) * 100.0f)) + "%";
-        }
-        else if (m_State.current == WeatherType::AcidRain)
-        {
+            break;
+        case WeatherType::AcidRain:
             line += "  ACID " + oneDecimal(m_State.acidDamagePerSecond) + "/s";
-        }
-        else if (m_State.current == WeatherType::EtherStorm)
-        {
+            break;
+        case WeatherType::EtherStorm:
             line += "  VIS -" + std::to_string(static_cast<int>((1.0f - m_State.visibilityMultiplier) * 100.0f)) + "%";
             line += "  ACID " + oneDecimal(m_State.acidDamagePerSecond) + "/s";
+            break;
+        default:
+            break;
         }
 
         text.setString(line);
@@ -184,8 +187,8 @@ namespace bunker
         }
 
         forceWeather(next, target);
-        std::cout << "[WEATHER] incoming: " << weatherName(next)
-                  << " intensity=" << static_cast<int>(target * 100.0f) << "%" << std::endl;
+        bunker::logInfo() << "[WEATHER] incoming: " << weatherName(next)
+                          << " intensity=" << static_cast<int>(target * 100.0f) << "%" << std::endl;
     }
 
     void WeatherSystem::updateIntensity(float dt)
@@ -267,12 +270,14 @@ namespace bunker
             m_State.acidDamagePerSecond = I * 1.15f;
             m_State.floorSlickness = I * 0.35f;
             break;
+        default:
+            break;
         }
         m_State.type = m_State.current;
         m_State.banner = label();
     }
 
-    void WeatherSystem::applyWorldEffects(GameState &gs, float dt)
+    void WeatherSystem::applyWorldEffects(GameState& gs, float dt)
     {
         gs.worldVisibilityModifier = m_State.visibilityMultiplier;
 
@@ -292,7 +297,7 @@ namespace bunker
         }
     }
 
-    void WeatherSystem::applyDamageTick(GameState &gs, float elapsed)
+    void WeatherSystem::applyDamageTick(GameState& gs, float elapsed)
     {
         if (m_State.acidDamagePerSecond <= 0.001f)
             return;
@@ -326,10 +331,10 @@ namespace bunker
         }
     }
 
-    void WeatherSystem::drawFogOverlay(sf::RenderWindow &window, float W, float H, float I) const
+    void WeatherSystem::drawFogOverlay(sf::RenderWindow& window, float W, float H, float I) const
     {
         sf::RectangleShape fog({W, H});
-        fog.setFillColor(sf::Color(115, 70, 180, static_cast<sf::Uint8>(30 + 95 * I)));
+        fog.setFillColor(sf::Color(115, 70, 180, static_cast<std::uint8_t>(30 + 95 * I)));
         window.draw(fog);
 
         for (int i = 0; i < 9; ++i)
@@ -338,16 +343,16 @@ namespace bunker
             const float y = phase - 70.0f;
 
             sf::RectangleShape band({W, 16.0f + 20.0f * I});
-            band.setPosition(0.0f, y);
-            band.setFillColor(sf::Color(180, 125, 255, static_cast<sf::Uint8>(15 + 30 * I)));
+            band.setPosition({0.0f, y});
+            band.setFillColor(sf::Color(180, 125, 255, static_cast<std::uint8_t>(15 + 30 * I)));
             window.draw(band);
         }
     }
 
-    void WeatherSystem::drawAcidRainOverlay(sf::RenderWindow &window, float W, float H, float I) const
+    void WeatherSystem::drawAcidRainOverlay(sf::RenderWindow& window, float W, float H, float I) const
     {
         sf::RectangleShape tint({W, H});
-        tint.setFillColor(sf::Color(70, 115, 30, static_cast<sf::Uint8>(18 + 55 * I)));
+        tint.setFillColor(sf::Color(70, 115, 30, static_cast<std::uint8_t>(18 + 55 * I)));
         window.draw(tint);
 
         const int drops = static_cast<int>(70 + 180 * I);
@@ -361,10 +366,9 @@ namespace bunker
             const float x = static_cast<float>((i * 53 + tX) % Wi) - 45.0f;
             const float y = static_cast<float>((i * 89 + tY) % Hi) - 45.0f;
 
-            sf::Vertex line[] = {
-                sf::Vertex(sf::Vector2f(x, y), sf::Color(150, 255, 75, static_cast<sf::Uint8>(65 + 45 * I))),
-                sf::Vertex(sf::Vector2f(x - 8.0f, y + 24.0f), sf::Color(150, 255, 75, 22))};
-            window.draw(line, 2, sf::Lines);
+            sf::Vertex line[] = {{{x, y}, sf::Color(150, 255, 75, static_cast<std::uint8_t>(65 + 45 * I))},
+                                 {{x - 8.0f, y + 24.0f}, sf::Color(150, 255, 75, 22)}};
+            window.draw(line, 2, sf::PrimitiveType::Lines);
         }
     }
 
@@ -381,6 +385,8 @@ namespace bunker
         case WeatherType::AshStorm:
         case WeatherType::EtherStorm:
             return sf::Color(235, 190, 255);
+        default:
+            break;
         }
         return sf::Color::White;
     }
@@ -399,6 +405,8 @@ namespace bunker
             return "ASH STORM";
         case WeatherType::EtherStorm:
             return "ETHER STORM";
+        default:
+            break;
         }
         return "UNKNOWN";
     }

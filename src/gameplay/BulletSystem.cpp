@@ -1,23 +1,23 @@
 #include "gameplay/BulletSystem.hpp"
 #include "gameplay/AdvancedMechanics.hpp"
 #include "gameplay/DamageSystem.hpp"
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 
 namespace bunker
 {
 
-    void BulletSystem::update(GameState &gs, float dt)
+    void BulletSystem::update(GameState& gs, float dt)
     {
         update(gs, dt, nullptr);
     }
 
-    void BulletSystem::update(GameState &gs, float dt, AdvancedMechanics *adv)
+    void BulletSystem::update(GameState& gs, float dt, AdvancedMechanics* adv)
     {
         for (std::size_t i = 0; i < gs.bullets.size();)
         {
-            Bullet &b = gs.bullets[i];
+            Bullet& b = gs.bullets[i];
             bool explodedThisFrame = false;
 
             int numSubSteps = 1;
@@ -132,7 +132,7 @@ namespace bunker
                     }
                 }
 
-                for (auto &e : gs.enemies)
+                for (auto& e : gs.enemies)
                 {
                     if (!e.isAlive)
                         continue;
@@ -142,34 +142,29 @@ namespace bunker
                     float distSq = edx * edx + edy * edy;
                     float hitRadiusSq = e.radius * e.radius;
 
-                    if (distSq <= hitRadiusSq)
+                    if (distSq > hitRadiusSq)
+                        continue;
+
+                    b.isAlive = false;
+
+                    if (isExplosive(b))
                     {
-                        b.isAlive = false;
-
-                        if (isExplosive(b))
-                        {
-                            if (!explodedThisFrame)
-                                processSplashDamage(gs, b, adv);
-                        }
-                        else
-                        {
-                            float dmg = (b.type == BulletType::Pellet) ? 14.0f : 25.0f;
-                            if (adv)
-                                dmg *= (gs.playerMode == UnitMode::Titan)
-                                           ? adv->skills.tankDamageMultiplier()
-                                           : adv->skills.footDamageMultiplier();
-
-                            if (DamageSystem::applyEnemyDamage(gs, e, dmg, DamageType::Kinetic))
-                            {
-                                if (adv)
-                                {
-                                    adv->skills.grantXp(gs, 60);
-                                    adv->profile.registerKill(adv->playerProfile);
-                                }
-                            }
-                        }
+                        if (!explodedThisFrame)
+                            processSplashDamage(gs, b, adv);
                         break;
                     }
+
+                    float dmg = (b.type == BulletType::Pellet) ? 14.0f : 25.0f;
+                    if (adv)
+                        dmg *= (gs.playerMode == UnitMode::Titan) ? adv->skills.tankDamageMultiplier()
+                                                                  : adv->skills.footDamageMultiplier();
+
+                    if (DamageSystem::applyEnemyDamage(gs, e, dmg, DamageType::Kinetic) && adv)
+                    {
+                        adv->skills.grantXp(gs, 60);
+                        adv->profile.registerKill(adv->playerProfile);
+                    }
+                    break;
                 }
             }
 
@@ -188,12 +183,12 @@ namespace bunker
         }
     }
 
-    void BulletSystem::fireScoutWeapon(GameState &gs, bool isAiming)
+    void BulletSystem::fireScoutWeapon(GameState& gs, bool isAiming)
     {
         fireScoutWeapon(gs, isAiming, nullptr);
     }
 
-    void BulletSystem::fireScoutWeapon(GameState &gs, bool isAiming, AdvancedMechanics *adv)
+    void BulletSystem::fireScoutWeapon(GameState& gs, bool isAiming, AdvancedMechanics* adv)
     {
         if (gs.fireCooldown > 0.0f)
             return;
@@ -226,20 +221,20 @@ namespace bunker
             Bullet b;
             b.start = gs.playerPos;
             b.current = gs.playerPos;
-            b.direction = normalizeDir({normDir.x + randomSpread(advancedSpread),
-                                        normDir.y + randomSpread(advancedSpread), 0.0f});
+            b.direction = normalizeDir(
+                {normDir.x + randomSpread(advancedSpread), normDir.y + randomSpread(advancedSpread), 0.0f});
             b.type = BulletType::Standard;
             gs.bullets.push_back(b);
             gs.fireCooldown = Config::CARBINE_COOLDOWN;
         }
     }
 
-    void BulletSystem::fireTitanWeapon(GameState &gs)
+    void BulletSystem::fireTitanWeapon(GameState& gs)
     {
         fireTitanWeapon(gs, nullptr);
     }
 
-    void BulletSystem::fireTitanWeapon(GameState &gs, AdvancedMechanics *adv)
+    void BulletSystem::fireTitanWeapon(GameState& gs, AdvancedMechanics* adv)
     {
         if (gs.fireCooldown > 0.0f)
             return;
@@ -294,12 +289,12 @@ namespace bunker
         }
     }
 
-    void BulletSystem::fireTitanMissiles(GameState &gs)
+    void BulletSystem::fireTitanMissiles(GameState& gs)
     {
         fireTitanMissiles(gs, nullptr);
     }
 
-    void BulletSystem::fireTitanMissiles(GameState &gs, AdvancedMechanics *adv)
+    void BulletSystem::fireTitanMissiles(GameState& gs, AdvancedMechanics* adv)
     {
         if (gs.fireCooldown > 0.0f || !gs.titan.hasMissileModule)
             return;
@@ -355,14 +350,13 @@ namespace bunker
             }
         }
 
-        gs.titan.missileMode = (gs.titan.missileMode == MissileStrikeMode::Ballistic)
-                                   ? MissileStrikeMode::Artillery
-                                   : MissileStrikeMode::Ballistic;
+        gs.titan.missileMode = (gs.titan.missileMode == MissileStrikeMode::Ballistic) ? MissileStrikeMode::Artillery
+                                                                                      : MissileStrikeMode::Ballistic;
 
         gs.fireCooldown = Config::MISSILE_COOLDOWN;
     }
 
-    void BulletSystem::processSplashDamage(GameState &gs, const Bullet &b, AdvancedMechanics *adv)
+    void BulletSystem::processSplashDamage(GameState& gs, const Bullet& b, AdvancedMechanics* adv)
     {
         float splashRadius = std::max(0.1f, b.splashRadius);
         float splashRadiusSq = splashRadius * splashRadius;
@@ -372,7 +366,7 @@ namespace bunker
             adv->onExplosion(gs, b.current, splashRadius, 85.0f);
         }
 
-        for (auto &e : gs.enemies)
+        for (auto& e : gs.enemies)
         {
             if (!e.isAlive)
                 continue;
@@ -405,12 +399,12 @@ namespace bunker
         }
     }
 
-    void BulletSystem::fireDebugGunChainLightning(GameState &gs)
+    void BulletSystem::fireDebugGunChainLightning(GameState& gs)
     {
         if (gs.enemies.empty())
             return;
         Vector3D curr = gs.playerPos;
-        for (auto &e : gs.enemies)
+        for (auto& e : gs.enemies)
         {
             if (!e.isAlive)
                 continue;
@@ -431,21 +425,21 @@ namespace bunker
         gs.fireCooldown = 0.25f;
     }
 
-    void BulletSystem::render(const GameState &gs, sf::RenderWindow &window, const sf::View &) const
+    void BulletSystem::render(const GameState& gs, sf::RenderWindow& window, const sf::View&) const
     {
-        for (const auto &b : gs.bullets)
+        for (const auto& b : gs.bullets)
         {
             if (!b.isAlive)
                 continue;
             sf::CircleShape dot(3.0f);
             dot.setFillColor(sf::Color(255, 240, 100));
-            dot.setOrigin(3.0f, 3.0f);
+            dot.setOrigin({3.0f, 3.0f});
             dot.setPosition(IsoMath::worldToScreen(b.current.x, b.current.y));
             window.draw(dot);
         }
     }
 
-    bool BulletSystem::isExplosive(const Bullet &b)
+    bool BulletSystem::isExplosive(const Bullet& b)
     {
         return b.type == BulletType::BallisticMissile || b.type == BulletType::ArtilleryMissile;
     }

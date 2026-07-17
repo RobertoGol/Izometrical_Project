@@ -1,5 +1,5 @@
 #include "world/DestructibleEnvironment.hpp"
-#include <iostream>
+#include "engine/Log.hpp"
 #include <cmath>
 
 namespace bunker
@@ -18,11 +18,12 @@ namespace bunker
         m_Props.push_back({{6.0f, 12.0f, 0.0f}, DestructibleKind::TrashDebrisPile, 40.0f, false});
     }
 
-    void DestructibleEnvironmentManager::applyBlastDisruption(GameState &gs, const Vector3D &blastOrigin, float blastRadius, float blastDamage)
+    void DestructibleEnvironmentManager::applyBlastDisruption(GameState& gs, const Vector3D& blastOrigin,
+                                                              float blastRadius, float blastDamage)
     {
         float radSq = blastRadius * blastRadius;
 
-        for (auto &prop : m_Props)
+        for (auto& prop : m_Props)
         {
             if (prop.isDestroyed)
                 continue;
@@ -39,7 +40,7 @@ namespace bunker
                     // Ржавый транспорт физически сдвигается взрывной ударной волной Скорча
                     prop.position.x += (dx * 0.4f);
                     prop.position.y += (dy * 0.4f);
-                    std::cout << "[PHYSICS] Взрыв миномёта сдвигает ржавый остов машины!" << std::endl;
+                    bunker::logInfo() << "[PHYSICS] Взрыв миномёта сдвигает ржавый остов машины!" << std::endl;
                 }
 
                 if (prop.health <= 0.0f)
@@ -47,7 +48,8 @@ namespace bunker
                     prop.isDestroyed = true;
                     if (prop.kind == DestructibleKind::FragileGlassPanel)
                     {
-                        std::cout << "[DESTRUCTION] !! ЗВОН СТЕКЛА !! Стеклянная панель разлетелась на осколки!" << std::endl;
+                        bunker::logInfo()
+                            << "[DESTRUCTION] !! ЗВОН СТЕКЛА !! Стеклянная панель разлетелась на осколки!" << std::endl;
                     }
                     gs.score += 50;
                 }

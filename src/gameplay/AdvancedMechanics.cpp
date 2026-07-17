@@ -1,8 +1,8 @@
 #include "gameplay/AdvancedMechanics.hpp"
-#include <iostream>
-#include <sstream>
+#include "engine/Log.hpp"
 #include <algorithm>
 #include <cmath>
+#include <sstream>
 
 namespace bunker
 {
@@ -13,16 +13,28 @@ namespace bunker
 
     RadioTapeSystem::RadioTapeSystem()
     {
-        m_Tapes.push_back({"CRYO_00", "Cryo Locker 00", "Если ты слышишь это — Убежище уже проснулось не по протоколу.", false, false});
-        m_Tapes.push_back({"GARAGE_BT", "Garage: BT-7274", "Котёл танка холодный. Нужен ручной запуск и синхронизация пилота.", false, false});
-        m_Tapes.push_back({"SURFACE_17", "Surface weather", "На поверхности эфирный туман режет дальность сенсоров почти вдвое.", false, false});
-        m_Tapes.push_back({"LAB_60S", "RobCo Lab 60s Archive (v.97.A.V)", "Диагностика главного фрейма Убежища 17. Синхронизация аудиобанка Vorbis завершена.", false, false});
-        m_Tapes.push_back({"MECH_WAR", "ROY/RAY Swarm War Log", "ROY и RAY — 100% механические самореплицирующиеся дроны. Органика и гнезда исключены.", false, false});
-        m_Tapes.push_back({"PORT_16", "Space Port Sector 16", "Шлюз бастиона 16 запечатан. Давление гидравлики БТ-7274 стабильно: 350 Бар.", false, false});
-        m_Tapes.push_back({"BATTLE_215", "Orbital Battle Log 215", "Температура хладагента танка 180°C. При пороге в 250°C сработает аварийный сброс пара.", false, false});
+        m_Tapes.push_back({"CRYO_00", "Cryo Locker 00", "Если ты слышишь это — Убежище уже проснулось не по протоколу.",
+                           false, false});
+        m_Tapes.push_back({"GARAGE_BT", "Garage: BT-7274",
+                           "Котёл танка холодный. Нужен ручной запуск и синхронизация пилота.", false, false});
+        m_Tapes.push_back({"SURFACE_17", "Surface weather",
+                           "На поверхности эфирный туман режет дальность сенсоров почти вдвое.", false, false});
+        m_Tapes.push_back({"LAB_60S", "RobCo Lab 60s Archive (v.97.A.V)",
+                           "Диагностика главного фрейма Убежища 17. Синхронизация аудиобанка Vorbis завершена.", false,
+                           false});
+        m_Tapes.push_back({"MECH_WAR", "ROY/RAY Swarm War Log",
+                           "ROY и RAY — 100% механические самореплицирующиеся дроны. Органика и гнезда исключены.",
+                           false, false});
+        m_Tapes.push_back({"PORT_16", "Space Port Sector 16",
+                           "Шлюз бастиона 16 запечатан. Давление гидравлики БТ-7274 стабильно: 350 Бар.", false,
+                           false});
+        m_Tapes.push_back({"BATTLE_215", "Orbital Battle Log 215",
+                           "Температура хладагента танка 180°C. При пороге в 250°C сработает аварийный сброс пара.",
+                           false, false});
 
         m_Radio.push_back({4.0f, "V17", "...приём... Башня молчит. Найдите Pip-Pad и синхронизируйтесь.", false});
-        m_Radio.push_back({18.0f, "BT", "Пилот, корпус повреждён. Ангарные ремкомплекты восстановят подсистемы.", false});
+        m_Radio.push_back(
+            {18.0f, "BT", "Пилот, корпус повреждён. Ангарные ремкомплекты восстановят подсистемы.", false});
         m_Radio.push_back({45.0f, "LAN", "Локальная сеть Lanline доступна: чат, заказы, доставки, отряд.", false});
     }
 
@@ -30,7 +42,7 @@ namespace bunker
     {
         m_Time += dt;
         m_LastSubtitle.clear();
-        for (auto &msg : m_Radio)
+        for (auto& msg : m_Radio)
         {
             if (!msg.fired && m_Time >= msg.atTime)
             {
@@ -38,15 +50,17 @@ namespace bunker
                 m_LastSubtitle = "[" + msg.channel + "] " + msg.text;
                 m_Log.push_back(m_LastSubtitle);
                 if (m_Log.size() > 12)
+                {
                     m_Log.pop_front();
+                }
                 break;
             }
         }
     }
 
-    void RadioTapeSystem::discoverTape(const std::string &id)
+    void RadioTapeSystem::discoverTape(const std::string& id)
     {
-        for (auto &tape : m_Tapes)
+        for (auto& tape : m_Tapes)
         {
             if (tape.id == id)
             {
@@ -60,7 +74,7 @@ namespace bunker
 
     std::string RadioTapeSystem::playNextUnplayed()
     {
-        for (auto &tape : m_Tapes)
+        for (auto& tape : m_Tapes)
         {
             if (tape.found && !tape.played)
             {
@@ -77,7 +91,7 @@ namespace bunker
     // 3) RATIONS / HEAL / RELOAD
     // ═══════════════════════════════════════════════════════════════════════════════
 
-    void SurvivalSystem::update(GameState &gs, PlayerInventory &inv, float dt)
+    void SurvivalSystem::update(GameState& gs, PlayerInventory& inv, float dt)
     {
         (void)inv;
         updateStress(gs, dt);
@@ -86,17 +100,19 @@ namespace bunker
         updateSecondWindAndSoulLine(gs);
     }
 
-    bool SurvivalSystem::useStim(GameState &gs, PlayerInventory &inv)
+    bool SurvivalSystem::useStim(GameState& gs, PlayerInventory& inv)
     {
         if (!inv.hasItem(ITEM_STIM) || gs.playerHealth >= gs.playerMaxHealth)
+        {
             return false;
+        }
         inv.removeItem(ITEM_STIM, 1);
         gs.playerHealth = advClamp(gs.playerHealth + 45.0f, 0.0f, gs.playerMaxHealth);
         m_Stress = advClamp(m_Stress - 10.0f, 0.0f, 100.0f);
         return true;
     }
 
-    bool SurvivalSystem::eatRation(GameState &gs, PlayerInventory &inv, RationKind kind)
+    bool SurvivalSystem::eatRation(GameState& gs, PlayerInventory& inv, RationKind kind)
     {
         unsigned int id = ITEM_RATION_PROTEIN;
         float amount = 1.0f;
@@ -123,9 +139,13 @@ namespace bunker
             amount = 25.0f;
             duration = 40.0f;
             break;
+        default:
+            break;
         }
         if (!inv.hasItem(id))
+        {
             return false;
+        }
         inv.removeItem(id, 1);
         m_Buffs.push_back({kind, duration, amount});
         if (kind == RationKind::Protein)
@@ -136,14 +156,20 @@ namespace bunker
         return true;
     }
 
-    void SurvivalSystem::startReload(PlayerInventory &inv)
+    void SurvivalSystem::startReload(PlayerInventory& inv)
     {
         if (m_Weapon.isReloading || m_Weapon.magazine >= m_Weapon.magazineMax)
+        {
             return;
+        }
         if (m_Weapon.reserveAmmo <= 0 && !inv.hasItem(ITEM_AMMO_556))
+        {
             return;
+        }
         if (m_Weapon.reserveAmmo <= 0 && inv.removeItem(ITEM_AMMO_556, 1))
+        {
             m_Weapon.reserveAmmo += 30;
+        }
         m_Weapon.isReloading = true;
         m_Weapon.reloadTimer = reloadDuration();
     }
@@ -151,7 +177,9 @@ namespace bunker
     bool SurvivalSystem::consumeRound()
     {
         if (m_Weapon.isReloading || m_Weapon.magazine <= 0)
+        {
             return false;
+        }
         --m_Weapon.magazine;
         return true;
     }
@@ -159,36 +187,50 @@ namespace bunker
     float SurvivalSystem::speedMultiplier() const
     {
         float result = 1.0f;
-        for (const auto &b : m_Buffs)
+        for (const auto& b : m_Buffs)
+        {
             if (b.kind == RationKind::Stamina)
+            {
                 result += b.amount;
+            }
+        }
         if (m_Stress > 70.0f)
+        {
             result -= 0.15f;
+        }
         return advClamp(result, 0.55f, 1.75f);
     }
 
     float SurvivalSystem::aimPenalty() const
     {
         float penalty = (m_Stress > 35.0f) ? (m_Stress - 35.0f) / 650.0f : 0.0f;
-        for (const auto &b : m_Buffs)
+        for (const auto& b : m_Buffs)
+        {
             if (b.kind == RationKind::Focus)
+            {
                 penalty -= b.amount;
+            }
+        }
         return advClamp(penalty, 0.0f, 0.35f);
     }
 
     float SurvivalSystem::reloadDuration() const
     {
         float d = 1.45f;
-        for (const auto &b : m_Buffs)
+        for (const auto& b : m_Buffs)
+        {
             if (b.kind == RationKind::Focus)
+            {
                 d *= 0.82f;
+            }
+        }
         return d;
     }
 
-    void SurvivalSystem::updateStress(GameState &gs, float dt)
+    void SurvivalSystem::updateStress(GameState& gs, float dt)
     {
         bool nearEnemy = false;
-        for (const auto &e : gs.enemies)
+        for (const auto& e : gs.enemies)
         {
             if (e.isAlive && advDistSq(e.position, gs.playerPos) < 5.5f * 5.5f)
             {
@@ -197,14 +239,18 @@ namespace bunker
             }
         }
         if (nearEnemy || gs.playerHealth < gs.playerMaxHealth * 0.35f)
+        {
             addStress((nearEnemy ? 4.0f : 2.0f) * dt);
+        }
         else
+        {
             calm(2.5f * dt);
+        }
     }
 
-    void SurvivalSystem::updateBuffs(GameState &gs, float dt)
+    void SurvivalSystem::updateBuffs(GameState& gs, float dt)
     {
-        for (auto &b : m_Buffs)
+        for (auto& b : m_Buffs)
         {
             b.timeLeft -= dt;
             if (b.kind == RationKind::AntiErosion)
@@ -212,16 +258,18 @@ namespace bunker
                 gs.playerErosionLevel = advClamp(gs.playerErosionLevel - b.amount * 0.03f * dt, 0.0f, 100.0f);
             }
         }
-        m_Buffs.erase(std::remove_if(m_Buffs.begin(), m_Buffs.end(), [](const ActiveBuff &b)
-                                     { return b.timeLeft <= 0.0f; }),
-                      m_Buffs.end());
+        m_Buffs.erase(
+            std::remove_if(m_Buffs.begin(), m_Buffs.end(), [](const ActiveBuff& b) { return b.timeLeft <= 0.0f; }),
+            m_Buffs.end());
     }
 
-    void SurvivalSystem::updateReload(GameState &gs, float dt)
+    void SurvivalSystem::updateReload(GameState& gs, float dt)
     {
         gs.fireCooldown = std::max(0.0f, gs.fireCooldown - dt);
         if (!m_Weapon.isReloading)
+        {
             return;
+        }
         m_Weapon.reloadTimer -= dt;
         if (m_Weapon.reloadTimer <= 0.0f)
         {
@@ -233,17 +281,19 @@ namespace bunker
         }
     }
 
-    void SurvivalSystem::updateSecondWindAndSoulLine(GameState &gs)
+    void SurvivalSystem::updateSecondWindAndSoulLine(GameState& gs)
     {
         if (gs.playerHealth <= 0.0f && !m_SoulLineUsed)
         {
             m_SoulLineUsed = true;
             gs.playerHealth = 1.0f;
             m_Stress = 100.0f;
-            std::cout << "[SURVIVAL] !! SOUL LINE !! Срыв смерти! Нить души удержала Пилота в Убежище 17!" << std::endl;
+            bunker::logInfo() << "[SURVIVAL] !! SOUL LINE !! Срыв смерти! Нить души удержала Пилота в Убежище 17!"
+                              << std::endl;
             return;
         }
-        if (gs.playerHealth > 0.0f && gs.playerHealth < gs.playerMaxHealth * 0.16f && !m_SecondWindUsed && m_Stress >= 55.0f)
+        if (gs.playerHealth > 0.0f && gs.playerHealth < gs.playerMaxHealth * 0.16f && !m_SecondWindUsed &&
+            m_Stress >= 55.0f)
         {
             m_SecondWindUsed = true;
             gs.playerHealth = std::min(gs.playerMaxHealth, gs.playerHealth + 28.0f);
@@ -255,21 +305,23 @@ namespace bunker
     // 4) TANK UTILITIES
     // ═══════════════════════════════════════════════════════════════════════════════
 
-    void TankUtilitySystem::update(GameState &gs, float dt)
+    void TankUtilitySystem::update(GameState& gs, float dt)
     {
-        for (auto &s : m_Sparks)
+        for (auto& s : m_Sparks)
         {
             s.pos += s.vel * dt;
             s.ttl -= dt;
         }
-        m_Sparks.erase(std::remove_if(m_Sparks.begin(), m_Sparks.end(), [](const MuzzleSpark &s)
-                                      { return s.ttl <= 0.0f; }),
-                       m_Sparks.end());
+        m_Sparks.erase(
+            std::remove_if(m_Sparks.begin(), m_Sparks.end(), [](const MuzzleSpark& s) { return s.ttl <= 0.0f; }),
+            m_Sparks.end());
 
         m_Runtime.utilityCooldown = std::max(0.0f, m_Runtime.utilityCooldown - dt);
         m_Runtime.cannonThermalLoad = advClamp(m_Runtime.cannonThermalLoad - 18.0f * dt, 0.0f, 100.0f);
         if (m_Runtime.cannonThermalLoad < 62.0f)
+        {
             m_Runtime.overheated = false;
+        }
 
         if (gs.titan.isPiloted)
         {
@@ -282,18 +334,26 @@ namespace bunker
             const Vector3D toTank = gs.titan.position - m_Runtime.towAnchor;
             m_Runtime.towAnchor += toTank * advClamp(dt * 1.8f, 0.0f, 1.0f);
             if (toTank.lengthSq() < 0.35f)
+            {
                 m_Runtime.towing = false;
+            }
         }
     }
 
     void TankUtilitySystem::nextUtility()
     {
-        if (m_Runtime.utility == TankUtilityMode::BucketRig)
+        switch (m_Runtime.utility)
+        {
+        case TankUtilityMode::BucketRig:
             m_Runtime.utility = TankUtilityMode::RamShield;
-        else if (m_Runtime.utility == TankUtilityMode::RamShield)
+            break;
+        case TankUtilityMode::RamShield:
             m_Runtime.utility = TankUtilityMode::TowCoupler;
-        else
+            break;
+        default:
             m_Runtime.utility = TankUtilityMode::BucketRig;
+            break;
+        }
     }
 
     void TankUtilitySystem::swapSeat()
@@ -301,10 +361,12 @@ namespace bunker
         m_Runtime.seat = (m_Runtime.seat == TankSeat::Driver) ? TankSeat::Gunner : TankSeat::Driver;
     }
 
-    bool TankUtilitySystem::useUtility(GameState &gs)
+    bool TankUtilitySystem::useUtility(GameState& gs)
     {
         if (m_Runtime.utilityCooldown > 0.0f)
+        {
             return false;
+        }
         switch (m_Runtime.utility)
         {
         case TankUtilityMode::BucketRig:
@@ -314,7 +376,7 @@ namespace bunker
         case TankUtilityMode::RamShield:
             gs.titan.systems.tracksCondition = advClamp(gs.titan.systems.tracksCondition + 12.0f, 0.0f, 100.0f);
             gs.titan.health = advClamp(gs.titan.health + 10.0f, 0.0f, gs.titan.maxHealth);
-            for (auto &e : gs.enemies)
+            for (auto& e : gs.enemies)
             {
                 if (e.isAlive && advDistSq(e.position, gs.titan.position) < 2.0f * 2.0f)
                 {
@@ -331,14 +393,18 @@ namespace bunker
             m_Runtime.towAnchor = gs.mouseWorldPos;
             m_Runtime.utilityCooldown = 2.0f;
             return true;
+        default:
+            break;
         }
         return false;
     }
 
-    bool TankUtilitySystem::registerCannonShot(GameState &gs, float heat)
+    bool TankUtilitySystem::registerCannonShot(GameState& gs, float heat)
     {
         if (m_Runtime.overheated)
+        {
             return false;
+        }
         m_Runtime.cannonThermalLoad = advClamp(m_Runtime.cannonThermalLoad + heat, 0.0f, 100.0f);
         if (m_Runtime.cannonThermalLoad >= 100.0f)
         {
@@ -356,12 +422,16 @@ namespace bunker
         return true;
     }
 
-    bool TankUtilitySystem::repairInHangar(GameState &gs, PlayerInventory &inv)
+    bool TankUtilitySystem::repairInHangar(GameState& gs, PlayerInventory& inv)
     {
         if (!isInsideHangar(gs.titan.position))
+        {
             return false;
+        }
         if (!inv.removeItem(ITEM_REPAIR_KIT, 1))
+        {
             return false;
+        }
         gs.titan.health = advClamp(gs.titan.health + 70.0f, 0.0f, gs.titan.maxHealth);
         gs.titan.systems.coreEnergy = advClamp(gs.titan.systems.coreEnergy + 25.0f, 0.0f, 100.0f);
         gs.titan.systems.sensorLink = advClamp(gs.titan.systems.sensorLink + 35.0f, 0.0f, 100.0f);
@@ -370,7 +440,7 @@ namespace bunker
         return true;
     }
 
-    void TankUtilitySystem::carveFront(GameState &gs, int radius, int damage)
+    void TankUtilitySystem::carveFront(GameState& gs, int radius, int damage)
     {
         const int cx = static_cast<int>(std::round(gs.titan.position.x));
         const int cy = static_cast<int>(std::round(gs.titan.position.y));
@@ -379,12 +449,16 @@ namespace bunker
             for (int y = cy - radius; y <= cy + radius; ++y)
             {
                 if (x < 0 || y < 0 || x >= Config::MAP_WIDTH || y >= Config::MAP_HEIGHT)
+                {
                     continue;
+                }
                 if (gs.sectorMap[x][y] == 1)
                 {
                     gs.wallDurability[x][y] -= damage;
                     if (gs.wallDurability[x][y] <= 0)
+                    {
                         gs.sectorMap[x][y] = 0;
+                    }
                 }
             }
         }
@@ -422,6 +496,8 @@ namespace bunker
             b.health = 55.0f;
             b.radius = 0.55f;
             break;
+        default:
+            break;
         }
         m_Breakables.push_back(b);
         return b.id;
@@ -430,7 +506,9 @@ namespace bunker
     void ReactiveWorldSystem::seedDefault()
     {
         if (!m_Breakables.empty())
+        {
             return;
+        }
         add(BreakableKind::Crate, {7.0f, 5.0f, 0.0f});
         add(BreakableKind::Glass, {9.0f, 8.0f, 0.0f});
         add(BreakableKind::Barrel, {12.0f, 9.0f, 0.0f});
@@ -438,37 +516,44 @@ namespace bunker
         add(BreakableKind::Vegetation, {15.0f, 15.0f, 0.0f});
     }
 
-    void ReactiveWorldSystem::update(GameState &gs, float dt)
+    void ReactiveWorldSystem::update(GameState& gs, float dt)
     {
-        for (auto &wave : m_Waves)
+        for (auto& wave : m_Waves)
         {
             wave.ttl -= dt;
             wave.radius += (wave.maxRadius / 0.45f) * dt;
             applyWave(gs, wave, dt);
         }
-        m_Waves.erase(std::remove_if(m_Waves.begin(), m_Waves.end(), [](const ShockWave &w)
-                                     { return w.ttl <= 0.0f; }),
+        m_Waves.erase(std::remove_if(m_Waves.begin(), m_Waves.end(), [](const ShockWave& w) { return w.ttl <= 0.0f; }),
                       m_Waves.end());
 
-        for (auto &b : m_Breakables)
+        for (auto& b : m_Breakables)
         {
             if (b.broken)
+            {
                 continue;
+            }
             b.position += b.velocity * dt;
             b.velocity = b.velocity * std::pow(0.04f, dt);
             if (b.kind == BreakableKind::Barrel && b.health <= 0.0f)
+            {
                 explodeBarrel(gs, b);
+            }
             else if (b.health <= 0.0f)
+            {
                 b.broken = true;
+            }
         }
     }
 
-    void ReactiveWorldSystem::damageAt(GameState &gs, Vector3D pos, float radius, float damage, float impulse)
+    void ReactiveWorldSystem::damageAt(GameState& gs, Vector3D pos, float radius, float damage, float impulse)
     {
-        for (auto &b : m_Breakables)
+        for (auto& b : m_Breakables)
         {
             if (b.broken)
+            {
                 continue;
+            }
             const float d = advDist2D(pos, b.position);
             if (d <= radius + b.radius)
             {
@@ -482,11 +567,11 @@ namespace bunker
         (void)gs;
     }
 
-    void ReactiveWorldSystem::explodeBarrel(GameState &gs, BreakableObject &b)
+    void ReactiveWorldSystem::explodeBarrel(GameState& gs, BreakableObject& b)
     {
         b.broken = true;
         damageAt(gs, b.position, 2.8f, 75.0f, 5.5f);
-        for (auto &e : gs.enemies)
+        for (auto& e : gs.enemies)
         {
             if (e.isAlive && advDistSq(e.position, b.position) < 2.8f * 2.8f)
             {
@@ -498,7 +583,7 @@ namespace bunker
         }
     }
 
-    void ReactiveWorldSystem::applyWave(GameState &gs, const ShockWave &wave, float dt)
+    void ReactiveWorldSystem::applyWave(GameState& gs, const ShockWave& wave, float dt)
     {
         const float inner = std::max(0.0f, wave.radius - 0.35f);
         const float outer = wave.radius;
@@ -507,13 +592,17 @@ namespace bunker
         {
             gs.playerPos += advNormalize2D(gs.playerPos - wave.origin) * (wave.force * dt);
         }
-        for (auto &e : gs.enemies)
+        for (auto& e : gs.enemies)
         {
             if (!e.isAlive)
+            {
                 continue;
+            }
             const float de = advDist2D(e.position, wave.origin);
             if (de >= inner && de <= outer)
+            {
                 e.position += advNormalize2D(e.position - wave.origin) * (wave.force * 0.8f * dt);
+            }
         }
     }
 
@@ -532,13 +621,15 @@ namespace bunker
         rebuildRoute();
     }
 
-    void StoryRouteSystem::update(GameState &gs, RadioTapeSystem *radio)
+    void StoryRouteSystem::update(GameState& gs, RadioTapeSystem* radio)
     {
         m_LastEvent.clear();
-        for (auto &t : m_Triggers)
+        for (auto& t : m_Triggers)
         {
             if (t.fired)
+            {
                 continue;
+            }
             if (advDistSq(gs.playerPos, t.center) <= t.radius * t.radius)
             {
                 fire(gs, t, radio);
@@ -550,18 +641,24 @@ namespace bunker
     void StoryRouteSystem::rebuildRoute()
     {
         m_Route.clear();
-        for (const auto &t : m_Triggers)
+        for (const auto& t : m_Triggers)
+        {
             m_Route.push_back({t.objective, t.fired});
+        }
     }
 
-    void StoryRouteSystem::mark(const std::string &text)
+    void StoryRouteSystem::mark(const std::string& text)
     {
-        for (auto &r : m_Route)
+        for (auto& r : m_Route)
+        {
             if (r.text == text)
+            {
                 r.completed = true;
+            }
+        }
     }
 
-    void StoryRouteSystem::fire(GameState &gs, ZoneTrigger &t, RadioTapeSystem *radio)
+    void StoryRouteSystem::fire(GameState& gs, ZoneTrigger& t, RadioTapeSystem* radio)
     {
         t.fired = true;
         mark(t.objective);
@@ -571,7 +668,9 @@ namespace bunker
         case ZoneEventId::CryoLocker:
             m_LastEvent = "Криокамера открыта. Найдите Pip-Pad.";
             if (radio)
+            {
                 radio->discoverTape("CRYO_00");
+            }
             break;
         case ZoneEventId::Archive:
             gs.story.archiveRecovered = true;
@@ -586,7 +685,9 @@ namespace bunker
             gs.story.tankLinked = true;
             m_LastEvent = "BT-7274 найден. Доступна синхронизация пилота.";
             if (radio)
+            {
                 radio->discoverTape("GARAGE_BT");
+            }
             break;
         case ZoneEventId::FirstCombat:
             m_LastEvent = "Первый контакт. Враги теперь активнее реагируют на шум.";
@@ -595,7 +696,9 @@ namespace bunker
             gs.story.exitedBunker = true;
             m_LastEvent = "Поверхность. Погодные угрозы активны.";
             if (radio)
+            {
                 radio->discoverTape("SURFACE_17");
+            }
             break;
         case ZoneEventId::ReturnToBase:
             m_LastEvent = "Возвращение в убежище. Можно чинить танк в ангаре.";
@@ -607,6 +710,8 @@ namespace bunker
                 radio->discoverTape("PORT_16");
                 radio->discoverTape("BATTLE_215");
             }
+            break;
+        default:
             break;
         }
     }
@@ -625,7 +730,7 @@ namespace bunker
         m_Skills.rank[SkillId::Builder] = 0;
     }
 
-    void SkillSystem::grantXp(GameState &gs, int xp)
+    void SkillSystem::grantXp(GameState& gs, int xp)
     {
         gs.characterProg.experience += xp;
         while (gs.characterProg.experience >= xpForNext(gs.characterProg.level))
@@ -638,27 +743,33 @@ namespace bunker
         }
     }
 
-    bool SkillSystem::upgrade(GameState &gs, SkillId id)
+    bool SkillSystem::upgrade(GameState& gs, SkillId id)
     {
         if (gs.characterProg.unusedPoints <= 0)
+        {
             return false;
-        int &r = m_Skills.rank[id];
+        }
+        int& r = m_Skills.rank[id];
         if (r >= 5)
+        {
             return false;
+        }
         ++r;
         --gs.characterProg.unusedPoints;
         applyPassive(gs, id, r);
         return true;
     }
 
-    void SkillSystem::applyPassive(GameState &gs, SkillId id, int r)
+    void SkillSystem::applyPassive(GameState& gs, SkillId id, int r)
     {
         switch (id)
         {
         case SkillId::ArchiveSync:
             gs.regionalGrid.localRelayAvailable = true;
             if (r >= 3)
+            {
                 gs.regionalGrid.towerSyncRecovered = true;
+            }
             break;
         case SkillId::StressSurvival:
             gs.playerMaxHealth += 3.0f;
@@ -683,15 +794,19 @@ namespace bunker
 
     InventoryItem LootGenerator::roll(LootTier tier)
     {
-        auto &table = m_Tables[tier];
+        auto& table = m_Tables[tier];
         if (table.empty())
+        {
             return {1, ItemType::Resource, 1, 0.1f, "SCRAP"};
+        }
         float total = 0.0f;
-        for (const auto &e : table)
+        for (const auto& e : table)
+        {
             total += e.weight;
+        }
         std::uniform_real_distribution<float> pick(0.0f, total);
         float r = pick(m_Rng);
-        for (const auto &e : table)
+        for (const auto& e : table)
         {
             r -= e.weight;
             if (r <= 0.0f)
@@ -705,11 +820,13 @@ namespace bunker
         return table.back().item;
     }
 
-    void LootGenerator::fillContainer(LootContainer &c, LootTier tier, int rolls)
+    void LootGenerator::fillContainer(LootContainer& c, LootTier tier, int rolls)
     {
         c.containsItems.clear();
         for (int i = 0; i < rolls; ++i)
+        {
             c.containsItems.push_back(roll(tier));
+        }
 
         // Гарантированный специальный предмет: Аналог ядра Титана в легендарных хранилищах
         if (c.type == LootContainerType::DevVault)
@@ -718,23 +835,30 @@ namespace bunker
         }
     }
 
-    void LootGenerator::normalizeWorldLoot(GameState &gs)
+    void LootGenerator::normalizeWorldLoot(GameState& gs)
     {
         int i = 0;
-        for (auto &c : gs.lootContainers)
+        for (auto& c : gs.lootContainers)
         {
             if (!c.containsItems.empty())
+            {
                 continue;
+            }
             LootTier tier = LootTier::Common;
             if (c.type == LootContainerType::IronSafe)
+            {
                 tier = LootTier::Rare;
+            }
             if (c.type == LootContainerType::DevVault)
+            {
                 tier = LootTier::Legendary;
+            }
             fillContainer(c, tier, 1 + (i++ % 3));
         }
     }
 
-    void LootGenerator::add(LootTier tier, unsigned int id, ItemType type, std::string name, int minQ, int maxQ, float w, float unitWeight)
+    void LootGenerator::add(LootTier tier, unsigned int id, ItemType type, std::string name, int minQ, int maxQ,
+                            float w, float unitWeight)
     {
         m_Tables[tier].push_back({{id, type, 1, unitWeight, std::move(name)}, minQ, maxQ, w});
     }
@@ -743,9 +867,11 @@ namespace bunker
     {
         add(LootTier::Common, 201, ItemType::Resource, "SCRAP METAL", 2, 8, 8.0f, 0.08f);
         add(LootTier::Common, SurvivalSystem::ITEM_AMMO_556, ItemType::Ammo, "5.56 AMMO BOX", 1, 3, 6.0f, 0.15f);
-        add(LootTier::Common, SurvivalSystem::ITEM_RATION_PROTEIN, ItemType::Medicine, "PROTEIN RATION", 1, 2, 3.0f, 0.25f);
+        add(LootTier::Common, SurvivalSystem::ITEM_RATION_PROTEIN, ItemType::Medicine, "PROTEIN RATION", 1, 2, 3.0f,
+            0.25f);
         add(LootTier::Uncommon, SurvivalSystem::ITEM_STIM, ItemType::Medicine, "STIM INJECTOR", 1, 2, 5.0f, 0.10f);
-        add(LootTier::Uncommon, SurvivalSystem::ITEM_RATION_STAMINA, ItemType::Medicine, "STAMINA RATION", 1, 2, 4.0f, 0.25f);
+        add(LootTier::Uncommon, SurvivalSystem::ITEM_RATION_STAMINA, ItemType::Medicine, "STAMINA RATION", 1, 2, 4.0f,
+            0.25f);
         add(LootTier::Rare, TankUtilitySystem::ITEM_REPAIR_KIT, ItemType::Resource, "BT REPAIR KIT", 1, 2, 4.0f, 0.60f);
         add(LootTier::Rare, SurvivalSystem::ITEM_RATION_FOCUS, ItemType::Medicine, "FOCUS RATION", 1, 1, 3.0f, 0.20f);
         add(LootTier::Epic, 777, ItemType::Weapon, "GMOD TOOLGUN", 1, 1, 1.0f, 0.0f);
@@ -766,66 +892,87 @@ namespace bunker
 
     void CampSystem::cycleType()
     {
-        if (m_Preview.activeType == CampObjectType::ConcreteWall)
+        switch (m_Preview.activeType)
+        {
+        case CampObjectType::ConcreteWall:
             m_Preview.activeType = CampObjectType::DefenseTurret;
-        else if (m_Preview.activeType == CampObjectType::DefenseTurret)
+            break;
+        case CampObjectType::DefenseTurret:
             m_Preview.activeType = CampObjectType::SupplyCrate;
-        else
+            break;
+        default:
             m_Preview.activeType = CampObjectType::ConcreteWall;
+            break;
+        }
     }
 
-    void CampSystem::updatePreview(const GameState &gs, const Vector3D &mouseWorld)
+    void CampSystem::updatePreview(const GameState& gs, const Vector3D& mouseWorld)
     {
         m_Preview.tileX = static_cast<int>(std::floor(mouseWorld.x));
         m_Preview.tileY = static_cast<int>(std::floor(mouseWorld.y));
         m_Preview.isPlacementValid = canPlace(gs, m_Preview.tileX, m_Preview.tileY);
     }
 
-    bool CampSystem::place(GameState &gs, PlayerInventory &inv, float costMult)
+    bool CampSystem::place(GameState& gs, PlayerInventory& inv, float costMult)
     {
         if (!m_Enabled || !m_Preview.isPlacementValid)
+        {
             return false;
+        }
         const int cost = std::max(1, static_cast<int>(baseCost(m_Preview.activeType) * costMult));
         if (!inv.removeItem(ITEM_BUILD_MATERIAL, cost))
+        {
             return false;
+        }
 
         CampObject obj;
         obj.id = ++m_NextId;
         obj.type = m_Preview.activeType;
         obj.tileX = m_Preview.tileX;
         obj.tileY = m_Preview.tileY;
-        obj.health = (obj.type == CampObjectType::ConcreteWall) ? 180.0f : (obj.type == CampObjectType::DefenseTurret ? 90.0f : 60.0f);
+        obj.health = (obj.type == CampObjectType::ConcreteWall)
+                         ? 180.0f
+                         : (obj.type == CampObjectType::DefenseTurret ? 90.0f : 60.0f);
         m_Objects.push_back(obj);
 
-        if (obj.type == CampObjectType::ConcreteWall)
+        switch (obj.type)
         {
+        case CampObjectType::ConcreteWall:
             gs.sectorMap[obj.tileX][obj.tileY] = 1;
             gs.wallDurability[obj.tileX][obj.tileY] = 180;
-        }
-        else if (obj.type == CampObjectType::SupplyCrate)
+            break;
+        case CampObjectType::SupplyCrate:
         {
             LootContainer c;
             c.position = {obj.tileX + 0.5f, obj.tileY + 0.5f, 0.0f};
             c.type = LootContainerType::WoodenCrate;
             gs.lootContainers.push_back(c);
+            break;
+        }
+        default:
+            break;
         }
         return true;
     }
 
-    void CampSystem::updateTurrets(GameState &gs, float dt)
+    void CampSystem::updateTurrets(GameState& gs, float dt)
     {
         (void)dt;
-        for (const auto &obj : m_Objects)
+        for (const auto& obj : m_Objects)
         {
             if (obj.type != CampObjectType::DefenseTurret)
+            {
                 continue;
+            }
             Vector3D pos{obj.tileX + 0.5f, obj.tileY + 0.5f, 0.0f};
-            Enemy *best = nullptr;
+            Enemy* best = nullptr;
             float bestD = 5.5f * 5.5f;
-            for (auto &e : gs.enemies)
+            for (auto& e : gs.enemies)
             {
                 if (!e.isAlive)
+                {
                     continue;
+                }
                 const float d = advDistSq(pos, e.position);
                 if (d < bestD)
                 {
@@ -850,21 +997,33 @@ namespace bunker
             return 12;
         case CampObjectType::SupplyCrate:
             return 6;
+        default:
+            break;
         }
         return 5;
     }
 
-    bool CampSystem::canPlace(const GameState &gs, int x, int y) const
+    bool CampSystem::canPlace(const GameState& gs, int x, int y) const
     {
         if (x < 0 || y < 0 || x >= Config::MAP_WIDTH || y >= Config::MAP_HEIGHT)
+        {
             return false;
+        }
         if (gs.sectorMap[x][y] == 1)
+        {
             return false;
+        }
         if (advDistSq({x + 0.5f, y + 0.5f, 0.0f}, gs.playerPos) > 5.0f * 5.0f)
+        {
             return false;
-        for (const auto &obj : m_Objects)
+        }
+        for (const auto& obj : m_Objects)
+        {
             if (obj.tileX == x && obj.tileY == y)
+            {
                 return false;
+            }
+        }
         return true;
     }
 
@@ -884,34 +1043,48 @@ namespace bunker
         m_Prefabs.push_back({"big_als_tattoo_parlor", {"#####", "#...#", "#####"}});
     }
 
-    const PrefabDef *PrefabLibrary::get(const std::string &name) const
+    const PrefabDef* PrefabLibrary::get(const std::string& name) const
     {
-        for (const auto &p : m_Prefabs)
+        for (const auto& p : m_Prefabs)
+        {
             if (p.name == name)
+            {
                 return &p;
+            }
+        }
         return m_Prefabs.empty() ? nullptr : &m_Prefabs.front();
     }
 
     void ToolGunSystem::cycleMode()
     {
-        if (m_Mode == ToolGunMode::SpawnPrefab)
+        switch (m_Mode)
+        {
+        case ToolGunMode::SpawnPrefab:
             m_Mode = ToolGunMode::Delete;
-        else if (m_Mode == ToolGunMode::Delete)
+            break;
+        case ToolGunMode::Delete:
             m_Mode = ToolGunMode::PaintErosion;
-        else if (m_Mode == ToolGunMode::PaintErosion)
+            break;
+        case ToolGunMode::PaintErosion:
             m_Mode = ToolGunMode::Validate;
-        else if (m_Mode == ToolGunMode::Validate)
+            break;
+        case ToolGunMode::Validate:
             m_Mode = ToolGunMode::Export;
-        else
+            break;
+        default:
             m_Mode = ToolGunMode::SpawnPrefab;
+            break;
+        }
     }
 
-    bool ToolGunSystem::apply(GameState &gs, Vector3D where, const PrefabLibrary &lib)
+    bool ToolGunSystem::apply(GameState& gs, Vector3D where, const PrefabLibrary& lib)
     {
         const int x = static_cast<int>(std::floor(where.x));
         const int y = static_cast<int>(std::floor(where.y));
         if (x < 0 || y < 0 || x >= Config::MAP_WIDTH || y >= Config::MAP_HEIGHT)
+        {
             return false;
+        }
         switch (m_Mode)
         {
         case ToolGunMode::SpawnPrefab:
@@ -922,7 +1095,7 @@ namespace bunker
             return paintErosion(gs, x, y);
         case ToolGunMode::Validate:
             m_LastValidation = validate(gs);
-            std::cout << "[TOOLGUN] " << m_LastValidation << std::endl;
+            bunker::logInfo() << "[TOOLGUN] " << m_LastValidation << std::endl;
             return true;
         case ToolGunMode::Export:
         {
@@ -932,18 +1105,23 @@ namespace bunker
             {
                 out << m_LastExport;
                 out.close();
-                std::cout << "[TOOLGUN EXPORT] Карта уровня экспортирована в saves/exported_map_level.cfg!" << std::endl;
+                bunker::logInfo() << "[TOOLGUN EXPORT] Карта уровня экспортирована в saves/exported_map_level.cfg!"
+                                  << std::endl;
             }
             return true;
         }
+        default:
+            break;
         }
         return false;
     }
 
-    bool ToolGunSystem::undo(GameState &gs)
+    bool ToolGunSystem::undo(GameState& gs)
     {
         if (m_Undo.empty())
+        {
             return false;
+        }
         auto action = std::move(m_Undo.back());
         m_Undo.pop_back();
         action.undo(gs);
@@ -951,10 +1129,12 @@ namespace bunker
         return true;
     }
 
-    bool ToolGunSystem::redo(GameState &gs)
+    bool ToolGunSystem::redo(GameState& gs)
     {
         if (m_Redo.empty())
+        {
             return false;
+        }
         auto action = std::move(m_Redo.back());
         m_Redo.pop_back();
         action.redo(gs);
@@ -967,14 +1147,18 @@ namespace bunker
         m_Undo.push_back(std::move(a));
         m_Redo.clear();
         if (m_Undo.size() > 64)
+        {
             m_Undo.erase(m_Undo.begin());
+        }
     }
 
-    bool ToolGunSystem::spawnPrefab(GameState &gs, int x, int y, const PrefabLibrary &lib)
+    bool ToolGunSystem::spawnPrefab(GameState& gs, int x, int y, const PrefabLibrary& lib)
     {
-        const PrefabDef *prefab = lib.get("small_bunker_room");
+        const PrefabDef* prefab = lib.get("small_bunker_room");
         if (!prefab)
+        {
             return false;
+        }
         auto oldMap = gs.sectorMap;
         auto oldDur = gs.wallDurability;
         for (int row = 0; row < static_cast<int>(prefab->rows.size()); ++row)
@@ -984,62 +1168,80 @@ namespace bunker
                 const int tx = x + col;
                 const int ty = y + row;
                 if (tx < 0 || ty < 0 || tx >= Config::MAP_WIDTH || ty >= Config::MAP_HEIGHT)
-                    continue;
-                const char c = prefab->rows[row][col];
-                if (c == '#')
                 {
+                    continue;
+                }
+                const char c = prefab->rows[row][col];
+                switch (c)
+                {
+                case '#':
                     gs.sectorMap[tx][ty] = 1;
                     gs.wallDurability[tx][ty] = 110;
-                }
-                else if (c == '.')
-                {
+                    break;
+                case '.':
                     gs.sectorMap[tx][ty] = 0;
                     gs.wallDurability[tx][ty] = 0;
-                }
-                else if (c == 'c')
+                    break;
+                case 'c':
                 {
                     LootContainer lc;
                     lc.position = {tx + 0.5f, ty + 0.5f, 0.0f};
                     lc.type = LootContainerType::WoodenCrate;
                     gs.lootContainers.push_back(lc);
+                    break;
+                }
+                default:
+                    break;
                 }
             }
         }
         auto newMap = gs.sectorMap;
         auto newDur = gs.wallDurability;
-        pushAction({"spawn prefab", [oldMap, oldDur](GameState &s)
-                    { s.sectorMap = oldMap; s.wallDurability = oldDur; },
-                    [newMap, newDur](GameState &s)
-                    { s.sectorMap = newMap; s.wallDurability = newDur; }});
+        pushAction({"spawn prefab",
+                    [oldMap, oldDur](GameState& s)
+                    {
+                        s.sectorMap = oldMap;
+                        s.wallDurability = oldDur;
+                    },
+                    [newMap, newDur](GameState& s)
+                    {
+                        s.sectorMap = newMap;
+                        s.wallDurability = newDur;
+                    }});
         return true;
     }
 
-    bool ToolGunSystem::deleteTile(GameState &gs, int x, int y)
+    bool ToolGunSystem::deleteTile(GameState& gs, int x, int y)
     {
         const int oldTile = gs.sectorMap[x][y];
         const int oldDur = gs.wallDurability[x][y];
         gs.sectorMap[x][y] = 0;
         gs.wallDurability[x][y] = 0;
-        pushAction({"delete tile", [x, y, oldTile, oldDur](GameState &s)
-                    { s.sectorMap[x][y] = oldTile; s.wallDurability[x][y] = oldDur; },
-                    [x, y](GameState &s)
-                    { s.sectorMap[x][y] = 0; s.wallDurability[x][y] = 0; }});
+        pushAction({"delete tile",
+                    [x, y, oldTile, oldDur](GameState& s)
+                    {
+                        s.sectorMap[x][y] = oldTile;
+                        s.wallDurability[x][y] = oldDur;
+                    },
+                    [x, y](GameState& s)
+                    {
+                        s.sectorMap[x][y] = 0;
+                        s.wallDurability[x][y] = 0;
+                    }});
         return true;
     }
 
-    bool ToolGunSystem::paintErosion(GameState &gs, int x, int y)
+    bool ToolGunSystem::paintErosion(GameState& gs, int x, int y)
     {
         const float old = gs.etherErosionMap[x][y];
         gs.etherErosionMap[x][y] = advClamp(old + 10.0f, 0.0f, 100.0f);
         const float now = gs.etherErosionMap[x][y];
-        pushAction({"paint erosion", [x, y, old](GameState &s)
-                    { s.etherErosionMap[x][y] = old; },
-                    [x, y, now](GameState &s)
-                    { s.etherErosionMap[x][y] = now; }});
+        pushAction({"paint erosion", [x, y, old](GameState& s) { s.etherErosionMap[x][y] = old; },
+                    [x, y, now](GameState& s) { s.etherErosionMap[x][y] = now; }});
         return true;
     }
 
-    std::string ToolGunSystem::validate(const GameState &gs) const
+    std::string ToolGunSystem::validate(const GameState& gs) const
     {
         int walls = 0;
         int brokenWalls = 0;
@@ -1052,38 +1254,47 @@ namespace bunker
                 {
                     ++walls;
                     if (gs.wallDurability[x][y] <= 0)
+                    {
                         ++brokenWalls;
+                    }
                 }
             }
         }
-        for (const auto &e : gs.enemies)
+        for (const auto& e : gs.enemies)
         {
             const int ex = static_cast<int>(e.position.x);
             const int ey = static_cast<int>(e.position.y);
             if (ex < 0 || ey < 0 || ex >= Config::MAP_WIDTH || ey >= Config::MAP_HEIGHT || gs.sectorMap[ex][ey] == 1)
+            {
                 ++invalidEnemies;
+            }
         }
 
         bool playerBlocked = false;
         int px = static_cast<int>(gs.playerPos.x);
         int py = static_cast<int>(gs.playerPos.y);
         if (px >= 0 && px < Config::MAP_WIDTH && py >= 0 && py < Config::MAP_HEIGHT)
+        {
             playerBlocked = (gs.sectorMap[px][py] == 1);
+        }
 
         std::ostringstream out;
         out << "VALIDATION: walls=" << walls << " brokenDurability=" << brokenWalls
-            << " invalidEnemies=" << invalidEnemies << (playerBlocked ? " [CRITICAL: PLAYER STUCK IN WALL!]" : " [GRID OK]");
+            << " invalidEnemies=" << invalidEnemies
+            << (playerBlocked ? " [CRITICAL: PLAYER STUCK IN WALL!]" : " [GRID OK]");
         return out.str();
     }
 
-    std::string ToolGunSystem::exportMap(const GameState &gs) const
+    std::string ToolGunSystem::exportMap(const GameState& gs) const
     {
         std::ostringstream out;
         out << "# Bunker Protocol ISO map export\n";
         for (int y = 0; y < Config::MAP_HEIGHT; ++y)
         {
             for (int x = 0; x < Config::MAP_WIDTH; ++x)
+            {
                 out << (gs.sectorMap[x][y] == 1 ? '#' : '.');
+            }
             out << '\n';
         }
         return out.str();
@@ -1096,19 +1307,22 @@ namespace bunker
     void ObjModel::computeFlatNormalsIfMissing()
     {
         if (!normals.empty() || vertices.empty() || faces.empty())
+        {
             return;
-        for (auto &f : faces)
+        }
+        for (auto& f : faces)
         {
             int i0 = f.v[0];
             int i1 = f.v[1];
             int i2 = f.v[2];
-            if (i0 < 0 || i0 >= static_cast<int>(vertices.size()) ||
-                i1 < 0 || i1 >= static_cast<int>(vertices.size()) ||
-                i2 < 0 || i2 >= static_cast<int>(vertices.size()))
+            if (i0 < 0 || i0 >= static_cast<int>(vertices.size()) || i1 < 0 ||
+                i1 >= static_cast<int>(vertices.size()) || i2 < 0 || i2 >= static_cast<int>(vertices.size()))
+            {
                 continue;
-            const auto &v0 = vertices[i0];
-            const auto &v1 = vertices[i1];
-            const auto &v2 = vertices[i2];
+            }
+            const auto& v0 = vertices[i0];
+            const auto& v1 = vertices[i1];
+            const auto& v2 = vertices[i2];
             float ux = v1.x - v0.x, uy = v1.y - v0.y, uz = v1.z - v0.z;
             float vx = v2.x - v0.x, vy = v2.y - v0.y, vz = v2.z - v0.z;
             float nx = uy * vz - uz * vy;
@@ -1131,13 +1345,15 @@ namespace bunker
         }
     }
 
-    void ObjModelLoader::parseFullFaceTriplet(const std::string &token, int &v_idx, int &vt_idx, int &vn_idx)
+    void ObjModelLoader::parseFullFaceTriplet(const std::string& token, int& v_idx, int& vt_idx, int& vn_idx)
     {
         v_idx = -1;
         vt_idx = -1;
         vn_idx = -1;
         if (token.empty())
+        {
             return;
+        }
 
         std::size_t p1 = token.find('/');
         if (p1 == std::string::npos)
@@ -1152,25 +1368,33 @@ namespace bunker
         {
             std::string t = token.substr(p1 + 1);
             if (!t.empty())
+            {
                 vt_idx = std::atoi(t.c_str()) - 1;
+            }
             return;
         }
 
         std::string t1 = token.substr(p1 + 1, p2 - (p1 + 1));
         if (!t1.empty())
+        {
             vt_idx = std::atoi(t1.c_str()) - 1;
+        }
 
         std::string t2 = token.substr(p2 + 1);
         if (!t2.empty())
+        {
             vn_idx = std::atoi(t2.c_str()) - 1;
+        }
     }
 
-    ObjModel ObjModelLoader::load(const std::string &path)
+    ObjModel ObjModelLoader::load(const std::string& path)
     {
         ObjModel model;
         std::ifstream in(path);
         if (!in)
+        {
             return model;
+        }
         std::string line;
         while (std::getline(in, line))
         {
@@ -1206,7 +1430,9 @@ namespace bunker
                     ss >> token;
                     parseFullFaceTriplet(token, v_idx[i], vt_idx[i], vn_idx[i]);
                     if (v_idx[i] < 0)
+                    {
                         v_idx[i] = parseFaceIndex(token) - 1;
+                    }
                 }
                 if (v_idx[0] >= 0 && v_idx[1] >= 0 && v_idx[2] >= 0)
                 {
@@ -1222,17 +1448,21 @@ namespace bunker
         return model;
     }
 
-    int ObjModelLoader::parseFaceIndex(const std::string &token)
+    int ObjModelLoader::parseFaceIndex(const std::string& token)
     {
         std::string n;
         for (char c : token)
         {
             if (c == '/')
+            {
                 break;
+            }
             n.push_back(c);
         }
         if (n.empty())
+        {
             return 0;
+        }
         return std::max(0, std::atoi(n.c_str()));
     }
 
@@ -1240,7 +1470,7 @@ namespace bunker
     // 13) LANLINE SERVICES
     // ═══════════════════════════════════════════════════════════════════════════════
 
-    int LanlineServices::createLocalLobby(const std::string &playerName)
+    int LanlineServices::createLocalLobby(const std::string& playerName)
     {
         m_Peers.clear();
         m_Deliveries.clear();
@@ -1252,11 +1482,10 @@ namespace bunker
         addPeerWithSocket("Scout_LogHorizon", {12.0f, 12.0f, 0.0f}, ++m_NextSocketFd);
         addPeerWithSocket("Vault17_Quartermaster", {15.0f, 8.0f, 0.0f}, ++m_NextSocketFd);
 
-        const char *coopNames[] = {
-            "Ranger_Kodiak", "Tech_Valerie", "Heavy_Goliath", "Medic_Mercy",
-            "Sniper_Ghost", "Engineer_Spark", "Recon_Viper", "Trooper_Blaze",
-            "Sapper_Boom", "Sentinel_Apex", "Commando_Rex", "Guardian_Shield",
-            "Warden_Frost", "Striker_Bolt", "Vanguard_Storm", "Overseer_Vault17"};
+        const char* coopNames[] = {"Ranger_Kodiak", "Tech_Valerie",   "Heavy_Goliath",  "Medic_Mercy",
+                                   "Sniper_Ghost",  "Engineer_Spark", "Recon_Viper",    "Trooper_Blaze",
+                                   "Sapper_Boom",   "Sentinel_Apex",  "Commando_Rex",   "Guardian_Shield",
+                                   "Warden_Frost",  "Striker_Bolt",   "Vanguard_Storm", "Overseer_Vault17"};
         for (int i = 0; i < 16 && static_cast<int>(m_Peers.size()) < MAX_COOP_PLAYERS; ++i)
         {
             float px = 8.0f + static_cast<float>((i * 5) % 40);
@@ -1264,16 +1493,17 @@ namespace bunker
             addPeerWithSocket(coopNames[i], {px, py, 0.0f}, ++m_NextSocketFd);
         }
 
-        systemMessage("LANLINE Winsock net #1001 connected. " + std::to_string(m_Peers.size()) + " squad combatants online.");
+        systemMessage("LANLINE Winsock net #1001 connected. " + std::to_string(m_Peers.size()) +
+                      " squad combatants online.");
         return m_LobbyId;
     }
 
-    int LanlineServices::addPeer(const std::string &name)
+    int LanlineServices::addPeer(const std::string& name)
     {
         return addPeerWithSocket(name, {10.0f, 10.0f, 0.0f}, ++m_NextSocketFd);
     }
 
-    int LanlineServices::addPeerWithSocket(const std::string &name, Vector3D pos, unsigned int sockFd)
+    int LanlineServices::addPeerWithSocket(const std::string& name, Vector3D pos, unsigned int sockFd)
     {
         LanlinePeer p;
         p.id = ++m_NextPeerId;
@@ -1285,10 +1515,10 @@ namespace bunker
         return p.id;
     }
 
-    void LanlineServices::cullInactiveOrDistantPeers(const Vector3D &localPlayerPos, float interestRadius)
+    void LanlineServices::cullInactiveOrDistantPeers(const Vector3D& localPlayerPos, float interestRadius)
     {
         float rSq = interestRadius * interestRadius;
-        for (auto &p : m_Peers)
+        for (auto& p : m_Peers)
         {
             float dx = p.lastKnownPos.x - localPlayerPos.x;
             float dy = p.lastKnownPos.y - localPlayerPos.y;
@@ -1302,7 +1532,7 @@ namespace bunker
         if (m_HeartbeatTimer >= 1.0f)
         {
             m_HeartbeatTimer = 0.0f;
-            for (auto &p : m_Peers)
+            for (auto& p : m_Peers)
             {
                 if (p.simulatedSocketFd > 0)
                 {
@@ -1313,23 +1543,31 @@ namespace bunker
         }
     }
 
-    void LanlineServices::sendChat(int fromPeer, const std::string &text)
+    void LanlineServices::sendChat(int fromPeer, const std::string& text)
     {
         if (!m_Connected)
+        {
             return;
+        }
         m_Chat.push_back({fromPeer, text, 10.0f});
         if (m_Chat.size() > 20)
+        {
             m_Chat.erase(m_Chat.begin());
+        }
     }
 
     void LanlineServices::setVoice(int peerId, bool active)
     {
-        for (auto &p : m_Peers)
+        for (auto& p : m_Peers)
+        {
             if (p.id == peerId)
+            {
                 p.voiceActive = active;
+            }
+        }
     }
 
-    int LanlineServices::requestDelivery(const std::string &payload, Vector3D dropPos)
+    int LanlineServices::requestDelivery(const std::string& payload, Vector3D dropPos)
     {
         LanlineDelivery d;
         d.id = ++m_NextDeliveryId;
@@ -1340,31 +1578,41 @@ namespace bunker
         return d.id;
     }
 
-    void LanlineServices::update(GameState &gs, PlayerInventory &inv, float dt)
+    void LanlineServices::update(GameState& gs, PlayerInventory& inv, float dt)
     {
         simulateWinsockUdpHeartbeat(dt);
         cullInactiveOrDistantPeers(gs.playerPos, 40.0f);
 
-        for (auto &c : m_Chat)
+        for (auto& c : m_Chat)
+        {
             c.ttl -= dt;
-        m_Chat.erase(std::remove_if(m_Chat.begin(), m_Chat.end(), [](const LanlineChatMessage &c)
-                                    { return c.ttl <= 0.0f; }),
-                     m_Chat.end());
+        }
+        m_Chat.erase(
+            std::remove_if(m_Chat.begin(), m_Chat.end(), [](const LanlineChatMessage& c) { return c.ttl <= 0.0f; }),
+            m_Chat.end());
 
-        for (auto &d : m_Deliveries)
+        for (auto& d : m_Deliveries)
         {
             if (d.delivered)
+            {
                 continue;
+            }
             d.eta -= dt;
             if (d.eta <= 0.0f)
             {
                 d.delivered = true;
                 if (d.payload == "ammo")
+                {
                     inv.addItem(SurvivalSystem::ITEM_AMMO_556, ItemType::Ammo, 2, 0.15f, "5.56 AMMO BOX");
+                }
                 else if (d.payload == "med")
+                {
                     inv.addItem(SurvivalSystem::ITEM_STIM, ItemType::Medicine, 1, 0.10f, "STIM INJECTOR");
+                }
                 else
+                {
                     inv.addItem(201, ItemType::Resource, 10, 0.08f, "SCRAP METAL");
+                }
                 gs.score += 25;
                 systemMessage("Delivery arrived: " + d.payload);
             }
@@ -1383,7 +1631,7 @@ namespace bunker
     // 14) PROFILE / SESSION MIGRATION
     // ═══════════════════════════════════════════════════════════════════════════════
 
-    void ProfileSessionSystem::startSession(PlayerProfile &p)
+    void ProfileSessionSystem::startSession(PlayerProfile& p)
     {
         migrate(p);
         p.sessionsPlayed += 1;
@@ -1391,15 +1639,17 @@ namespace bunker
         m_Started = true;
     }
 
-    void ProfileSessionSystem::update(PlayerProfile &p, float dt)
+    void ProfileSessionSystem::update(PlayerProfile& p, float dt)
     {
         if (!m_Started)
+        {
             return;
+        }
         m_SessionTime += dt;
         p.totalPlayTime += dt;
     }
 
-    void ProfileSessionSystem::migrate(PlayerProfile &p)
+    void ProfileSessionSystem::migrate(PlayerProfile& p)
     {
         if (p.version < 15)
         {
@@ -1413,12 +1663,12 @@ namespace bunker
         }
     }
 
-    std::string ProfileSessionSystem::summary(const PlayerProfile &p) const
+    std::string ProfileSessionSystem::summary(const PlayerProfile& p) const
     {
         std::ostringstream ss;
-        ss << "PROFILE v" << p.version << " name=" << p.playerName
-           << " kills=" << p.totalKills << " deaths=" << p.totalDeaths
-           << " sessions=" << p.sessionsPlayed << " playtime=" << std::fixed << std::setprecision(1) << p.totalPlayTime;
+        ss << "PROFILE v" << p.version << " name=" << p.playerName << " kills=" << p.totalKills
+           << " deaths=" << p.totalDeaths << " sessions=" << p.sessionsPlayed << " playtime=" << std::fixed
+           << std::setprecision(1) << p.totalPlayTime;
         return ss.str();
     }
 
@@ -1426,7 +1676,7 @@ namespace bunker
     // 15) FACADE
     // ═══════════════════════════════════════════════════════════════════════════════
 
-    void AdvancedMechanics::initialize(GameState &gs, PlayerInventory &inv)
+    void AdvancedMechanics::initialize(GameState& gs, PlayerInventory& inv)
     {
         (void)inv;
         reactive.seedDefault();
@@ -1437,13 +1687,12 @@ namespace bunker
         ObjModel testModel = ObjModelLoader::load("assets/models/bastion.obj");
         if (!testModel.empty())
         {
-            std::cout << "[OBJ LOADER] Модель bastion.obj успешно загружена: "
-                      << testModel.vertices.size() << " вершин, "
-                      << testModel.faces.size() << " полигонов." << std::endl;
+            bunker::logInfo() << "[OBJ LOADER] Модель bastion.obj успешно загружена: " << testModel.vertices.size()
+                              << " вершин, " << testModel.faces.size() << " полигонов." << std::endl;
         }
     }
 
-    void AdvancedMechanics::update(GameState &gs, PlayerInventory &inv, const InputSnapshot &input, float dt)
+    void AdvancedMechanics::update(GameState& gs, PlayerInventory& inv, const InputSnapshot& input, float dt)
     {
         profile.update(playerProfile, dt);
         weather.update(gs, dt);
@@ -1457,18 +1706,24 @@ namespace bunker
         lanline.update(gs, inv, dt);
 
         if (input.toggleCamp)
+        {
             camp.toggle();
+        }
         if (input.switchWeapon && gs.playerMode == UnitMode::Titan)
+        {
             tankUtility.nextUtility();
+        }
         if (input.dismountVehicle && gs.playerMode == UnitMode::Titan)
+        {
             tankUtility.swapSeat();
+        }
         if (input.interact)
         {
             tankUtility.repairInHangar(gs, inv);
         }
     }
 
-    void AdvancedMechanics::onExplosion(GameState &gs, Vector3D pos, float radius, float damage)
+    void AdvancedMechanics::onExplosion(GameState& gs, Vector3D pos, float radius, float damage)
     {
         reactive.damageAt(gs, pos, radius, damage, radius * 1.8f);
     }

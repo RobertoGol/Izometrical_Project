@@ -1,15 +1,16 @@
 #pragma once
 
+#include "engine/Log.hpp"
 #include <SFML/Graphics.hpp>
-#include <string>
-#include <vector>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <ctime>
 #include <filesystem>
-#include <iostream>
 #include <functional>
 #include <map>
+#include <string>
+#include <vector>
 
 namespace bunker
 {
@@ -50,7 +51,7 @@ namespace bunker
 
     class TextureGenerator
     {
-    private:
+      private:
         // Кэш уже загруженных базовых текстур
         std::map<std::string, sf::Image> m_BaseCache;
 
@@ -62,7 +63,8 @@ namespace bunker
             {
                 int n = xi * 374761393 + yi * 668265263 + s;
                 n = (n << 13) ^ n;
-                return 1.0f - static_cast<float>((n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0f;
+                return 1.0f -
+                       static_cast<float>((n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0f;
             };
 
             int xi = static_cast<int>(std::floor(x));
@@ -102,25 +104,25 @@ namespace bunker
         }
 
         // ── Clamp байт ──
-        static sf::Uint8 clampByte(int v)
+        static std::uint8_t clampByte(int v)
         {
-            return static_cast<sf::Uint8>(std::max(0, std::min(255, v)));
+            return static_cast<std::uint8_t>(std::max(0, std::min(255, v)));
         }
 
-    public:
+      public:
         TextureGenerator() = default;
 
         // ═══════════════════════════════════════════════
         // Проверить, нужна ли генерация
         // (если папка generated/ уже содержит файлы — пропускаем)
         // ═══════════════════════════════════════════════
-        bool needsGeneration(const std::string &outputDir, int expectedCount) const
+        bool needsGeneration(const std::string& outputDir, int expectedCount) const
         {
             if (!std::filesystem::exists(outputDir))
                 return true;
 
             int count = 0;
-            for (const auto &entry : std::filesystem::directory_iterator(outputDir))
+            for (const auto& entry : std::filesystem::directory_iterator(outputDir))
             {
                 if (entry.path().extension() == ".png")
                     count++;
@@ -131,12 +133,12 @@ namespace bunker
         // ═══════════════════════════════════════════════
         // Главная точка входа: генерация по конфигу
         // ═══════════════════════════════════════════════
-        bool generate(const TextureGenConfig &cfg)
+        bool generate(const TextureGenConfig& cfg)
         {
             // Проверяем, нужно ли генерировать
             if (!needsGeneration(cfg.outputDir, cfg.variantCount))
             {
-                std::cout << "[TEXGEN] Пропуск " << cfg.outputDir << " — уже запечено." << std::endl;
+                bunker::logInfo() << "[TEXGEN] Пропуск " << cfg.outputDir << " — уже запечено." << std::endl;
                 return true;
             }
 
@@ -144,7 +146,7 @@ namespace bunker
             sf::Image baseImg;
             if (!loadBase(cfg.baseTexturePath, baseImg))
             {
-                std::cerr << "[TEXGEN] Базовая текстура не найдена: " << cfg.baseTexturePath << std::endl;
+                bunker::logError() << "[TEXGEN] Базовая текстура не найдена: " << cfg.baseTexturePath << std::endl;
                 return false;
             }
 
@@ -188,17 +190,17 @@ namespace bunker
 
                 // Сохраняем вариацию
                 std::string outPath = cfg.outputDir + "/" + cfg.prefix + "_" + std::to_string(i) + ".png";
-                variant.saveToFile(outPath);
+                (void)variant.saveToFile(outPath);
 
                 // Генерация карты нормалей (для визуальных выпуклостей)
                 if (cfg.generateNormalMap)
                 {
                     sf::Image normalMap = generateNormalMap(variant, cfg.normalStrength);
                     std::string normalPath = cfg.outputDir + "/" + cfg.prefix + "_" + std::to_string(i) + "_normal.png";
-                    normalMap.saveToFile(normalPath);
+                    (void)normalMap.saveToFile(normalPath);
                 }
 
-                std::cout << "[TEXGEN] Сгенерировано: " << outPath << std::endl;
+                bunker::logInfo() << "[TEXGEN] Сгенерировано: " << outPath << std::endl;
             }
 
             return true;
@@ -209,7 +211,7 @@ namespace bunker
         // ═══════════════════════════════════════════════
         void generateAllOnFirstRun()
         {
-            std::cout << "[TEXGEN] Проверка текстур при запуске..." << std::endl;
+            bunker::logInfo() << "[TEXGEN] Проверка текстур при запуске..." << std::endl;
 
             // ── Земля / тайлы ──
             if (std::filesystem::exists("assets/textures/base_ground.png"))
@@ -217,8 +219,7 @@ namespace bunker
                 generate({
                     "assets/textures/base_ground.png",
                     "", // Без маски
-                    "assets/generated/ground",
-                    "ground",
+                    "assets/generated/ground", "ground",
                     8, // 8 вариаций
                     "terrain",
                     true, // Генерировать normal map
@@ -229,8 +230,8 @@ namespace bunker
             // ── Стены ──
             if (std::filesystem::exists("assets/textures/base_wall.png"))
             {
-                generate({"assets/textures/base_wall.png", "",
-                          "assets/generated/walls", "wall", 4, "terrain", true, 2.0f});
+                generate(
+                    {"assets/textures/base_wall.png", "", "assets/generated/walls", "wall", 4, "terrain", true, 2.0f});
             }
 
             // ── Враги / мобы ──
@@ -244,25 +245,23 @@ namespace bunker
             // ── Роботы ──
             if (std::filesystem::exists("assets/textures/base_robot.png"))
             {
-                generate({"assets/textures/base_robot.png",
-                          "assets/textures/base_robot_mask.png",
+                generate({"assets/textures/base_robot.png", "assets/textures/base_robot_mask.png",
                           "assets/generated/robots", "robot", 5, "robot", true, 2.5f});
             }
 
             // ── Оружие / предметы ──
             if (std::filesystem::exists("assets/textures/base_item.png"))
             {
-                generate({"assets/textures/base_item.png",
-                          "assets/textures/base_item_mask.png",
+                generate({"assets/textures/base_item.png", "assets/textures/base_item_mask.png",
                           "assets/generated/items", "item", 10, "item", true, 1.2f});
             }
 
-            std::cout << "[TEXGEN] Генерация текстур завершена." << std::endl;
+            bunker::logInfo() << "[TEXGEN] Генерация текстур завершена." << std::endl;
         }
 
-    private:
+      private:
         // ── Загрузка базовой текстуры с кэшем ──
-        bool loadBase(const std::string &path, sf::Image &out)
+        bool loadBase(const std::string& path, sf::Image& out)
         {
             auto it = m_BaseCache.find(path);
             if (it != m_BaseCache.end())
@@ -280,7 +279,7 @@ namespace bunker
         // МЕТОД: Перекраска (recolor)
         // Сдвиг оттенка + насыщенности с учётом маски
         // ═══════════════════════════════════════════════
-        void applyRecolor(sf::Image &img, const sf::Image &mask, bool hasMask, int seed)
+        void applyRecolor(sf::Image& img, const sf::Image& mask, bool hasMask, int seed)
         {
             unsigned w = img.getSize().x;
             unsigned h = img.getSize().y;
@@ -296,12 +295,12 @@ namespace bunker
                     // Проверяем маску
                     if (hasMask && x < mask.getSize().x && y < mask.getSize().y)
                     {
-                        sf::Color m = mask.getPixel(x, y);
+                        sf::Color m = mask.getPixel({x, y});
                         if (m.r < 30 && m.g < 30 && m.b < 30)
                             continue; // Чёрный = не трогать
                     }
 
-                    sf::Color c = img.getPixel(x, y);
+                    sf::Color c = img.getPixel({x, y});
                     if (c.a == 0)
                         continue;
 
@@ -365,7 +364,9 @@ namespace bunker
                         b2 = X;
                     }
 
-                    img.setPixel(x, y, sf::Color(clampByte(static_cast<int>((r2 + m2) * 255)), clampByte(static_cast<int>((g2 + m2) * 255)), clampByte(static_cast<int>((b2 + m2) * 255)), c.a));
+                    img.setPixel({x, y}, sf::Color(clampByte(static_cast<int>((r2 + m2) * 255)),
+                                                   clampByte(static_cast<int>((g2 + m2) * 255)),
+                                                   clampByte(static_cast<int>((b2 + m2) * 255)), c.a));
                 }
             }
         }
@@ -374,7 +375,7 @@ namespace bunker
         // МЕТОД: Террейн (terrain)
         // Шум Перлина + цветовые вариации + пятна
         // ═══════════════════════════════════════════════
-        void applyTerrainNoise(sf::Image &img, int seed)
+        void applyTerrainNoise(sf::Image& img, int seed)
         {
             unsigned w = img.getSize().x;
             unsigned h = img.getSize().y;
@@ -385,7 +386,7 @@ namespace bunker
             {
                 for (unsigned x = 0; x < w; ++x)
                 {
-                    sf::Color c = img.getPixel(x, y);
+                    sf::Color c = img.getPixel({x, y});
                     if (c.a == 0)
                         continue;
 
@@ -397,7 +398,9 @@ namespace bunker
                     float grain = perlinNoise(x * 0.3f, y * 0.3f, seed + 999) * 0.1f;
                     factor += grain;
 
-                    img.setPixel(x, y, sf::Color(clampByte(static_cast<int>(c.r * factor)), clampByte(static_cast<int>(c.g * factor)), clampByte(static_cast<int>(c.b * factor)), c.a));
+                    img.setPixel({x, y}, sf::Color(clampByte(static_cast<int>(c.r * factor)),
+                                                   clampByte(static_cast<int>(c.g * factor)),
+                                                   clampByte(static_cast<int>(c.b * factor)), c.a));
                 }
             }
         }
@@ -407,7 +410,7 @@ namespace bunker
         // Перекраска тела с сохранением лица через маску
         // + пятна/полосы/раны
         // ═══════════════════════════════════════════════
-        void applyCreatureVariation(sf::Image &img, const sf::Image &mask, bool hasMask, int seed)
+        void applyCreatureVariation(sf::Image& img, const sf::Image& mask, bool hasMask, int seed)
         {
             // Сначала перекрашиваем (с маской)
             applyRecolor(img, mask, hasMask, seed);
@@ -437,19 +440,22 @@ namespace bunker
                         // Не трогаем маскированные зоны (лицо)
                         if (hasMask && px < (int)mask.getSize().x && py < (int)mask.getSize().y)
                         {
-                            sf::Color m = mask.getPixel(px, py);
+                            sf::Color m = mask.getPixel({static_cast<unsigned int>(px), static_cast<unsigned int>(py)});
                             if (m.r < 30)
                                 continue;
                         }
 
-                        sf::Color c = img.getPixel(px, py);
+                        sf::Color c = img.getPixel({static_cast<unsigned int>(px), static_cast<unsigned int>(py)});
                         if (c.a == 0)
                             continue;
 
                         float dist = std::sqrt(static_cast<float>(dx * dx + dy * dy)) / radius;
                         float blend = (1.0f - dist) * (1.0f - darkness);
 
-                        img.setPixel(px, py, sf::Color(clampByte(static_cast<int>(c.r * (1.0f - blend * 0.4f))), clampByte(static_cast<int>(c.g * (1.0f - blend * 0.3f))), clampByte(static_cast<int>(c.b * (1.0f - blend * 0.2f))), c.a));
+                        img.setPixel({static_cast<unsigned int>(px), static_cast<unsigned int>(py)},
+                                     sf::Color(clampByte(static_cast<int>(c.r * (1.0f - blend * 0.4f))),
+                                               clampByte(static_cast<int>(c.g * (1.0f - blend * 0.3f))),
+                                               clampByte(static_cast<int>(c.b * (1.0f - blend * 0.2f))), c.a));
                     }
                 }
             }
@@ -459,7 +465,7 @@ namespace bunker
         // МЕТОД: Робот (robot)
         // Цветовые схемы + металлические паттерны + царапины
         // ═══════════════════════════════════════════════
-        void applyRobotScheme(sf::Image &img, const sf::Image &mask, bool hasMask, int seed)
+        void applyRobotScheme(sf::Image& img, const sf::Image& mask, bool hasMask, int seed)
         {
             // Цветовая схема (выбираем одну из N)
             struct ColorScheme
@@ -486,12 +492,12 @@ namespace bunker
                 {
                     if (hasMask && x < mask.getSize().x && y < mask.getSize().y)
                     {
-                        sf::Color m = mask.getPixel(x, y);
+                        sf::Color m = mask.getPixel({x, y});
                         if (m.r < 30)
                             continue; // Сенсоры/глаза не трогать
                     }
 
-                    sf::Color c = img.getPixel(x, y);
+                    sf::Color c = img.getPixel({x, y});
                     if (c.a == 0)
                         continue;
 
@@ -501,7 +507,9 @@ namespace bunker
                     float metallic = perlinNoise(x * 0.1f, y * 0.1f, seed) * 0.15f;
                     gray += metallic;
 
-                    img.setPixel(x, y, sf::Color(clampByte(static_cast<int>(gray * cs.r * 255)), clampByte(static_cast<int>(gray * cs.g * 255)), clampByte(static_cast<int>(gray * cs.b * 255)), c.a));
+                    img.setPixel({x, y}, sf::Color(clampByte(static_cast<int>(gray * cs.r * 255)),
+                                                   clampByte(static_cast<int>(gray * cs.g * 255)),
+                                                   clampByte(static_cast<int>(gray * cs.b * 255)), c.a));
                 }
             }
 
@@ -521,8 +529,9 @@ namespace bunker
                     if (px < 0 || py < 0 || px >= (int)w || py >= (int)h)
                         continue;
 
-                    sf::Color c = img.getPixel(px, py);
-                    img.setPixel(px, py, sf::Color(clampByte(c.r + 40), clampByte(c.g + 40), clampByte(c.b + 40), c.a));
+                    sf::Color c = img.getPixel({static_cast<unsigned int>(px), static_cast<unsigned int>(py)});
+                    img.setPixel({static_cast<unsigned int>(px), static_cast<unsigned int>(py)},
+                                 sf::Color(clampByte(c.r + 40), clampByte(c.g + 40), clampByte(c.b + 40), c.a));
                 }
             }
         }
@@ -531,7 +540,7 @@ namespace bunker
         // МЕТОД: Предмет (item)
         // Перекраска деталей + мелкие изменения формы
         // ═══════════════════════════════════════════════
-        void applyItemVariation(sf::Image &img, const sf::Image &mask, bool hasMask, int seed)
+        void applyItemVariation(sf::Image& img, const sf::Image& mask, bool hasMask, int seed)
         {
             applyRecolor(img, mask, hasMask, seed);
 
@@ -544,14 +553,16 @@ namespace bunker
             {
                 for (unsigned x = 0; x < w; ++x)
                 {
-                    sf::Color c = img.getPixel(x, y);
+                    sf::Color c = img.getPixel({x, y});
                     if (c.a == 0)
                         continue;
 
                     float yFactor = static_cast<float>(y) / static_cast<float>(h);
                     float mod = 0.9f + yFactor * 0.2f * brightZone;
 
-                    img.setPixel(x, y, sf::Color(clampByte(static_cast<int>(c.r * mod)), clampByte(static_cast<int>(c.g * mod)), clampByte(static_cast<int>(c.b * mod)), c.a));
+                    img.setPixel({x, y}, sf::Color(clampByte(static_cast<int>(c.r * mod)),
+                                                   clampByte(static_cast<int>(c.g * mod)),
+                                                   clampByte(static_cast<int>(c.b * mod)), c.a));
                 }
             }
         }
@@ -561,19 +572,19 @@ namespace bunker
         // Создаёт РЕАЛЬНЫЕ выпуклости, не нарисованные!
         // Используется Sobel-фильтр по яркости пикселей.
         // ═══════════════════════════════════════════════
-        sf::Image generateNormalMap(const sf::Image &source, float strength)
+        sf::Image generateNormalMap(const sf::Image& source, float strength)
         {
             unsigned w = source.getSize().x;
             unsigned h = source.getSize().y;
 
             sf::Image normalMap;
-            normalMap.create(w, h, sf::Color(128, 128, 255)); // Нейтральная нормаль (0,0,1)
+            normalMap.resize({w, h}, sf::Color(128, 128, 255)); // Нейтральная нормаль (0,0,1)
 
             auto getGray = [&](int x, int y) -> float
             {
                 x = std::max(0, std::min(static_cast<int>(w) - 1, x));
                 y = std::max(0, std::min(static_cast<int>(h) - 1, y));
-                sf::Color c = source.getPixel(x, y);
+                sf::Color c = source.getPixel({static_cast<unsigned int>(x), static_cast<unsigned int>(y)});
                 return (c.r + c.g + c.b) / (3.0f * 255.0f);
             };
 
@@ -582,9 +593,11 @@ namespace bunker
                 for (unsigned x = 0; x < w; ++x)
                 {
                     // Sobel X
-                    float dx = -getGray(x - 1, y - 1) - 2 * getGray(x - 1, y) - getGray(x - 1, y + 1) + getGray(x + 1, y - 1) + 2 * getGray(x + 1, y) + getGray(x + 1, y + 1);
+                    float dx = -getGray(x - 1, y - 1) - 2 * getGray(x - 1, y) - getGray(x - 1, y + 1) +
+                               getGray(x + 1, y - 1) + 2 * getGray(x + 1, y) + getGray(x + 1, y + 1);
                     // Sobel Y
-                    float dy = -getGray(x - 1, y - 1) - 2 * getGray(x, y - 1) - getGray(x + 1, y - 1) + getGray(x - 1, y + 1) + 2 * getGray(x, y + 1) + getGray(x + 1, y + 1);
+                    float dy = -getGray(x - 1, y - 1) - 2 * getGray(x, y - 1) - getGray(x + 1, y - 1) +
+                               getGray(x - 1, y + 1) + 2 * getGray(x, y + 1) + getGray(x + 1, y + 1);
 
                     dx *= strength;
                     dy *= strength;
@@ -597,7 +610,9 @@ namespace bunker
                     dz /= len;
 
                     // Кодируем в RGB: [-1,1] → [0,255]
-                    normalMap.setPixel(x, y, sf::Color(clampByte(static_cast<int>((dx * 0.5f + 0.5f) * 255)), clampByte(static_cast<int>((dy * 0.5f + 0.5f) * 255)), clampByte(static_cast<int>((dz * 0.5f + 0.5f) * 255)), 255));
+                    normalMap.setPixel({x, y}, sf::Color(clampByte(static_cast<int>((dx * 0.5f + 0.5f) * 255)),
+                                                         clampByte(static_cast<int>((dy * 0.5f + 0.5f) * 255)),
+                                                         clampByte(static_cast<int>((dz * 0.5f + 0.5f) * 255)), 255));
                 }
             }
 
@@ -617,8 +632,9 @@ namespace bunker
 
     class MegaTileAtlasBaker
     {
-    public:
-        static bool bakeTileAtlas(const std::vector<sf::Image> &tiles, int atlasWidth, sf::Image &outAtlasImg, std::vector<AtlasSubRect> &outRects)
+      public:
+        static bool bakeTileAtlas(const std::vector<sf::Image>& tiles, int atlasWidth, sf::Image& outAtlasImg,
+                                  std::vector<AtlasSubRect>& outRects)
         {
             if (tiles.empty() || atlasWidth <= 0)
                 return false;
@@ -633,7 +649,8 @@ namespace bunker
             int rows = (static_cast<int>(tiles.size()) + cols - 1) / cols;
             int atlasHeight = rows * tileH;
 
-            outAtlasImg.create(atlasWidth, atlasHeight, sf::Color::Transparent);
+            outAtlasImg.resize({static_cast<unsigned int>(atlasWidth), static_cast<unsigned int>(atlasHeight)},
+                               sf::Color::Transparent);
             outRects.clear();
 
             for (std::size_t i = 0; i < tiles.size(); ++i)
@@ -643,12 +660,12 @@ namespace bunker
                 int px = c * tileW;
                 int py = r * tileH;
 
-                outAtlasImg.copy(tiles[i], px, py);
+                (void)outAtlasImg.copy(tiles[i], {static_cast<unsigned int>(px), static_cast<unsigned int>(py)});
                 outRects.push_back({px, py, tileW, tileH});
             }
 
-            std::cout << "[TEXGEN] Запечен Мега-Атлас Убежища 17 (" << atlasWidth << "x" << atlasHeight
-                      << "), упаковано тайлов: " << tiles.size() << " (0% спайков I/O)!" << std::endl;
+            bunker::logInfo() << "[TEXGEN] Запечен Мега-Атлас Убежища 17 (" << atlasWidth << "x" << atlasHeight
+                              << "), упаковано тайлов: " << tiles.size() << " (0% спайков I/O)!" << std::endl;
             return true;
         }
     };

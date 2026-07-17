@@ -1,19 +1,18 @@
 #include "ui/HUD.hpp"
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 #include <sstream>
 
 namespace bunker
 {
 
-    void HUD::drawBar(sf::RenderWindow &window, float x, float y, float width, float height,
-                      float percent, sf::Color bgColor, sf::Color fillColor,
-                      sf::Color borderColor)
+    void HUD::drawBar(sf::RenderWindow& window, float x, float y, float width, float height, float percent,
+                      sf::Color bgColor, sf::Color fillColor, sf::Color borderColor)
     {
         percent = std::clamp(percent, 0.0f, 1.0f);
 
         sf::RectangleShape bg({width, height});
-        bg.setPosition(x, y);
+        bg.setPosition({x, y});
         bg.setFillColor(bgColor);
         if (borderColor != sf::Color::Transparent)
         {
@@ -23,31 +22,24 @@ namespace bunker
         window.draw(bg);
 
         sf::RectangleShape fill({width * percent, height});
-        fill.setPosition(x, y);
+        fill.setPosition({x, y});
         fill.setFillColor(fillColor);
         window.draw(fill);
     }
 
-    void HUD::drawText(sf::RenderWindow &window, const std::string &str,
-                       float x, float y, int size, sf::Color color)
+    void HUD::drawText(sf::RenderWindow& window, const std::string& str, float x, float y, int size, sf::Color color)
     {
         if (!m_FontLoaded)
             return;
-        sf::Text text;
-        text.setFont(m_Font);
-        text.setString(str);
-        text.setCharacterSize(size);
+        sf::Text text(m_Font, str, static_cast<unsigned int>(size));
         text.setFillColor(color);
-        text.setPosition(x, y);
+        text.setPosition({x, y});
         window.draw(text);
     }
 
-    void HUD::render(sf::RenderWindow &window, const GameState &gs,
-                     const PlayerController &playerCtrl,
-                     const TacticsManager &tactics,
-                     const TitanAI &titanAI,
-                     const VehicleManager &vehicles,
-                     const PlayerInventory &inventory)
+    void HUD::render(sf::RenderWindow& window, const GameState& gs, const PlayerController& playerCtrl,
+                     const TacticsManager& tactics, const TitanAI& titanAI, const VehicleManager& vehicles,
+                     const PlayerInventory& inventory)
     {
 
         float W = static_cast<float>(Config::SCREEN_WIDTH);
@@ -56,15 +48,21 @@ namespace bunker
         if (vehicles.isPlayerInVehicle())
         {
             renderVehicleHUD(window, gs, vehicles, W, H);
+            renderScore(window, gs, W);
+            renderErosionWarning(window, gs, W, H);
+            renderPipPadHint(window, gs, W, H);
+            return;
         }
-        else if (gs.playerMode == UnitMode::Titan)
+
+        switch (gs.playerMode)
         {
+        case UnitMode::Titan:
             drawTankFrame(window, W, H);
             renderTankHUD(window, gs, titanAI, W, H);
-        }
-        else
-        {
+            break;
+        default:
             renderScoutHUD(window, gs, playerCtrl, tactics, inventory, W, H);
+            break;
         }
 
         renderScore(window, gs, W);
@@ -72,7 +70,7 @@ namespace bunker
         renderPipPadHint(window, gs, W, H);
     }
 
-    void HUD::drawTankFrame(sf::RenderWindow &window, float W, float H)
+    void HUD::drawTankFrame(sf::RenderWindow& window, float W, float H)
     {
         sf::Color frameColor(230, 115, 25, 80);
         drawBar(window, 10, 10, W - 20, 3, 1.0f, frameColor, frameColor);
@@ -81,10 +79,8 @@ namespace bunker
         drawBar(window, W - 13, 10, 3, H - 20, 1.0f, frameColor, frameColor);
     }
 
-    void HUD::renderScoutHUD(sf::RenderWindow &window, const GameState &gs,
-                             const PlayerController &ctrl, const TacticsManager &tactics,
-                             const PlayerInventory &inventory,
-                             float W, float H)
+    void HUD::renderScoutHUD(sf::RenderWindow& window, const GameState& gs, const PlayerController& ctrl,
+                             const TacticsManager& tactics, const PlayerInventory& inventory, float W, float H)
     {
         sf::Color fo76Amber(255, 185, 40);
         float barX = 40.0f;
@@ -92,32 +88,30 @@ namespace bunker
 
         drawText(window, "FO76 AMBER HUD — ON-FOOT PILOT", barX, barBaseY - 20, 11, fo76Amber);
 
-        float xpRequired = static_cast<float>(Config::BASE_XP_PER_LEVEL +
-                                              (gs.characterProg.level - 1) * Config::XP_INCREMENT);
+        float xpRequired =
+            static_cast<float>(Config::BASE_XP_PER_LEVEL + (gs.characterProg.level - 1) * Config::XP_INCREMENT);
         float xpPct = (xpRequired > 0.0f) ? static_cast<float>(gs.characterProg.experience) / xpRequired : 0.0f;
-        drawBar(window, barX, barBaseY, 260, 5, xpPct,
-                sf::Color(40, 40, 40, 130), sf::Color(255, 220, 50, 200));
+        drawBar(window, barX, barBaseY, 260, 5, xpPct, sf::Color(40, 40, 40, 130), sf::Color(255, 220, 50, 200));
         std::string lvlStr = "LV " + std::to_string(gs.characterProg.level);
         drawText(window, lvlStr, barX + 265, barBaseY - 2, 10, sf::Color(255, 220, 50));
 
         float hpPct = gs.playerHealth / gs.playerMaxHealth;
-        drawBar(window, barX, barBaseY + 10, 250, 14, hpPct,
-                sf::Color(50, 50, 50, 130), sf::Color(255, 50, 50, 220),
+        drawBar(window, barX, barBaseY + 10, 250, 14, hpPct, sf::Color(50, 50, 50, 130), sf::Color(255, 50, 50, 220),
                 sf::Color(80, 30, 30, 150));
-        std::string hpStr = std::to_string(static_cast<int>(gs.playerHealth)) + "/" + std::to_string(static_cast<int>(gs.playerMaxHealth));
+        std::string hpStr = std::to_string(static_cast<int>(gs.playerHealth)) + "/" +
+                            std::to_string(static_cast<int>(gs.playerMaxHealth));
         drawText(window, hpStr, barX + 5, barBaseY + 10, 11, sf::Color(255, 150, 150));
 
         float apPct = ctrl.getStaminaPercent();
-        drawBar(window, barX, barBaseY + 30, 200, 8, apPct,
-                sf::Color(50, 50, 50, 130), sf::Color(100, 220, 50, 200),
+        drawBar(window, barX, barBaseY + 30, 200, 8, apPct, sf::Color(50, 50, 50, 130), sf::Color(100, 220, 50, 200),
                 sf::Color(40, 80, 20, 150));
         drawText(window, "AP", barX + 205, barBaseY + 27, 10, sf::Color(100, 220, 50));
 
         float erPct = gs.playerErosionLevel / 100.0f;
         if (erPct > 0.01f)
         {
-            drawBar(window, barX, barBaseY + 44, 150, 5, erPct,
-                    sf::Color(30, 30, 30, 150), sf::Color(150, 50, 200, 180));
+            drawBar(window, barX, barBaseY + 44, 150, 5, erPct, sf::Color(30, 30, 30, 150),
+                    sf::Color(150, 50, 200, 180));
             drawText(window, "ETHER", barX + 155, barBaseY + 41, 9, sf::Color(150, 50, 200));
         }
 
@@ -142,7 +136,8 @@ namespace bunker
             drawText(window, ">> DIVE <<", W / 2 - 40, H - 140, 14, sf::Color(255, 255, 100));
         }
 
-        std::string wt = std::to_string(static_cast<int>(inventory.getCurrentWeight())) + "/" + std::to_string(static_cast<int>(inventory.getMaxWeight())) + " kg";
+        std::string wt = std::to_string(static_cast<int>(inventory.getCurrentWeight())) + "/" +
+                         std::to_string(static_cast<int>(inventory.getMaxWeight())) + " kg";
         drawText(window, wt, W - 120, H - 30, 11, sf::Color(180, 180, 180));
 
         if (gs.bunkerProgression.hasFoundPipPad)
@@ -151,8 +146,7 @@ namespace bunker
         }
     }
 
-    void HUD::renderTankHUD(sf::RenderWindow &window, const GameState &gs,
-                            const TitanAI &titanAI, float W, float H)
+    void HUD::renderTankHUD(sf::RenderWindow& window, const GameState& gs, const TitanAI& titanAI, float W, float H)
     {
         sf::Color tankOrange(230, 115, 25);
         sf::Color darkBg(25, 50, 25, 100);
@@ -160,33 +154,27 @@ namespace bunker
         float barX = 50.0f;
 
         float hpPct = gs.titan.health / gs.titan.maxHealth;
-        drawBar(window, barX, H - 100, 300, 18, hpPct,
-                darkBg, sf::Color(255, 80, 30, 220), sf::Color(120, 50, 10, 150));
+        drawBar(window, barX, H - 100, 300, 18, hpPct, darkBg, sf::Color(255, 80, 30, 220),
+                sf::Color(120, 50, 10, 150));
         drawText(window, "BT-7274 HULL", barX + 2, H - 102, 12, tankOrange);
 
         float vortexPct = titanAI.getVortexEnergy() / 100.0f;
-        drawBar(window, barX, H - 75, 300, 12, vortexPct,
-                darkBg, sf::Color(80, 150, 255, 220));
+        drawBar(window, barX, H - 75, 300, 12, vortexPct, darkBg, sf::Color(80, 150, 255, 220));
         std::string vLabel = titanAI.isVortexActive() ? "VORTEX [ACTIVE]" : "VORTEX SHIELD";
         drawText(window, vLabel, barX + 2, H - 77, 10, sf::Color(80, 150, 255));
 
         float tracksPct = gs.titan.systems.tracksCondition / 100.0f;
-        drawBar(window, barX, H - 58, 300, 10, tracksPct,
-                sf::Color(50, 25, 0, 100), tankOrange);
+        drawBar(window, barX, H - 58, 300, 10, tracksPct, sf::Color(50, 25, 0, 100), tankOrange);
         std::string trkLabel = (tracksPct < 0.4f) ? "TRACKS [DAMAGED]" : "TRACKS";
-        drawText(window, trkLabel, barX + 2, H - 60, 9,
-                 (tracksPct < 0.4f) ? sf::Color::Red : tankOrange);
+        drawText(window, trkLabel, barX + 2, H - 60, 9, (tracksPct < 0.4f) ? sf::Color::Red : tankOrange);
 
         float turretPct = gs.titan.systems.turretStatus / 100.0f;
-        drawBar(window, barX, H - 44, 300, 10, turretPct,
-                sf::Color(50, 25, 0, 100), tankOrange);
+        drawBar(window, barX, H - 44, 300, 10, turretPct, sf::Color(50, 25, 0, 100), tankOrange);
         std::string turLabel = (turretPct < 0.5f) ? "TURRET [MALFUNCTION]" : "TURRET";
-        drawText(window, turLabel, barX + 2, H - 46, 9,
-                 (turretPct < 0.5f) ? sf::Color::Red : tankOrange);
+        drawText(window, turLabel, barX + 2, H - 46, 9, (turretPct < 0.5f) ? sf::Color::Red : tankOrange);
 
         float corePct = titanAI.getCoreCharge() / 100.0f;
-        drawBar(window, barX, H - 28, 300, 22, corePct,
-                sf::Color(50, 50, 50, 130), sf::Color(255, 180, 0, 230),
+        drawBar(window, barX, H - 28, 300, 22, corePct, sf::Color(50, 50, 50, 130), sf::Color(255, 180, 0, 230),
                 sf::Color(100, 80, 0, 150));
         std::string coreLabel = titanAI.isCoreActive() ? "!! CORE OVERDRIVE !!" : "CORE CHARGE";
         sf::Color coreColor = titanAI.isCoreActive() ? sf::Color(255, 50, 50) : sf::Color(255, 200, 50);
@@ -204,6 +192,8 @@ namespace bunker
         case AncientLoadout::Ion_SplitLaser_Vacuum:
             wpn = "[3] ION LASER";
             break;
+        default:
+            break;
         }
         // ── Модульная физическая диаграмма Танка БТ-7274 (Omniverse v.137) ──
         drawText(window, ">> TITAN WIREFRAME CHASSIS <<", barX + 330, H - 100, 11, tankOrange);
@@ -219,53 +209,55 @@ namespace bunker
         drawText(window, "[Q] Vortex  [Tab] Dismount", barX, H - 5, 10, sf::Color(100, 100, 100));
     }
 
-    void HUD::renderVehicleHUD(sf::RenderWindow &window, const GameState &gs,
-                               const VehicleManager &vehicles, float W, float H)
+    void HUD::renderVehicleHUD(sf::RenderWindow& window, const GameState& gs, const VehicleManager& vehicles, float W,
+                               float H)
     {
+        (void)gs;
         sf::Color amber(255, 180, 0);
-        const auto *cfg = vehicles.getActiveConfig();
+        const auto* cfg = vehicles.getActiveConfig();
         std::string name = cfg ? cfg->displayName : "VEHICLE";
 
         drawText(window, name, W / 2 - 80, H - 90, 14, amber);
 
-        drawBar(window, W / 2 - 200, H - 65, 400, 18, 0.5f,
-                sf::Color(40, 25, 0, 130), amber, sf::Color(100, 80, 0, 100));
+        drawBar(window, W / 2 - 200, H - 65, 400, 18, 0.5f, sf::Color(40, 25, 0, 130), amber,
+                sf::Color(100, 80, 0, 100));
         drawText(window, "SPEED", W / 2 - 198, H - 67, 10, amber);
 
         if (cfg && cfg->driveType == "pressure")
         {
             float pressurePct = vehicles.getCarPressurePercent();
-            drawBar(window, W / 2 - 200, H - 40, 200, 8, pressurePct,
-                    sf::Color(50, 25, 0, 130), sf::Color(200, 100, 0, 200));
+            drawBar(window, W / 2 - 200, H - 40, 200, 8, pressurePct, sf::Color(50, 25, 0, 130),
+                    sf::Color(200, 100, 0, 200));
             drawText(window, "STEAM PRESSURE", W / 2 - 198, H - 42, 9, sf::Color(200, 100, 0));
         }
 
         drawText(window, "[X] Dismount", W / 2 - 45, H - 20, 12, sf::Color(200, 200, 200));
     }
 
-    void HUD::renderScore(sf::RenderWindow &window, const GameState &gs, float W)
+    void HUD::renderScore(sf::RenderWindow& window, const GameState& gs, float W)
     {
         drawText(window, "SCORE: " + std::to_string(gs.score), W - 180, 20, 14, sf::Color(50, 255, 50));
     }
 
-    void HUD::renderErosionWarning(sf::RenderWindow &window, const GameState &gs, float W, float H)
+    void HUD::renderErosionWarning(sf::RenderWindow& window, const GameState& gs, float W, float H)
     {
+        (void)H;
         if (gs.playerErosionLevel > 70.0f)
         {
             sf::RectangleShape warn({20, 20});
-            warn.setPosition(W - 60, 50);
+            warn.setPosition({W - 60.0f, 50.0f});
             warn.setFillColor(sf::Color(255, 50, 50, 150));
             window.draw(warn);
             drawText(window, "!", W - 55, 48, 16, sf::Color::Red);
         }
     }
 
-    void HUD::renderPipPadHint(sf::RenderWindow &window, const GameState &gs, float W, float H)
+    void HUD::renderPipPadHint(sf::RenderWindow& window, const GameState& gs, float W, float H)
     {
+        (void)H;
         if (!gs.bunkerProgression.hasFoundPipPad)
         {
-            drawText(window, "Find the Pip-Pad to unlock abilities!",
-                     W / 2 - 150, 30, 13, sf::Color(200, 200, 50));
+            drawText(window, "Find the Pip-Pad to unlock abilities!", W / 2 - 150, 30, 13, sf::Color(200, 200, 50));
         }
     }
 

@@ -17,5 +17,7 @@
 #define IMGUI_SFML_API
 #endif
 
+#ifndef IMGUI_API
 #define IMGUI_API IMGUI_SFML_API
+#endif
 #endif

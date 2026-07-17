@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Types.hpp"
-#include "GameState.hpp"
 #include "Constants.hpp"
 #include "EnemySpawner.hpp"
+#include "GameState.hpp"
+#include "Types.hpp"
+#include "engine/Log.hpp"
 #include <array>
 #include <vector>
-#include <iostream>
 
 namespace bunker
 {
@@ -28,7 +28,7 @@ namespace bunker
 
     class TimeShift
     {
-    private:
+      private:
         Timeline m_CurrentTimeline = Timeline::Present;
         TimelineSnapshot m_PresentSnapshot;
         TimelineSnapshot m_PastSnapshot;
@@ -46,32 +46,62 @@ namespace bunker
         bool m_IsTransitioning = false;
         bool m_Initialized = false;
 
-    public:
+      public:
         TimeShift() = default;
 
-        void initialize(GameState &gs, EnemySpawner &spawner);
-        bool tryShift(GameState &gs);
+        void initialize(GameState& gs, EnemySpawner& spawner);
+        bool tryShift(GameState& gs);
         void update(float dt);
-        void renderTransitionEffect(sf::RenderWindow &window) const;
-        void renderHUD(sf::RenderWindow &window, const sf::Font *font) const;
+        void renderTransitionEffect(sf::RenderWindow& window) const;
+        void renderHUD(sf::RenderWindow& window, const sf::Font* font) const;
 
-        Timeline getCurrentTimeline() const { return m_CurrentTimeline; }
-        bool isPast() const { return m_CurrentTimeline == Timeline::Past; }
-        bool isPresent() const { return m_CurrentTimeline == Timeline::Present; }
-        bool isTransitioning() const { return m_IsTransitioning; }
-        float getDeviceCharge() const { return m_DeviceCharge; }
-        float getMaxCharge() const { return m_MaxCharge; }
-        float getChargePercent() const { return m_DeviceCharge / m_MaxCharge; }
-        float getCooldown() const { return m_ShiftCooldown; }
-        bool isReady() const { return m_ShiftCooldown <= 0.0f && m_DeviceCharge >= 5.0f; }
-        bool isInitialized() const { return m_Initialized; }
+        Timeline getCurrentTimeline() const
+        {
+            return m_CurrentTimeline;
+        }
+        bool isPast() const
+        {
+            return m_CurrentTimeline == Timeline::Past;
+        }
+        bool isPresent() const
+        {
+            return m_CurrentTimeline == Timeline::Present;
+        }
+        bool isTransitioning() const
+        {
+            return m_IsTransitioning;
+        }
+        float getDeviceCharge() const
+        {
+            return m_DeviceCharge;
+        }
+        float getMaxCharge() const
+        {
+            return m_MaxCharge;
+        }
+        float getChargePercent() const
+        {
+            return m_DeviceCharge / m_MaxCharge;
+        }
+        float getCooldown() const
+        {
+            return m_ShiftCooldown;
+        }
+        bool isReady() const
+        {
+            return m_ShiftCooldown <= 0.0f && m_DeviceCharge >= 5.0f;
+        }
+        bool isInitialized() const
+        {
+            return m_Initialized;
+        }
 
-    private:
-        void savePresentFromGameState(const GameState &gs);
-        void savePastFromGameState(const GameState &gs);
-        void loadPresentToGameState(GameState &gs);
-        void loadPastToGameState(GameState &gs);
-        void generatePastTimeline(GameState &gs, EnemySpawner &spawner);
+      private:
+        void savePresentFromGameState(const GameState& gs);
+        void savePastFromGameState(const GameState& gs);
+        void loadPresentToGameState(GameState& gs);
+        void loadPastToGameState(GameState& gs);
+        void generatePastTimeline(GameState& gs, EnemySpawner& spawner);
     };
 
 } // namespace bunker

@@ -1,14 +1,14 @@
 #include "world/WorldSession.hpp"
-#include "gameplay/DamageSystem.hpp"
 #include "core/Constants.hpp"
-#include <cmath>
+#include "engine/Log.hpp"
+#include "gameplay/DamageSystem.hpp"
 #include <algorithm>
-#include <iostream>
+#include <cmath>
 
 namespace bunker
 {
 
-    void WorldSession::generateDefaultWorld(GameState &gs, EnemySpawner &spawner)
+    void WorldSession::generateDefaultWorld(GameState& gs, EnemySpawner& spawner)
     {
         for (int x = 0; x < Config::MAP_WIDTH; ++x)
         {
@@ -52,10 +52,10 @@ namespace bunker
         gs.playerPos = {5.0f, 5.0f, 0.0f};
         gs.titan.position = {7.0f, 7.0f, 0.0f};
 
-        std::cout << "[WORLD] Убежище 17 сгенерировано." << std::endl;
+        bunker::logInfo() << "[WORLD] Убежище 17 сгенерировано." << std::endl;
     }
 
-    void WorldSession::update(GameState &gs, float dt)
+    void WorldSession::update(GameState& gs, float dt)
     {
         for (int x = 0; x < Config::MAP_WIDTH; ++x)
         {
@@ -63,16 +63,16 @@ namespace bunker
             {
                 if (gs.etherErosionMap[x][y] > 0.01f)
                 {
-                    gs.etherErosionMap[x][y] = std::min(100.0f,
-                                                        gs.etherErosionMap[x][y] + Config::EROSION_SPREAD_RATE * dt);
+                    gs.etherErosionMap[x][y] =
+                        std::min(100.0f, gs.etherErosionMap[x][y] + Config::EROSION_SPREAD_RATE * dt);
 
                     float dx = gs.playerPos.x - (static_cast<float>(x) + 0.5f);
                     float dy = gs.playerPos.y - (static_cast<float>(y) + 0.5f);
 
                     if ((dx * dx + dy * dy) < 0.25f)
                     {
-                        gs.playerErosionLevel = std::min(100.0f,
-                                                         gs.playerErosionLevel + Config::EROSION_PLAYER_DAMAGE * dt);
+                        gs.playerErosionLevel =
+                            std::min(100.0f, gs.playerErosionLevel + Config::EROSION_PLAYER_DAMAGE * dt);
 
                         if (gs.playerErosionLevel > Config::EROSION_DAMAGE_THRESHOLD)
                         {
@@ -100,8 +100,8 @@ namespace bunker
 
         if (!gs.mapMeta.isBaseCleared && gs.regionalGrid.towerHealth > 0.0f)
         {
-            gs.mapMeta.baseSuppliesLevel = std::max(0.0f,
-                                                    gs.mapMeta.baseSuppliesLevel - 0.02f * gs.mapMeta.activeVerminNests * dt);
+            gs.mapMeta.baseSuppliesLevel =
+                std::max(0.0f, gs.mapMeta.baseSuppliesLevel - 0.02f * gs.mapMeta.activeVerminNests * dt);
         }
 
         if (!gs.bunkerProgression.hasFoundPipPad)
@@ -111,13 +111,13 @@ namespace bunker
             if ((dx * dx + dy * dy) < 0.5f)
             {
                 gs.bunkerProgression.hasFoundPipPad = true;
-                std::cout << "[STORY] Pip-Pad найден! Тактические способности разблокированы." << std::endl;
+                bunker::logInfo() << "[STORY] Pip-Pad найден! Тактические способности разблокированы." << std::endl;
             }
         }
 
         if (gs.regionalGrid.towerHealth > 0.0f)
         {
-            for (const auto &e : gs.enemies)
+            for (const auto& e : gs.enemies)
             {
                 if (!e.isAlive)
                     continue;
@@ -139,9 +139,9 @@ namespace bunker
         }
     }
 
-    void WorldSession::interactWithContainers(GameState &gs, PlayerInventory &inventory)
+    void WorldSession::interactWithContainers(GameState& gs, PlayerInventory& inventory)
     {
-        for (auto &container : gs.lootContainers)
+        for (auto& container : gs.lootContainers)
         {
             if (container.isOpened)
                 continue;
@@ -153,20 +153,19 @@ namespace bunker
             {
                 container.isOpened = true;
 
-                for (const auto &item : container.containsItems)
+                for (const auto& item : container.containsItems)
                 {
-                    inventory.addItem(item.itemID, item.type, item.quantity,
-                                      item.weightPerUnit, item.displayName);
+                    inventory.addItem(item.itemID, item.type, item.quantity, item.weightPerUnit, item.displayName);
                 }
 
-                std::cout << "[LOOT] Контейнер вскрыт, получено "
-                          << container.containsItems.size() << " предметов." << std::endl;
+                bunker::logInfo() << "[LOOT] Контейнер вскрыт, получено " << container.containsItems.size()
+                                  << " предметов." << std::endl;
                 return;
             }
         }
     }
 
-    void WorldSession::spreadErosionToNeighbors(GameState &gs)
+    void WorldSession::spreadErosionToNeighbors(GameState& gs)
     {
         std::array<std::array<float, Config::MAP_HEIGHT>, Config::MAP_WIDTH> copy = gs.etherErosionMap;
 
@@ -177,16 +176,15 @@ namespace bunker
                 if (copy[x][y] > 20.0f)
                 {
                     int neighbors[4][2] = {{x - 1, y}, {x + 1, y}, {x, y - 1}, {x, y + 1}};
-                    for (auto &n : neighbors)
+                    for (auto& n : neighbors)
                     {
                         int nx = n[0], ny = n[1];
-                        if (nx >= 0 && nx < Config::MAP_WIDTH &&
-                            ny >= 0 && ny < Config::MAP_HEIGHT)
+                        if (nx >= 0 && nx < Config::MAP_WIDTH && ny >= 0 && ny < Config::MAP_HEIGHT)
                         {
                             if (gs.sectorMap[nx][ny] != 1)
                             {
-                                gs.etherErosionMap[nx][ny] = std::min(100.0f,
-                                                                      gs.etherErosionMap[nx][ny] + copy[x][y] * 0.01f);
+                                gs.etherErosionMap[nx][ny] =
+                                    std::min(100.0f, gs.etherErosionMap[nx][ny] + copy[x][y] * 0.01f);
                             }
                         }
                     }

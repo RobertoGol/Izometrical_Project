@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Types.hpp"
-#include "GameState.hpp"
-#include "Inventory.hpp"
-#include "InputManager.hpp"
 #include "Constants.hpp"
+#include "GameState.hpp"
+#include "InputManager.hpp"
+#include "Inventory.hpp"
+#include "Types.hpp"
 #include "gameplay/DamageSystem.hpp"
 #include "world/WeatherSystem.hpp"
 
@@ -40,7 +40,7 @@ namespace bunker
         return std::max(lo, std::min(hi, v));
     }
 
-    inline float advDistSq(const Vector3D &a, const Vector3D &b)
+    inline float advDistSq(const Vector3D& a, const Vector3D& b)
     {
         const float dx = a.x - b.x;
         const float dy = a.y - b.y;
@@ -48,7 +48,7 @@ namespace bunker
         return dx * dx + dy * dy + dz * dz;
     }
 
-    inline float advDist2D(const Vector3D &a, const Vector3D &b)
+    inline float advDist2D(const Vector3D& a, const Vector3D& b)
     {
         const float dx = a.x - b.x;
         const float dy = a.y - b.y;
@@ -59,7 +59,9 @@ namespace bunker
     {
         const float len = std::sqrt(v.x * v.x + v.y * v.y);
         if (len < 0.0001f)
+        {
             return {0.0f, 0.0f, 0.0f};
+        }
         return {v.x / len, v.y / len, 0.0f};
     }
 
@@ -86,17 +88,26 @@ namespace bunker
 
     class RadioTapeSystem
     {
-    public:
+      public:
         RadioTapeSystem();
         void update(float dt);
-        void discoverTape(const std::string &id);
+        void discoverTape(const std::string& id);
         std::string playNextUnplayed();
 
-        const std::string &lastSubtitle() const { return m_LastSubtitle; }
-        const std::deque<std::string> &log() const { return m_Log; }
-        const std::vector<TapeRecord> &tapes() const { return m_Tapes; }
+        const std::string& lastSubtitle() const
+        {
+            return m_LastSubtitle;
+        }
+        const std::deque<std::string>& log() const
+        {
+            return m_Log;
+        }
+        const std::vector<TapeRecord>& tapes() const
+        {
+            return m_Tapes;
+        }
 
-    private:
+      private:
         float m_Time = 0.0f;
         std::string m_LastSubtitle;
         std::deque<std::string> m_Log;
@@ -134,7 +145,7 @@ namespace bunker
 
     class SurvivalSystem
     {
-    public:
+      public:
         static constexpr unsigned int ITEM_STIM = 303;
         static constexpr unsigned int ITEM_RATION_PROTEIN = 510;
         static constexpr unsigned int ITEM_RATION_STAMINA = 511;
@@ -142,25 +153,46 @@ namespace bunker
         static constexpr unsigned int ITEM_RATION_ANTI_EROSION = 513;
         static constexpr unsigned int ITEM_AMMO_556 = 610;
 
-        void update(GameState &gs, PlayerInventory &inv, float dt);
-        bool useStim(GameState &gs, PlayerInventory &inv);
-        bool eatRation(GameState &gs, PlayerInventory &inv, RationKind kind);
-        void startReload(PlayerInventory &inv);
+        void update(GameState& gs, PlayerInventory& inv, float dt);
+        bool useStim(GameState& gs, PlayerInventory& inv);
+        bool eatRation(GameState& gs, PlayerInventory& inv, RationKind kind);
+        void startReload(PlayerInventory& inv);
         bool consumeRound();
 
-        void addStress(float amount) { m_Stress = advClamp(m_Stress + amount, 0.0f, 100.0f); }
-        void calm(float amount) { m_Stress = advClamp(m_Stress - amount, 0.0f, 100.0f); }
+        void addStress(float amount)
+        {
+            m_Stress = advClamp(m_Stress + amount, 0.0f, 100.0f);
+        }
+        void calm(float amount)
+        {
+            m_Stress = advClamp(m_Stress - amount, 0.0f, 100.0f);
+        }
 
-        float stress() const { return m_Stress; }
-        bool secondWindAvailable() const { return !m_SecondWindUsed; }
-        bool soulLineAvailable() const { return !m_SoulLineUsed; }
-        const WeaponRuntime &weapon() const { return m_Weapon; }
-        const std::vector<ActiveBuff> &buffs() const { return m_Buffs; }
+        float stress() const
+        {
+            return m_Stress;
+        }
+        bool secondWindAvailable() const
+        {
+            return !m_SecondWindUsed;
+        }
+        bool soulLineAvailable() const
+        {
+            return !m_SoulLineUsed;
+        }
+        const WeaponRuntime& weapon() const
+        {
+            return m_Weapon;
+        }
+        const std::vector<ActiveBuff>& buffs() const
+        {
+            return m_Buffs;
+        }
 
         float speedMultiplier() const;
         float aimPenalty() const;
 
-    private:
+      private:
         float m_Stress = 0.0f;
         bool m_SecondWindUsed = false;
         bool m_SoulLineUsed = false;
@@ -168,10 +200,10 @@ namespace bunker
         std::vector<ActiveBuff> m_Buffs;
 
         float reloadDuration() const;
-        void updateStress(GameState &gs, float dt);
-        void updateBuffs(GameState &gs, float dt);
-        void updateReload(GameState &gs, float dt);
-        void updateSecondWindAndSoulLine(GameState &gs);
+        void updateStress(GameState& gs, float dt);
+        void updateBuffs(GameState& gs, float dt);
+        void updateReload(GameState& gs, float dt);
+        void updateSecondWindAndSoulLine(GameState& gs);
     };
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -210,25 +242,34 @@ namespace bunker
 
     class TankUtilitySystem
     {
-    public:
+      public:
         static constexpr unsigned int ITEM_REPAIR_KIT = 401;
 
-        void update(GameState &gs, float dt);
+        void update(GameState& gs, float dt);
         void nextUtility();
         void swapSeat();
-        bool useUtility(GameState &gs);
-        bool registerCannonShot(GameState &gs, float heat);
-        bool repairInHangar(GameState &gs, PlayerInventory &inv);
+        bool useUtility(GameState& gs);
+        bool registerCannonShot(GameState& gs, float heat);
+        bool repairInHangar(GameState& gs, PlayerInventory& inv);
 
-        bool isInsideHangar(const Vector3D &p) const { return p.x >= 1.5f && p.x <= 6.5f && p.y >= 1.5f && p.y <= 6.5f; }
-        const TankUtilityRuntime &runtime() const { return m_Runtime; }
-        const std::vector<MuzzleSpark> &sparks() const { return m_Sparks; }
+        bool isInsideHangar(const Vector3D& p) const
+        {
+            return p.x >= 1.5f && p.x <= 6.5f && p.y >= 1.5f && p.y <= 6.5f;
+        }
+        const TankUtilityRuntime& runtime() const
+        {
+            return m_Runtime;
+        }
+        const std::vector<MuzzleSpark>& sparks() const
+        {
+            return m_Sparks;
+        }
 
-    private:
+      private:
         TankUtilityRuntime m_Runtime;
         std::vector<MuzzleSpark> m_Sparks;
 
-        void carveFront(GameState &gs, int radius, int damage);
+        void carveFront(GameState& gs, int radius, int damage);
     };
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -266,22 +307,28 @@ namespace bunker
 
     class ReactiveWorldSystem
     {
-    public:
+      public:
         int add(BreakableKind kind, Vector3D pos);
         void seedDefault();
-        void update(GameState &gs, float dt);
-        void damageAt(GameState &gs, Vector3D pos, float radius, float damage, float impulse);
+        void update(GameState& gs, float dt);
+        void damageAt(GameState& gs, Vector3D pos, float radius, float damage, float impulse);
 
-        const std::vector<BreakableObject> &breakables() const { return m_Breakables; }
-        const std::vector<ShockWave> &waves() const { return m_Waves; }
+        const std::vector<BreakableObject>& breakables() const
+        {
+            return m_Breakables;
+        }
+        const std::vector<ShockWave>& waves() const
+        {
+            return m_Waves;
+        }
 
-    private:
+      private:
         int m_NextId = 0;
         std::vector<BreakableObject> m_Breakables;
         std::vector<ShockWave> m_Waves;
 
-        void explodeBarrel(GameState &gs, BreakableObject &b);
-        void applyWave(GameState &gs, const ShockWave &wave, float dt);
+        void explodeBarrel(GameState& gs, BreakableObject& b);
+        void applyWave(GameState& gs, const ShockWave& wave, float dt);
     };
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -310,21 +357,27 @@ namespace bunker
 
     class StoryRouteSystem
     {
-    public:
+      public:
         StoryRouteSystem();
-        void update(GameState &gs, RadioTapeSystem *radio = nullptr);
+        void update(GameState& gs, RadioTapeSystem* radio = nullptr);
 
-        const std::vector<StoryRouteEntry> &route() const { return m_Route; }
-        const std::string &lastEvent() const { return m_LastEvent; }
+        const std::vector<StoryRouteEntry>& route() const
+        {
+            return m_Route;
+        }
+        const std::string& lastEvent() const
+        {
+            return m_LastEvent;
+        }
 
-    private:
+      private:
         std::vector<ZoneTrigger> m_Triggers;
         std::vector<StoryRouteEntry> m_Route;
         std::string m_LastEvent;
 
         void rebuildRoute();
-        void mark(const std::string &text);
-        void fire(GameState &gs, ZoneTrigger &t, RadioTapeSystem *radio);
+        void mark(const std::string& text);
+        void fire(GameState& gs, ZoneTrigger& t, RadioTapeSystem* radio);
     };
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -350,27 +403,45 @@ namespace bunker
 
     class SkillSystem
     {
-    public:
+      public:
         SkillSystem();
-        void grantXp(GameState &gs, int xp);
-        bool upgrade(GameState &gs, SkillId id);
+        void grantXp(GameState& gs, int xp);
+        bool upgrade(GameState& gs, SkillId id);
 
-        float footDamageMultiplier() const { return 1.0f + 0.08f * rank(SkillId::FootKill); }
-        float tankDamageMultiplier() const { return 1.0f + 0.10f * rank(SkillId::TankAction); }
-        float repairMultiplier() const { return 1.0f + 0.12f * rank(SkillId::Mechanic); }
-        float buildCostMultiplier() const { return 1.0f - 0.07f * rank(SkillId::Builder); }
+        float footDamageMultiplier() const
+        {
+            return 1.0f + 0.08f * rank(SkillId::FootKill);
+        }
+        float tankDamageMultiplier() const
+        {
+            return 1.0f + 0.10f * rank(SkillId::TankAction);
+        }
+        float repairMultiplier() const
+        {
+            return 1.0f + 0.12f * rank(SkillId::Mechanic);
+        }
+        float buildCostMultiplier() const
+        {
+            return 1.0f - 0.07f * rank(SkillId::Builder);
+        }
         int rank(SkillId id) const
         {
             auto it = m_Skills.rank.find(id);
             return it == m_Skills.rank.end() ? 0 : it->second;
         }
-        const SkillRuntime &runtime() const { return m_Skills; }
+        const SkillRuntime& runtime() const
+        {
+            return m_Skills;
+        }
 
-    private:
+      private:
         SkillRuntime m_Skills;
 
-        static int xpForNext(int level) { return 250 + level * 125; }
-        void applyPassive(GameState &gs, SkillId id, int r);
+        static int xpForNext(int level)
+        {
+            return 250 + level * 125;
+        }
+        void applyPassive(GameState& gs, SkillId id, int r);
     };
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -396,17 +467,18 @@ namespace bunker
 
     class LootGenerator
     {
-    public:
+      public:
         LootGenerator();
         InventoryItem roll(LootTier tier);
-        void fillContainer(LootContainer &c, LootTier tier, int rolls);
-        void normalizeWorldLoot(GameState &gs);
+        void fillContainer(LootContainer& c, LootTier tier, int rolls);
+        void normalizeWorldLoot(GameState& gs);
 
-    private:
+      private:
         std::mt19937 m_Rng;
         std::map<LootTier, std::vector<LootRollEntry>> m_Tables;
 
-        void add(LootTier tier, unsigned int id, ItemType type, std::string name, int minQ, int maxQ, float w, float unitWeight);
+        void add(LootTier tier, unsigned int id, ItemType type, std::string name, int minQ, int maxQ, float w,
+                 float unitWeight);
         void addDefaults();
     };
 
@@ -425,28 +497,40 @@ namespace bunker
 
     class CampSystem
     {
-    public:
+      public:
         static constexpr unsigned int ITEM_BUILD_MATERIAL = 201;
 
-        void toggle() { m_Enabled = !m_Enabled; }
-        bool enabled() const { return m_Enabled; }
+        void toggle()
+        {
+            m_Enabled = !m_Enabled;
+        }
+        bool enabled() const
+        {
+            return m_Enabled;
+        }
 
         void cycleType();
-        void updatePreview(const GameState &gs, const Vector3D &mouseWorld);
-        bool place(GameState &gs, PlayerInventory &inv, float costMult = 1.0f);
-        void updateTurrets(GameState &gs, float dt);
+        void updatePreview(const GameState& gs, const Vector3D& mouseWorld);
+        bool place(GameState& gs, PlayerInventory& inv, float costMult = 1.0f);
+        void updateTurrets(GameState& gs, float dt);
 
-        const CampPreview &preview() const { return m_Preview; }
-        const std::vector<CampObject> &objects() const { return m_Objects; }
+        const CampPreview& preview() const
+        {
+            return m_Preview;
+        }
+        const std::vector<CampObject>& objects() const
+        {
+            return m_Objects;
+        }
 
-    private:
+      private:
         bool m_Enabled = false;
         int m_NextId = 0;
         CampPreview m_Preview;
         std::vector<CampObject> m_Objects;
 
         static int baseCost(CampObjectType type);
-        bool canPlace(const GameState &gs, int x, int y) const;
+        bool canPlace(const GameState& gs, int x, int y) const;
     };
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -456,10 +540,13 @@ namespace bunker
     template <typename T>
     class TemplateSpatialGrid
     {
-    public:
+      public:
         explicit TemplateSpatialGrid(float cellSize = 2.0f) : m_CellSize(std::max(0.25f, cellSize)) {}
 
-        void clear() { m_Cells.clear(); }
+        void clear()
+        {
+            m_Cells.clear();
+        }
 
         void insert(Vector3D pos, T value)
         {
@@ -479,20 +566,33 @@ namespace bunker
                 {
                     auto it = m_Cells.find(key(x, y));
                     if (it == m_Cells.end())
+                    {
                         continue;
-                    for (const auto &value : it->second)
+                    }
+                    for (const auto& value : it->second)
+                    {
                         fn(value);
+                    }
                 }
             }
         }
 
-    private:
+      private:
         float m_CellSize;
         std::unordered_map<std::int64_t, std::vector<T>> m_Cells;
 
-        int cellX(float x) const { return static_cast<int>(std::floor(x / m_CellSize)); }
-        int cellY(float y) const { return static_cast<int>(std::floor(y / m_CellSize)); }
-        static std::int64_t key(int x, int y) { return (static_cast<std::int64_t>(x) << 32) ^ static_cast<unsigned int>(y); }
+        int cellX(float x) const
+        {
+            return static_cast<int>(std::floor(x / m_CellSize));
+        }
+        int cellY(float y) const
+        {
+            return static_cast<int>(std::floor(y / m_CellSize));
+        }
+        static std::int64_t key(int x, int y)
+        {
+            return (static_cast<std::int64_t>(x) << 32) ^ static_cast<unsigned int>(y);
+        }
     };
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -517,34 +617,46 @@ namespace bunker
     struct ToolGunAction
     {
         std::string label;
-        std::function<void(GameState &)> undo;
-        std::function<void(GameState &)> redo;
+        std::function<void(GameState&)> undo;
+        std::function<void(GameState&)> redo;
     };
 
     class PrefabLibrary
     {
-    public:
+      public:
         PrefabLibrary();
-        const PrefabDef *get(const std::string &name) const;
-        const std::vector<PrefabDef> &all() const { return m_Prefabs; }
+        const PrefabDef* get(const std::string& name) const;
+        const std::vector<PrefabDef>& all() const
+        {
+            return m_Prefabs;
+        }
 
-    private:
+      private:
         std::vector<PrefabDef> m_Prefabs;
     };
 
     class ToolGunSystem
     {
-    public:
+      public:
         void cycleMode();
-        bool apply(GameState &gs, Vector3D where, const PrefabLibrary &lib);
-        bool undo(GameState &gs);
-        bool redo(GameState &gs);
+        bool apply(GameState& gs, Vector3D where, const PrefabLibrary& lib);
+        bool undo(GameState& gs);
+        bool redo(GameState& gs);
 
-        ToolGunMode mode() const { return m_Mode; }
-        const std::string &lastValidation() const { return m_LastValidation; }
-        const std::string &lastExport() const { return m_LastExport; }
+        ToolGunMode mode() const
+        {
+            return m_Mode;
+        }
+        const std::string& lastValidation() const
+        {
+            return m_LastValidation;
+        }
+        const std::string& lastExport() const
+        {
+            return m_LastExport;
+        }
 
-    private:
+      private:
         ToolGunMode m_Mode = ToolGunMode::SpawnPrefab;
         std::vector<ToolGunAction> m_Undo;
         std::vector<ToolGunAction> m_Redo;
@@ -552,11 +664,11 @@ namespace bunker
         std::string m_LastExport;
 
         void pushAction(ToolGunAction a);
-        bool spawnPrefab(GameState &gs, int x, int y, const PrefabLibrary &lib);
-        bool deleteTile(GameState &gs, int x, int y);
-        bool paintErosion(GameState &gs, int x, int y);
-        std::string validate(const GameState &gs) const;
-        std::string exportMap(const GameState &gs) const;
+        bool spawnPrefab(GameState& gs, int x, int y, const PrefabLibrary& lib);
+        bool deleteTile(GameState& gs, int x, int y);
+        bool paintErosion(GameState& gs, int x, int y);
+        std::string validate(const GameState& gs) const;
+        std::string exportMap(const GameState& gs) const;
     };
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -588,18 +700,21 @@ namespace bunker
         std::vector<ObjTexCoord> texCoords;
         std::vector<ObjNormal> normals;
         std::vector<ObjFace> faces;
-        bool empty() const { return vertices.empty() || faces.empty(); }
+        bool empty() const
+        {
+            return vertices.empty() || faces.empty();
+        }
         void computeFlatNormalsIfMissing();
     };
 
     class ObjModelLoader
     {
-    public:
-        static ObjModel load(const std::string &path);
+      public:
+        static ObjModel load(const std::string& path);
 
-    private:
-        static int parseFaceIndex(const std::string &token);
-        static void parseFullFaceTriplet(const std::string &token, int &v_idx, int &vt_idx, int &vn_idx);
+      private:
+        static int parseFaceIndex(const std::string& token);
+        static void parseFullFaceTriplet(const std::string& token, int& v_idx, int& vt_idx, int& vn_idx);
     };
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -634,26 +749,38 @@ namespace bunker
 
     class LanlineServices
     {
-    public:
+      public:
         static constexpr int MAX_COOP_PLAYERS = 20;
 
-        int createLocalLobby(const std::string &playerName);
-        int addPeer(const std::string &name);
-        int addPeerWithSocket(const std::string &name, Vector3D pos, unsigned int sockFd);
-        void sendChat(int fromPeer, const std::string &text);
+        int createLocalLobby(const std::string& playerName);
+        int addPeer(const std::string& name);
+        int addPeerWithSocket(const std::string& name, Vector3D pos, unsigned int sockFd);
+        void sendChat(int fromPeer, const std::string& text);
         void setVoice(int peerId, bool active);
-        int requestDelivery(const std::string &payload, Vector3D dropPos);
-        void update(GameState &gs, PlayerInventory &inv, float dt);
+        int requestDelivery(const std::string& payload, Vector3D dropPos);
+        void update(GameState& gs, PlayerInventory& inv, float dt);
 
-        void cullInactiveOrDistantPeers(const Vector3D &localPlayerPos, float interestRadius);
+        void cullInactiveOrDistantPeers(const Vector3D& localPlayerPos, float interestRadius);
         void simulateWinsockUdpHeartbeat(float dt);
 
-        bool connected() const { return m_Connected; }
-        const std::vector<LanlinePeer> &peers() const { return m_Peers; }
-        const std::vector<LanlineChatMessage> &chat() const { return m_Chat; }
-        const std::vector<LanlineDelivery> &deliveries() const { return m_Deliveries; }
+        bool connected() const
+        {
+            return m_Connected;
+        }
+        const std::vector<LanlinePeer>& peers() const
+        {
+            return m_Peers;
+        }
+        const std::vector<LanlineChatMessage>& chat() const
+        {
+            return m_Chat;
+        }
+        const std::vector<LanlineDelivery>& deliveries() const
+        {
+            return m_Deliveries;
+        }
 
-    private:
+      private:
         bool m_Connected = false;
         int m_LobbyId = 0;
         int m_NextLobbyId = 1000;
@@ -665,7 +792,10 @@ namespace bunker
         std::vector<LanlineChatMessage> m_Chat;
         std::vector<LanlineDelivery> m_Deliveries;
 
-        void systemMessage(const std::string &text) { m_Chat.push_back({0, text, 8.0f}); }
+        void systemMessage(const std::string& text)
+        {
+            m_Chat.push_back({0, text, 8.0f});
+        }
     };
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -685,15 +815,21 @@ namespace bunker
 
     class ProfileSessionSystem
     {
-    public:
-        void startSession(PlayerProfile &p);
-        void update(PlayerProfile &p, float dt);
-        void registerKill(PlayerProfile &p) { p.totalKills += 1; }
-        void registerDeath(PlayerProfile &p) { p.totalDeaths += 1; }
-        void migrate(PlayerProfile &p);
-        std::string summary(const PlayerProfile &p) const;
+      public:
+        void startSession(PlayerProfile& p);
+        void update(PlayerProfile& p, float dt);
+        void registerKill(PlayerProfile& p)
+        {
+            p.totalKills += 1;
+        }
+        void registerDeath(PlayerProfile& p)
+        {
+            p.totalDeaths += 1;
+        }
+        void migrate(PlayerProfile& p);
+        std::string summary(const PlayerProfile& p) const;
 
-    private:
+      private:
         bool m_Started = false;
         float m_SessionTime = 0.0f;
     };
@@ -704,10 +840,10 @@ namespace bunker
 
     class AdvancedMechanics
     {
-    public:
-        void initialize(GameState &gs, PlayerInventory &inv);
-        void update(GameState &gs, PlayerInventory &inv, const InputSnapshot &input, float dt);
-        void onExplosion(GameState &gs, Vector3D pos, float radius, float damage);
+      public:
+        void initialize(GameState& gs, PlayerInventory& inv);
+        void update(GameState& gs, PlayerInventory& inv, const InputSnapshot& input, float dt);
+        void onExplosion(GameState& gs, Vector3D pos, float radius, float damage);
 
         WeatherSystem weather;
         RadioTapeSystem radio;

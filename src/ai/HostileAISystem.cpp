@@ -1,16 +1,16 @@
 #include "ai/HostileAISystem.hpp"
-#include "ai/PerceptionSystem.hpp"
 #include "ai/EnemyArchetypeRegistry.hpp"
+#include "ai/PerceptionSystem.hpp"
+#include "engine/Log.hpp"
 #include "gameplay/DamageSystem.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
-#include <iostream>
 
 namespace bunker
 {
 
-    int HostileAISystem::spawnHostile(GameState &gs, HostileKind kind, const Vector3D &pos)
+    int HostileAISystem::spawnHostile(GameState& gs, HostileKind kind, const Vector3D& pos)
     {
         Enemy e;
         e.position = pos;
@@ -29,7 +29,7 @@ namespace bunker
         return index;
     }
 
-    void HostileAISystem::assignKind(GameState &gs, std::size_t enemyIndex, HostileKind kind)
+    void HostileAISystem::assignKind(GameState& gs, std::size_t enemyIndex, HostileKind kind)
     {
         ensureStateSize(gs);
         if (enemyIndex >= gs.enemies.size())
@@ -45,14 +45,14 @@ namespace bunker
         }
     }
 
-    void HostileAISystem::update(GameState &gs, float dt)
+    void HostileAISystem::update(GameState& gs, float dt)
     {
         ensureStateSize(gs);
 
         for (std::size_t i = 0; i < gs.enemies.size(); ++i)
         {
-            Enemy &e = gs.enemies[i];
-            HostileRuntimeState &st = m_State[i];
+            Enemy& e = gs.enemies[i];
+            HostileRuntimeState& st = m_State[i];
 
             if (!e.isAlive)
                 continue;
@@ -101,18 +101,20 @@ namespace bunker
             case HostileAlertState::Searching:
                 updateSearching(gs, e, st, p, dt);
                 break;
+            default:
+                break;
             }
         }
     }
 
-    void HostileAISystem::applyDamageToHostile(GameState &gs, std::size_t enemyIndex, float damage, float hitLocalX)
+    void HostileAISystem::applyDamageToHostile(GameState& gs, std::size_t enemyIndex, float damage, float hitLocalX)
     {
         ensureStateSize(gs);
         if (enemyIndex >= gs.enemies.size())
             return;
 
-        Enemy &e = gs.enemies[enemyIndex];
-        HostileRuntimeState &st = m_State[enemyIndex];
+        Enemy& e = gs.enemies[enemyIndex];
+        HostileRuntimeState& st = m_State[enemyIndex];
 
         if (!e.isAlive)
             return;
@@ -161,6 +163,8 @@ namespace bunker
             return 65.0f;
         case HostileKind::RobotControl:
             return 140.0f;
+        default:
+            break;
         }
         return Config::ENEMY_BASE_HP;
     }
@@ -177,11 +181,13 @@ namespace bunker
             return 0.28f;
         case HostileKind::RobotControl:
             return 0.42f;
+        default:
+            break;
         }
         return Config::ENEMY_RADIUS;
     }
 
-    void HostileAISystem::ensureStateSize(const GameState &gs)
+    void HostileAISystem::ensureStateSize(const GameState& gs)
     {
         if (m_State.size() == gs.enemies.size())
             return;
@@ -214,7 +220,7 @@ namespace bunker
         return st;
     }
 
-    void HostileAISystem::applyMechanicalDegradation(HostileProfile &p, const HostileRuntimeState &st, Enemy &e) const
+    void HostileAISystem::applyMechanicalDegradation(HostileProfile& p, const HostileRuntimeState& st, Enemy& e) const
     {
         if (!p.isMechanical)
             return;
@@ -230,8 +236,8 @@ namespace bunker
         e.speed = p.speed;
     }
 
-    void HostileAISystem::updateAwareness(HostileRuntimeState &st, const HostileProfile &p,
-                                          const Vector3D &target, float dist, float dt, float visModifier, bool hasLOS) const
+    void HostileAISystem::updateAwareness(HostileRuntimeState& st, const HostileProfile& p, const Vector3D& target,
+                                          float dist, float dt, float visModifier, bool hasLOS) const
     {
         float effRadius = p.detectRadius * std::clamp(visModifier, 0.2f, 1.0f);
         bool canSense = (dist <= effRadius) && hasLOS;
@@ -246,29 +252,32 @@ namespace bunker
             {
                 st.alert = HostileAlertState::Aggro;
                 st.searchTimer = 2.5f;
+                return;
             }
-            else if (st.alert == HostileAlertState::Idle)
+
+            if (st.alert == HostileAlertState::Idle)
             {
                 st.alert = HostileAlertState::Suspicious;
             }
+            return;
         }
-        else
-        {
-            st.awareness = std::max(0.0f, st.awareness - p.awarenessDecay * dt);
 
-            if (st.alert == HostileAlertState::Aggro && tooFar)
-            {
-                st.alert = HostileAlertState::Searching;
-                st.searchTimer = 3.0f;
-            }
-            else if (st.awareness <= 0.0f)
-            {
-                st.alert = HostileAlertState::Idle;
-            }
+        st.awareness = std::max(0.0f, st.awareness - p.awarenessDecay * dt);
+
+        if (st.alert == HostileAlertState::Aggro && tooFar)
+        {
+            st.alert = HostileAlertState::Searching;
+            st.searchTimer = 3.0f;
+            return;
+        }
+
+        if (st.awareness <= 0.0f)
+        {
+            st.alert = HostileAlertState::Idle;
         }
     }
 
-    void HostileAISystem::updateIdle(Enemy &e, float dt) const
+    void HostileAISystem::updateIdle(Enemy& e, float dt) const
     {
         float wobbleX = (random01() - 0.5f) * 0.15f * dt;
         float wobbleY = (random01() - 0.5f) * 0.15f * dt;
@@ -276,8 +285,8 @@ namespace bunker
         e.position.y += wobbleY;
     }
 
-    void HostileAISystem::updateSearching(GameState &gs, Enemy &e, HostileRuntimeState &st,
-                                          const HostileProfile &p, float dt)
+    void HostileAISystem::updateSearching(GameState& gs, Enemy& e, HostileRuntimeState& st, const HostileProfile& p,
+                                          float dt)
     {
         st.searchTimer -= dt;
         moveToward(gs, e, st.lastKnownTarget, p.speed * 0.70f, dt);
@@ -288,9 +297,8 @@ namespace bunker
         }
     }
 
-    void HostileAISystem::updateAggro(GameState &gs, Enemy &e, HostileRuntimeState &st,
-                                      const HostileProfile &p, const Vector3D &target,
-                                      float dist, float dt)
+    void HostileAISystem::updateAggro(GameState& gs, Enemy& e, HostileRuntimeState& st, const HostileProfile& p,
+                                      const Vector3D& target, float dist, float dt)
     {
         if (p.usesRangedAttack)
         {
@@ -302,9 +310,8 @@ namespace bunker
         }
     }
 
-    void HostileAISystem::updateMelee(GameState &gs, Enemy &e, HostileRuntimeState &st,
-                                      const HostileProfile &p, const Vector3D &target,
-                                      float dist, float dt)
+    void HostileAISystem::updateMelee(GameState& gs, Enemy& e, HostileRuntimeState& st, const HostileProfile& p,
+                                      const Vector3D& target, float dist, float dt)
     {
         if (dist > p.attackRadius)
         {
@@ -316,9 +323,8 @@ namespace bunker
         performAttack(gs, st, p);
     }
 
-    void HostileAISystem::updateRanged(GameState &gs, Enemy &e, HostileRuntimeState &st,
-                                       const HostileProfile &p, const Vector3D &target,
-                                       float dist, float dt)
+    void HostileAISystem::updateRanged(GameState& gs, Enemy& e, HostileRuntimeState& st, const HostileProfile& p,
+                                       const Vector3D& target, float dist, float dt)
     {
         if (dist > p.attackRadius)
         {
@@ -339,7 +345,7 @@ namespace bunker
         }
     }
 
-    void HostileAISystem::performAttack(GameState &gs, HostileRuntimeState &st, const HostileProfile &p)
+    void HostileAISystem::performAttack(GameState& gs, HostileRuntimeState& st, const HostileProfile& p)
     {
         if (st.attackTimer > 0.0f)
             return;
@@ -360,7 +366,7 @@ namespace bunker
         st.attackTimer = p.attackCooldown;
     }
 
-    Vector3D HostileAISystem::chooseTarget(const GameState &gs, const Enemy &e) const
+    Vector3D HostileAISystem::chooseTarget(const GameState& gs, const Enemy& e) const
     {
         if (gs.playerMode == UnitMode::Titan || gs.titan.isPiloted)
         {
@@ -382,7 +388,7 @@ namespace bunker
         return gs.playerPos;
     }
 
-    void HostileAISystem::moveToward(GameState &gs, Enemy &e, const Vector3D &target, float speed, float dt) const
+    void HostileAISystem::moveToward(GameState& gs, Enemy& e, const Vector3D& target, float speed, float dt) const
     {
         float dx = target.x - e.position.x;
         float dy = target.y - e.position.y;
@@ -392,7 +398,7 @@ namespace bunker
         tryMove(gs, e, dx / len, dy / len, speed, dt);
     }
 
-    void HostileAISystem::moveAway(GameState &gs, Enemy &e, const Vector3D &target, float speed, float dt) const
+    void HostileAISystem::moveAway(GameState& gs, Enemy& e, const Vector3D& target, float speed, float dt) const
     {
         float dx = e.position.x - target.x;
         float dy = e.position.y - target.y;
@@ -402,8 +408,8 @@ namespace bunker
         tryMove(gs, e, dx / len, dy / len, speed, dt);
     }
 
-    void HostileAISystem::strafeAround(GameState &gs, Enemy &e, const Vector3D &target,
-                                       float speed, float sign, float dt) const
+    void HostileAISystem::strafeAround(GameState& gs, Enemy& e, const Vector3D& target, float speed, float sign,
+                                       float dt) const
     {
         float dx = target.x - e.position.x;
         float dy = target.y - e.position.y;
@@ -417,7 +423,7 @@ namespace bunker
         tryMove(gs, e, -ny * sign, nx * sign, speed, dt);
     }
 
-    void HostileAISystem::tryMove(GameState &gs, Enemy &e, float dirX, float dirY, float speed, float dt) const
+    void HostileAISystem::tryMove(GameState& gs, Enemy& e, float dirX, float dirY, float speed, float dt) const
     {
         float nx = e.position.x + dirX * speed * dt;
         float ny = e.position.y + dirY * speed * dt;

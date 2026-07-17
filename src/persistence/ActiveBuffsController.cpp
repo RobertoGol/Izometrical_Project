@@ -1,11 +1,11 @@
 #include "persistence/ActiveBuffsController.hpp"
-#include <iostream>
+#include "engine/Log.hpp"
 #include <algorithm>
 
 namespace bunker
 {
 
-    void ActiveBuffsController::consumeRation(unsigned int itemId, const std::string &name)
+    void ActiveBuffsController::consumeRation(unsigned int itemId, const std::string& name)
     {
         ConsumableBuff b;
         b.sourceItemId = itemId;
@@ -22,22 +22,21 @@ namespace bunker
         }
 
         m_ActiveBuffs.push_back(b);
-        std::cout << "[BUFF MANAGER] Активирован рацион РобКо: " << name << " (+120с действия)" << std::endl;
+        bunker::logInfo() << "[BUFF MANAGER] Активирован рацион РобКо: " << name << " (+120с действия)" << std::endl;
     }
 
-    void ActiveBuffsController::update(GameState &gs, float dt)
+    void ActiveBuffsController::update(GameState& gs, float dt)
     {
         float speedMult = 1.0f;
-        for (auto &b : m_ActiveBuffs)
+        for (auto& b : m_ActiveBuffs)
         {
             b.timeRemaining -= dt;
             speedMult = std::max(speedMult, b.speedBonusMultiplier);
         }
 
-        m_ActiveBuffs.erase(
-            std::remove_if(m_ActiveBuffs.begin(), m_ActiveBuffs.end(), [](const ConsumableBuff &b)
-                           { return b.timeRemaining <= 0.0f; }),
-            m_ActiveBuffs.end());
+        m_ActiveBuffs.erase(std::remove_if(m_ActiveBuffs.begin(), m_ActiveBuffs.end(),
+                                           [](const ConsumableBuff& b) { return b.timeRemaining <= 0.0f; }),
+                            m_ActiveBuffs.end());
 
         gs.playerSpeed = Config::PLAYER_WALK_SPEED * speedMult;
     }
@@ -45,7 +44,7 @@ namespace bunker
     float ActiveBuffsController::getCurrentSpeedBonus() const
     {
         float m = 1.0f;
-        for (const auto &b : m_ActiveBuffs)
+        for (const auto& b : m_ActiveBuffs)
             m = std::max(m, b.speedBonusMultiplier);
         return m;
     }
@@ -53,7 +52,7 @@ namespace bunker
     float ActiveBuffsController::getCurrentErosionResist() const
     {
         float r = 0.0f;
-        for (const auto &b : m_ActiveBuffs)
+        for (const auto& b : m_ActiveBuffs)
             r += b.erosionResistBonus;
         return r;
     }

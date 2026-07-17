@@ -1,16 +1,16 @@
 #include "persistence/Progression.hpp"
+#include "engine/Log.hpp"
 #include <algorithm>
-#include <iostream>
 
 namespace bunker
 {
 
-    bool Progression::awardXP(GameState &gs, int amount, std::string *eventText)
+    bool Progression::awardXP(GameState& gs, int amount, std::string* eventText)
     {
         if (amount <= 0)
             return false;
 
-        auto &prog = gs.characterProg;
+        auto& prog = gs.characterProg;
         prog.experience += amount;
         bool leveledUp = false;
 
@@ -31,17 +31,16 @@ namespace bunker
 
             leveledUp = true;
 
-            std::cout << "[LEVEL UP] Уровень " << prog.level
-                      << "! HP:" << prog.maxHp
-                      << " MP:" << prog.maxMp
-                      << " Очков:" << prog.unusedPoints << std::endl;
+            bunker::logInfo() << "[LEVEL UP] Уровень " << prog.level << "! HP:" << prog.maxHp << " MP:" << prog.maxMp
+                              << " Очков:" << prog.unusedPoints << std::endl;
         }
 
         if (eventText != nullptr)
         {
             if (leveledUp)
             {
-                *eventText = "LEVEL UP! Lv." + std::to_string(prog.level) + " | +" + std::to_string(Config::POINTS_PER_LEVEL) + " attribute points";
+                *eventText = "LEVEL UP! Lv." + std::to_string(prog.level) + " | +" +
+                             std::to_string(Config::POINTS_PER_LEVEL) + " attribute points";
             }
             else
             {
@@ -52,22 +51,22 @@ namespace bunker
         return leveledUp;
     }
 
-    void Progression::onEnemyKilled(GameState &gs)
+    void Progression::onEnemyKilled(GameState& gs)
     {
         awardXP(gs, 25);
     }
 
-    void Progression::onContainerOpened(GameState &gs)
+    void Progression::onContainerOpened(GameState& gs)
     {
         awardXP(gs, 10);
     }
 
-    void Progression::onPipPadFound(GameState &gs)
+    void Progression::onPipPadFound(GameState& gs)
     {
         awardXP(gs, 100);
     }
 
-    void Progression::onBaseCleared(GameState &gs)
+    void Progression::onBaseCleared(GameState& gs)
     {
         awardXP(gs, 500);
     }
@@ -78,7 +77,7 @@ namespace bunker
         return Config::BASE_XP_PER_LEVEL + (safeLevel - 1) * Config::XP_INCREMENT;
     }
 
-    float Progression::xpPercent(const GameState &gs)
+    float Progression::xpPercent(const GameState& gs)
     {
         int required = xpRequiredForLevel(gs.characterProg.level);
         if (required <= 0)
@@ -86,9 +85,9 @@ namespace bunker
         return static_cast<float>(gs.characterProg.experience) / static_cast<float>(required);
     }
 
-    bool Progression::spendPoint(GameState &gs, StatType stat)
+    bool Progression::spendPoint(GameState& gs, StatType stat)
     {
-        auto &prog = gs.characterProg;
+        auto& prog = gs.characterProg;
         if (prog.unusedPoints <= 0)
             return false;
 
@@ -110,9 +109,11 @@ namespace bunker
             break;
         case StatType::ErosionResist:
             break;
+        default:
+            break;
         }
 
-        std::cout << "[SKILL] Очко потрачено. Осталось: " << prog.unusedPoints << std::endl;
+        bunker::logInfo() << "[SKILL] Очко потрачено. Осталось: " << prog.unusedPoints << std::endl;
         return true;
     }
 

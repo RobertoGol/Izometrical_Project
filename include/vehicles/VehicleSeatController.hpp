@@ -1,9 +1,9 @@
 #pragma once
 
 #include "core/Types.hpp"
+#include "engine/Log.hpp"
 #include "gameplay/GameState.hpp"
 #include <array>
-#include <iostream>
 
 namespace bunker
 {
@@ -27,20 +27,29 @@ namespace bunker
 
     class VehicleSeatController
     {
-    private:
+      private:
         std::array<SeatSlot, 2> m_Seats;
         CockpitRole m_ActivePlayerRole = CockpitRole::Driver;
 
-    public:
+      public:
         VehicleSeatController();
 
-        bool tryMountPlayer(GameState &gs, CockpitRole role);
-        void dismountPlayer(GameState &gs);
+        bool tryMountPlayer(GameState& gs, CockpitRole role);
+        void dismountPlayer(GameState& gs);
         void swapPlayerRole();
 
-        CockpitRole activeRole() const { return m_ActivePlayerRole; }
-        bool isDriverOccupied() const { return m_Seats[0].isOccupied; }
-        bool isGunnerOccupied() const { return m_Seats[1].isOccupied; }
+        CockpitRole activeRole() const
+        {
+            return m_ActivePlayerRole;
+        }
+        bool isDriverOccupied() const
+        {
+            return m_Seats[0].isOccupied;
+        }
+        bool isGunnerOccupied() const
+        {
+            return m_Seats[1].isOccupied;
+        }
     };
 
 } // namespace bunker

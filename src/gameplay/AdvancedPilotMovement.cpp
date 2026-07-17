@@ -1,23 +1,23 @@
 #include "gameplay/AdvancedPilotMovement.hpp"
 #include "core/Constants.hpp"
-#include <iostream>
+#include "engine/Log.hpp"
 #include <algorithm>
 
 namespace bunker
 {
 
-    void AdvancedPilotMovementController::triggerKneeSlide(GameState &gs)
+    void AdvancedPilotMovementController::triggerKneeSlide(GameState& gs)
     {
         if (m_Mode == PilotLocomotionMode::GroundRunning)
         {
             m_Mode = PilotLocomotionMode::FloorSlideHop;
             m_SlideTimer = 1.25f;    // Длительность скольжения на коленях по полу
             gs.playerSpeed *= 1.45f; // Импульс ускорения подката!
-            std::cout << "[LOCOMotion] Активировано тактическое скольжение по полу (Подкат)!" << std::endl;
+            bunker::logInfo() << "[LOCOMotion] Активировано тактическое скольжение по полу (Подкат)!" << std::endl;
         }
     }
 
-    void AdvancedPilotMovementController::fireGrappleZipline(GameState &gs, const Vector3D &targetAnchor)
+    void AdvancedPilotMovementController::fireGrappleZipline(GameState& gs, const Vector3D& targetAnchor)
     {
         m_Grapple.isAttached = true;
         m_Grapple.anchorPoint = targetAnchor;
@@ -25,8 +25,8 @@ namespace bunker
         float dy = targetAnchor.y - gs.playerPos.y;
         m_Grapple.cableLength = std::sqrt(dx * dx + dy * dy);
         m_Mode = PilotLocomotionMode::GrappleZipline;
-        std::cout << "[ZIPLINE] !! ТАРЗАНКА !! Выпущен тросовый крюк-кошка к координате ("
-                  << targetAnchor.x << ", " << targetAnchor.y << ")!" << std::endl;
+        bunker::logInfo() << "[ZIPLINE] !! ТАРЗАНКА !! Выпущен тросовый крюк-кошка к координате (" << targetAnchor.x
+                          << ", " << targetAnchor.y << ")!" << std::endl;
     }
 
     void AdvancedPilotMovementController::detachGrapple()
@@ -35,34 +35,47 @@ namespace bunker
         m_Mode = PilotLocomotionMode::GroundRunning;
     }
 
-    void AdvancedPilotMovementController::updateLocomotionPhysics(GameState &gs, const WorldGridState &grid, float dt)
+    void AdvancedPilotMovementController::updateLocomotionPhysics(GameState& gs, const WorldGridState& grid, float dt)
     {
-        if (m_Mode == PilotLocomotionMode::FloorSlideHop)
+        switch (m_Mode)
         {
+        case PilotLocomotionMode::FloorSlideHop:
             m_SlideTimer -= dt;
             if (m_SlideTimer <= 0.0f)
             {
                 m_Mode = PilotLocomotionMode::GroundRunning;
             }
-        }
-        else if (m_Mode == PilotLocomotionMode::GrappleZipline && m_Grapple.isAttached)
-        {
-            // Физика подтягивания Пилота по тарзанке на огромной скорости
-            float pullSpeed = Config::PLAYER_WALK_SPEED * 3.5f;
-            float dx = m_Grapple.anchorPoint.x - gs.playerPos.x;
-            float dy = m_Grapple.anchorPoint.y - gs.playerPos.y;
-            float dist = std::sqrt(dx * dx + dy * dy);
+            break;
 
-            if (dist <= 0.5f)
+        case PilotLocomotionMode::GrappleZipline:
+            if (!m_Grapple.isAttached)
             {
-                detachGrapple(); // Достигли точки крепления троса
+                break;
             }
-            else
+
             {
-                gs.playerPos.x += (dx / dist) * pullSpeed * dt;
-                gs.playerPos.y += (dy / dist) * pullSpeed * dt;
+                float pullSpeed = Config::PLAYER_WALK_SPEED * 3.5f;
+                float dx = m_Grapple.anchorPoint.x - gs.playerPos.x;
+                float dy = m_Grapple.anchorPoint.y - gs.playerPos.y;
+                float dist = std::sqrt(dx * dx + dy * dy);
+
+                if (dist <= 0.5f)
+                {
+                    detachGrapple();
+                }
+                else
+                {
+                    gs.playerPos.x += (dx / dist) * pullSpeed * dt;
+                    gs.playerPos.y += (dy / dist) * pullSpeed * dt;
+                }
             }
             return;
+
+        case PilotLocomotionMode::GroundRunning:
+        case PilotLocomotionMode::WallRunningLeft:
+        case PilotLocomotionMode::WallRunningRight:
+        default:
+            break;
         }
 
         // Проверка прилипания к стенам для паркура (Wall running)

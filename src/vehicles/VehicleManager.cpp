@@ -1,15 +1,15 @@
 #include "vehicles/VehicleManager.hpp"
+#include "engine/Log.hpp"
+#include <algorithm>
+#include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
-#include <iostream>
-#include <filesystem>
-#include <cmath>
-#include <algorithm>
 
 namespace bunker
 {
 
-    void VehicleInstance::updatePhysics(GameState &gs, const InputSnapshot &input, float dt)
+    void VehicleInstance::updatePhysics(GameState& gs, const InputSnapshot& input, float dt)
     {
         if (!config)
             return;
@@ -28,7 +28,7 @@ namespace bunker
         }
     }
 
-    void VehicleInstance::updatePressureDrive(GameState &gs, const InputSnapshot &input, float dt)
+    void VehicleInstance::updatePressureDrive(GameState& gs, const InputSnapshot& input, float dt)
     {
         if (input.moveForward > 0.0f)
         {
@@ -47,9 +47,7 @@ namespace bunker
         float reverse = (input.moveForward < 0.0f) ? -3.0f : 0.0f;
         float targetSpd = (currentPressure / config->maxPressure) * config->maxSpeed + reverse;
 
-        Vector3D targetVel = {
-            std::cos(hullAngle) * targetSpd,
-            std::sin(hullAngle) * targetSpd, 0.0f};
+        Vector3D targetVel = {std::cos(hullAngle) * targetSpd, std::sin(hullAngle) * targetSpd, 0.0f};
 
         velocity.x += (targetVel.x - velocity.x) * config->acceleration * dt;
         velocity.y += (targetVel.y - velocity.y) * config->acceleration * dt;
@@ -57,7 +55,7 @@ namespace bunker
         applyMovement(gs, dt);
     }
 
-    void VehicleInstance::updateThrottleDrive(GameState &gs, const InputSnapshot &input, float dt)
+    void VehicleInstance::updateThrottleDrive(GameState& gs, const InputSnapshot& input, float dt)
     {
         bool moving = false;
 
@@ -91,48 +89,47 @@ namespace bunker
         applyMovement(gs, dt);
     }
 
-    void VehicleInstance::updateHoverDrive(GameState &gs, const InputSnapshot &input, float dt)
+    void VehicleInstance::updateHoverDrive(GameState& gs, const InputSnapshot& input, float dt)
     {
-        Vector3D inputVector = {
-            std::cos(hullAngle) * input.moveForward - std::sin(hullAngle) * input.moveStrafe,
-            std::sin(hullAngle) * input.moveForward + std::cos(hullAngle) * input.moveStrafe,
-            0.0f};
+        Vector3D inputVector = {std::cos(hullAngle) * input.moveForward - std::sin(hullAngle) * input.moveStrafe,
+                                std::sin(hullAngle) * input.moveForward + std::cos(hullAngle) * input.moveStrafe, 0.0f};
 
-        if (input.moveForward != 0.0f || input.moveStrafe != 0.0f)
-        {
-            float len = std::sqrt(inputVector.x * inputVector.x + inputVector.y * inputVector.y);
-            if (len > 0.0001f)
-            {
-                inputVector.x /= len;
-                inputVector.y /= len;
-            }
-
-            velocity.x += inputVector.x * config->acceleration * dt;
-            velocity.y += inputVector.y * config->acceleration * dt;
-
-            float spd = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
-            if (spd > config->maxSpeed)
-            {
-                velocity.x = (velocity.x / spd) * config->maxSpeed;
-                velocity.y = (velocity.y / spd) * config->maxSpeed;
-            }
-
-            if (input.moveStrafe != 0.0f)
-            {
-                hullAngle += input.moveStrafe * config->turnSpeed * 0.5f * dt;
-            }
-        }
-        else
+        if (input.moveForward == 0.0f && input.moveStrafe == 0.0f)
         {
             velocity.x *= std::pow(0.1f, dt);
             velocity.y *= std::pow(0.1f, dt);
+            position.z = 0.5f + std::sin(static_cast<float>(rand() % 100)) * 0.05f;
+            applyMovement(gs, dt);
+            return;
+        }
+
+        float len = std::sqrt(inputVector.x * inputVector.x + inputVector.y * inputVector.y);
+        if (len > 0.0001f)
+        {
+            inputVector.x /= len;
+            inputVector.y /= len;
+        }
+
+        velocity.x += inputVector.x * config->acceleration * dt;
+        velocity.y += inputVector.y * config->acceleration * dt;
+
+        float spd = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+        if (spd > config->maxSpeed)
+        {
+            velocity.x = (velocity.x / spd) * config->maxSpeed;
+            velocity.y = (velocity.y / spd) * config->maxSpeed;
+        }
+
+        if (input.moveStrafe != 0.0f)
+        {
+            hullAngle += input.moveStrafe * config->turnSpeed * 0.5f * dt;
         }
 
         position.z = 0.5f + std::sin(static_cast<float>(rand() % 100)) * 0.05f;
         applyMovement(gs, dt);
     }
 
-    void VehicleInstance::applyMovement(GameState &gs, float dt)
+    void VehicleInstance::applyMovement(GameState& gs, float dt)
     {
         float nextX = position.x + velocity.x * dt;
         float nextY = position.y + velocity.y * dt;
@@ -158,17 +155,17 @@ namespace bunker
         }
     }
 
-    void VehicleManager::scanAndLoadConfigs(const std::string &vehiclesDir)
+    void VehicleManager::scanAndLoadConfigs(const std::string& vehiclesDir)
     {
         m_Registry.clear();
 
         if (!std::filesystem::exists(vehiclesDir))
         {
-            std::cout << "[VEHICLES] Папка " << vehiclesDir << " не найдена, пропускаем." << std::endl;
+            bunker::logInfo() << "[VEHICLES] Папка " << vehiclesDir << " не найдена, пропускаем." << std::endl;
             return;
         }
 
-        for (const auto &entry : std::filesystem::directory_iterator(vehiclesDir))
+        for (const auto& entry : std::filesystem::directory_iterator(vehiclesDir))
         {
             if (!entry.is_directory())
                 continue;
@@ -191,20 +188,20 @@ namespace bunker
 
                 cfg.loaded = true;
                 m_Registry.push_back(cfg);
-                std::cout << "[VEHICLES] Зарегистрирован: " << cfg.displayName
-                          << " [" << cfg.id << "] spd=" << cfg.maxSpeed << std::endl;
+                bunker::logInfo() << "[VEHICLES] Зарегистрирован: " << cfg.displayName << " [" << cfg.id
+                                  << "] spd=" << cfg.maxSpeed << std::endl;
             }
         }
 
-        std::cout << "[VEHICLES] Всего типов транспорта: " << m_Registry.size() << std::endl;
+        bunker::logInfo() << "[VEHICLES] Всего типов транспорта: " << m_Registry.size() << std::endl;
     }
 
-    bool VehicleManager::spawnVehicle(const std::string &configId, const Vector3D &pos)
+    bool VehicleManager::spawnVehicle(const std::string& configId, const Vector3D& pos)
     {
-        const VehicleConfig *cfg = findConfig(configId);
+        const VehicleConfig* cfg = findConfig(configId);
         if (!cfg)
         {
-            std::cerr << "[VEHICLES] Конфиг '" << configId << "' не найден!" << std::endl;
+            bunker::logError() << "[VEHICLES] Конфиг '" << configId << "' не найден!" << std::endl;
             return false;
         }
 
@@ -213,12 +210,12 @@ namespace bunker
         inst.position = pos;
         m_Spawned.push_back(inst);
 
-        std::cout << "[VEHICLES] Спавн транспорта: " << cfg->displayName
-                  << " в [" << pos.x << ", " << pos.y << "]" << std::endl;
+        bunker::logInfo() << "[VEHICLES] Спавн транспорта: " << cfg->displayName << " в [" << pos.x << ", " << pos.y
+                          << "]" << std::endl;
         return true;
     }
 
-    bool VehicleManager::mountNearest(GameState &gs)
+    bool VehicleManager::mountNearest(GameState& gs)
     {
         if (gs.playerMode == UnitMode::Titan)
             return false;
@@ -247,19 +244,19 @@ namespace bunker
             m_Spawned[bestIndex].isOccupied = true;
             gs.playerPos = m_Spawned[bestIndex].position;
 
-            std::cout << "[VEHICLES] Посадка в " << m_Spawned[bestIndex].config->displayName << std::endl;
+            bunker::logInfo() << "[VEHICLES] Посадка в " << m_Spawned[bestIndex].config->displayName << std::endl;
             return true;
         }
 
         return false;
     }
 
-    void VehicleManager::dismount(GameState &gs)
+    void VehicleManager::dismount(GameState& gs)
     {
         if (m_ActiveVehicleIndex < 0)
             return;
 
-        VehicleInstance &v = m_Spawned[m_ActiveVehicleIndex];
+        VehicleInstance& v = m_Spawned[m_ActiveVehicleIndex];
         v.isOccupied = false;
 
         gs.playerPos.x = v.position.x + 1.0f;
@@ -271,16 +268,16 @@ namespace bunker
             gs.playerPos.x = v.position.x - 1.0f;
         }
 
-        std::cout << "[VEHICLES] Выход из " << v.config->displayName << std::endl;
+        bunker::logInfo() << "[VEHICLES] Выход из " << v.config->displayName << std::endl;
         m_ActiveVehicleIndex = -1;
     }
 
-    void VehicleManager::update(GameState &gs, const InputSnapshot &input, float dt)
+    void VehicleManager::update(GameState& gs, const InputSnapshot& input, float dt)
     {
         if (m_ActiveVehicleIndex < 0)
             return;
 
-        VehicleInstance &v = m_Spawned[m_ActiveVehicleIndex];
+        VehicleInstance& v = m_Spawned[m_ActiveVehicleIndex];
         v.updatePhysics(gs, input, dt);
         gs.playerPos = v.position;
     }
@@ -289,27 +286,27 @@ namespace bunker
     {
         if (m_ActiveVehicleIndex < 0)
             return 0.0f;
-        const auto &inst = m_Spawned[m_ActiveVehicleIndex];
+        const auto& inst = m_Spawned[m_ActiveVehicleIndex];
         if (!inst.config || inst.config->maxPressure <= 0.0f)
             return 0.0f;
         return inst.currentPressure / inst.config->maxPressure;
     }
 
-    const VehicleConfig *VehicleManager::getActiveConfig() const
+    const VehicleConfig* VehicleManager::getActiveConfig() const
     {
         if (m_ActiveVehicleIndex < 0)
             return nullptr;
         return m_Spawned[m_ActiveVehicleIndex].config;
     }
 
-    const VehicleInstance *VehicleManager::getActiveInstance() const
+    const VehicleInstance* VehicleManager::getActiveInstance() const
     {
         if (m_ActiveVehicleIndex < 0)
             return nullptr;
         return &m_Spawned[m_ActiveVehicleIndex];
     }
 
-    bool VehicleManager::loadConfig(const std::string &path, VehicleConfig &cfg)
+    bool VehicleManager::loadConfig(const std::string& path, VehicleConfig& cfg)
     {
         std::ifstream file(path);
         if (!file.is_open())
@@ -357,9 +354,9 @@ namespace bunker
         return true;
     }
 
-    const VehicleConfig *VehicleManager::findConfig(const std::string &id) const
+    const VehicleConfig* VehicleManager::findConfig(const std::string& id) const
     {
-        for (const auto &cfg : m_Registry)
+        for (const auto& cfg : m_Registry)
         {
             if (cfg.id == id)
                 return &cfg;

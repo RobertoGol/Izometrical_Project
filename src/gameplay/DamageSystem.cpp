@@ -1,12 +1,12 @@
 #include "gameplay/DamageSystem.hpp"
+#include "engine/Log.hpp"
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 
 namespace bunker
 {
 
-    DamageResult DamageSystem::applyPlayerDamage(GameState &gs, float rawDamage, DamageType type)
+    DamageResult DamageSystem::applyPlayerDamage(GameState& gs, float rawDamage, DamageType type)
     {
         DamageResult res;
         if (!gs.isRunning || gs.playerHealth <= 0.0f)
@@ -36,7 +36,7 @@ namespace bunker
         {
             gs.playerHealth = gs.playerMaxHealth * 0.15f; // Оставляем 15% HP
             res.secondWind = true;
-            std::cout << "[SURVIVAL] !! SECOND WIND !! Смертельный удар заблокирован адреналином!" << std::endl;
+            bunker::logInfo() << "[SURVIVAL] !! SECOND WIND !! Смертельный удар заблокирован адреналином!" << std::endl;
         }
         else
         {
@@ -54,27 +54,29 @@ namespace bunker
         if (gs.playerHealth <= 0.0f)
         {
             res.wasFatal = true;
-            std::cout << "[DAMAGE] Пилот погиб в секторе Убежища 17." << std::endl;
+            bunker::logInfo() << "[DAMAGE] Пилот погиб в секторе Убежища 17." << std::endl;
         }
 
         return res;
     }
 
-    bool DamageSystem::applyEnemyDamage(GameState &gs, Enemy &enemy, float rawDamage, DamageType type)
+    bool DamageSystem::applyEnemyDamage(GameState& gs, Enemy& enemy, float rawDamage, DamageType type)
     {
         if (!enemy.isAlive)
             return false;
 
         float dmg = rawDamage;
-
-        // Особенности урона по единицам Роя
-        if (type == DamageType::Explosive || type == DamageType::Thermal)
+        switch (type)
         {
-            dmg *= 1.25f; // Биомасса Роя крайне уязвима к огню и взрывам
-        }
-        else if (type == DamageType::Electric)
-        {
-            dmg *= 1.40f; // Перегрузка нервных узлов
+        case DamageType::Explosive:
+        case DamageType::Thermal:
+            dmg *= 1.25f;
+            break;
+        case DamageType::Electric:
+            dmg *= 1.40f;
+            break;
+        default:
+            break;
         }
 
         enemy.health -= dmg;
@@ -89,7 +91,7 @@ namespace bunker
         return false;
     }
 
-    DamageResult DamageSystem::applyTitanDamage(GameState &gs, float rawDamage, DamageType type)
+    DamageResult DamageSystem::applyTitanDamage(GameState& gs, float rawDamage, DamageType type)
     {
         DamageResult res;
         if (gs.titan.health <= 0.0f)
@@ -115,13 +117,13 @@ namespace bunker
         {
             res.wasFatal = true;
             gs.titan.isPiloted = false; // Автоматическое высаживание Пилота
-            std::cout << "[DAMAGE] Ядро БТ-7274 деактивировано! Питание потеряно." << std::endl;
+            bunker::logInfo() << "[DAMAGE] Ядро БТ-7274 деактивировано! Питание потеряно." << std::endl;
         }
 
         return res;
     }
 
-    void DamageSystem::applyTowerDamage(GameState &gs, float rawDamage)
+    void DamageSystem::applyTowerDamage(GameState& gs, float rawDamage)
     {
         if (gs.regionalGrid.towerHealth <= 0.0f)
             return;
@@ -129,19 +131,19 @@ namespace bunker
         if (gs.regionalGrid.towerHealth <= 0.0f)
         {
             gs.regionalGrid.towerSyncRecovered = false;
-            std::cout << "[GRID] Региональная вышка связи разрушена!" << std::endl;
+            bunker::logInfo() << "[GRID] Региональная вышка связи разрушена!" << std::endl;
         }
     }
 
-    void DamageSystem::applyRadiusDamage(GameState &gs, const Vector3D &origin, float maxRadius,
-                                         float maxDamage, DamageType type)
+    void DamageSystem::applyRadiusDamage(GameState& gs, const Vector3D& origin, float maxRadius, float maxDamage,
+                                         DamageType type)
     {
         if (maxRadius <= 0.001f || maxDamage <= 0.0f)
             return;
         const float maxRadiusSq = maxRadius * maxRadius;
 
         // 1. Враги
-        for (auto &e : gs.enemies)
+        for (auto& e : gs.enemies)
         {
             if (!e.isAlive)
                 continue;
@@ -187,10 +189,11 @@ namespace bunker
         }
     }
 
-    void DamageSystem::applySubsystemCrippling(TitanAlly &titan, DamageType type, float rawDamage)
+    void DamageSystem::applySubsystemCrippling(TitanAlly& titan, DamageType type, float rawDamage)
     {
         float trackPenalty = (type == DamageType::Acid) ? rawDamage * 0.08f : rawDamage * 0.25f;
-        float sensorPenalty = (type == DamageType::Electric || type == DamageType::Acid) ? rawDamage * 0.18f : rawDamage * 0.15f;
+        float sensorPenalty =
+            (type == DamageType::Electric || type == DamageType::Acid) ? rawDamage * 0.18f : rawDamage * 0.15f;
         float weaponPenalty = rawDamage * 0.10f;
 
         titan.systems.tracksCondition = std::max(0.0f, titan.systems.tracksCondition - trackPenalty);
@@ -199,7 +202,7 @@ namespace bunker
 
         if (titan.systems.tracksCondition < 40.0f)
         {
-            std::cout << "[BT-7274] Внимание: Ходовая часть повреждена! Мобильность снижена." << std::endl;
+            bunker::logInfo() << "[BT-7274] Внимание: Ходовая часть повреждена! Мобильность снижена." << std::endl;
         }
     }
 

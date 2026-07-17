@@ -9,10 +9,11 @@
 #include "Constants.hpp"
 #include "GameState.hpp"
 #include "HostileAISystem.hpp"
-#include "ai/EnemyArchetypeRegistry.hpp"
 #include "IsoMath.hpp"
 #include "TimeShift.hpp"
 #include "Types.hpp"
+#include "ai/EnemyArchetypeRegistry.hpp"
+#include <cstdint>
 
 #include <algorithm>
 #include <sstream>
@@ -25,9 +26,7 @@ namespace bunker
     // ═══════════════════════════════════════════════════════
     // Отрисовка изометрического пола
     // ═══════════════════════════════════════════════════════
-    void GameRenderer::renderFloor(sf::RenderWindow &window,
-                                   const GameState &gs,
-                                   const TimeShift &timeShift)
+    void GameRenderer::renderFloor(sf::RenderWindow& window, const GameState& gs, const TimeShift& timeShift)
     {
         for (int x = 0; x < Config::MAP_WIDTH; ++x)
         {
@@ -55,7 +54,8 @@ namespace bunker
                 else if (gs.etherErosionMap[x][y] > 5.0f)
                 {
                     int intensity = static_cast<int>(std::min(gs.etherErosionMap[x][y] * 1.5f, 80.0f));
-                    tile.setFillColor(sf::Color(30 + intensity / 2, 20, 35 + intensity));
+                    tile.setFillColor(sf::Color(static_cast<std::uint8_t>(30 + intensity / 2), 20,
+                                                static_cast<std::uint8_t>(35 + intensity)));
                     tile.setOutlineColor(sf::Color(50, 30, 60));
                 }
                 else
@@ -81,10 +81,8 @@ namespace bunker
     // ═══════════════════════════════════════════════════════
     // Отрисовка сущностей с Z-сортировкой
     // ═══════════════════════════════════════════════════════
-    void GameRenderer::renderEntities(sf::RenderWindow &window,
-                                      const GameState &gs,
-                                      const TimeShift &timeShift,
-                                      const HostileAISystem &hostileAI)
+    void GameRenderer::renderEntities(sf::RenderWindow& window, const GameState& gs, const TimeShift& timeShift,
+                                      const HostileAISystem& hostileAI)
     {
         std::vector<RenderObject> renderQueue;
 
@@ -97,14 +95,14 @@ namespace bunker
                                    {
                                        sf::RectangleShape pad({10, 8});
                                        pad.setFillColor(sf::Color(255, 255, 50, 200));
-                                       pad.setOrigin(5, 4);
+                                       pad.setOrigin({5.0f, 4.0f});
                                        pad.setPosition(IsoMath::worldToScreen(px, py));
                                        window.draw(pad);
                                    }});
         }
 
         // Лут-контейнеры
-        for (const auto &c : gs.lootContainers)
+        for (const auto& c : gs.lootContainers)
         {
             float cx = c.position.x;
             float cy = c.position.y;
@@ -112,7 +110,7 @@ namespace bunker
             renderQueue.push_back({cx + cy, [&, cx, cy, opened]()
                                    {
                                        sf::RectangleShape box({12, 10});
-                                       box.setOrigin(6, 5);
+                                       box.setOrigin({6.0f, 5.0f});
                                        box.setPosition(IsoMath::worldToScreen(cx, cy));
                                        box.setFillColor(opened ? sf::Color(80, 60, 30, 120) : sf::Color(180, 140, 60));
                                        box.setOutlineThickness(1.0f);
@@ -123,10 +121,10 @@ namespace bunker
 
         // Враги: цвета и форма зависят от HostileAISystem
         bool isPast = timeShift.isPast();
-        const auto &hostileStates = hostileAI.debugStates();
+        const auto& hostileStates = hostileAI.debugStates();
         for (std::size_t i = 0; i < gs.enemies.size(); ++i)
         {
-            const auto &e = gs.enemies[i];
+            const auto& e = gs.enemies[i];
             if (!e.isAlive)
                 continue;
 
@@ -143,35 +141,36 @@ namespace bunker
 
             renderQueue.push_back({ex + ey, [&, ex, ey, er, isPast, kind, alert]()
                                    {
-                                       const auto &profile = EnemyArchetypeRegistry::getProfile(kind);
+                                       const auto& profile = EnemyArchetypeRegistry::getProfile(kind);
                                        sf::Color body = profile.bodyColor;
                                        int points = profile.shapePoints;
 
                                        if (isPast)
                                        {
-                                           body = sf::Color(
-                                               static_cast<sf::Uint8>(std::min(255, body.r / 2 + 50)),
-                                               static_cast<sf::Uint8>(std::min(255, body.g / 2 + 90)),
-                                               static_cast<sf::Uint8>(std::min(255, body.b + 40)),
-                                               220);
+                                           body = sf::Color(static_cast<std::uint8_t>(std::min(255, body.r / 2 + 50)),
+                                                            static_cast<std::uint8_t>(std::min(255, body.g / 2 + 90)),
+                                                            static_cast<std::uint8_t>(std::min(255, body.b + 40)), 220);
                                        }
 
                                        float radius = 8.0f + er * 5.0f;
                                        sf::CircleShape shape(radius, points);
                                        shape.setFillColor(body);
-                                       shape.setOrigin(radius, radius);
+                                       shape.setOrigin({radius, radius});
                                        shape.setPosition(IsoMath::worldToScreen(ex, ey));
 
-                                       if (alert == HostileAlertState::Aggro)
+                                       switch (alert)
                                        {
+                                       case HostileAlertState::Aggro:
                                            shape.setOutlineThickness(2.0f);
                                            shape.setOutlineColor(sf::Color(255, 40, 40));
-                                       }
-                                       else if (alert == HostileAlertState::Suspicious ||
-                                                alert == HostileAlertState::Searching)
-                                       {
+                                           break;
+                                       case HostileAlertState::Suspicious:
+                                       case HostileAlertState::Searching:
                                            shape.setOutlineThickness(1.5f);
                                            shape.setOutlineColor(sf::Color(255, 220, 60));
+                                           break;
+                                       default:
+                                           break;
                                        }
 
                                        window.draw(shape);
@@ -186,7 +185,7 @@ namespace bunker
                                    {
                                        sf::CircleShape tower(7.0f, 6);
                                        tower.setFillColor(sf::Color(200, 200, 255));
-                                       tower.setOrigin(7, 7);
+                                       tower.setOrigin({7.0f, 7.0f});
                                        tower.setPosition(IsoMath::worldToScreen(tx, ty));
                                        tower.setOutlineThickness(2.0f);
                                        tower.setOutlineColor(sf::Color::White);
@@ -203,7 +202,7 @@ namespace bunker
                                    {
                                        sf::CircleShape bt(16.0f, 4);
                                        bt.setFillColor(piloted ? sf::Color(255, 160, 40) : sf::Color(230, 115, 25));
-                                       bt.setOrigin(16, 16);
+                                       bt.setOrigin({16.0f, 16.0f});
                                        bt.setPosition(IsoMath::worldToScreen(bx, by));
                                        bt.setOutlineThickness(2.0f);
                                        bt.setOutlineColor(sf::Color(180, 80, 10));
@@ -220,7 +219,7 @@ namespace bunker
                                    {
                                        sf::CircleShape pShape(12.0f);
                                        pShape.setFillColor(sf::Color::Cyan);
-                                       pShape.setOrigin(12, 12);
+                                       pShape.setOrigin({12.0f, 12.0f});
                                        pShape.setPosition(IsoMath::worldToScreen(ppx, ppy));
                                        pShape.setOutlineThickness(2.0f);
                                        pShape.setOutlineColor(sf::Color(0, 200, 200));
@@ -230,12 +229,9 @@ namespace bunker
 
         // Z-сортировка и отрисовка
         std::sort(renderQueue.begin(), renderQueue.end(),
-                  [](const RenderObject &a, const RenderObject &b)
-                  {
-                      return a.depth < b.depth;
-                  });
+                  [](const RenderObject& a, const RenderObject& b) { return a.depth < b.depth; });
 
-        for (auto &obj : renderQueue)
+        for (auto& obj : renderQueue)
         {
             obj.drawFunc();
         }
@@ -245,11 +241,10 @@ namespace bunker
     // Отрисовка перенесённых advanced-механик:
     // Weather, C.A.M.P., breakables, shock waves.
     // ═══════════════════════════════════════════════════════
-    void GameRenderer::renderAdvancedWorld(sf::RenderWindow &window,
-                                           const AdvancedMechanics &adv)
+    void GameRenderer::renderAdvancedWorld(sf::RenderWindow& window, const AdvancedMechanics& adv)
     {
         // Разрушаемые объекты
-        for (const auto &b : adv.reactive.breakables())
+        for (const auto& b : adv.reactive.breakables())
         {
             if (b.broken)
                 continue;
@@ -284,10 +279,12 @@ namespace bunker
                 points = 6;
                 radius = 10.0f;
                 break;
+            default:
+                break;
             }
 
             sf::CircleShape shape(radius, points);
-            shape.setOrigin(radius, radius);
+            shape.setOrigin({radius, radius});
             shape.setPosition(IsoMath::worldToScreen(b.position.x, b.position.y));
             shape.setFillColor(color);
             shape.setOutlineThickness(1.0f);
@@ -296,11 +293,11 @@ namespace bunker
         }
 
         // Волны от взрывов/ударов
-        for (const auto &w : adv.reactive.waves())
+        for (const auto& w : adv.reactive.waves())
         {
             float sr = w.radius * 24.0f;
             sf::CircleShape ring(sr);
-            ring.setOrigin(sr, sr);
+            ring.setOrigin({sr, sr});
             ring.setPosition(IsoMath::worldToScreen(w.origin.x, w.origin.y));
             ring.setFillColor(sf::Color(0, 0, 0, 0));
             ring.setOutlineThickness(2.0f);
@@ -309,35 +306,42 @@ namespace bunker
         }
 
         // C.A.M.P. построенные объекты
-        for (const auto &obj : adv.camp.objects())
+        for (const auto& obj : adv.camp.objects())
         {
             sf::Vector2f pos = IsoMath::worldToScreen(obj.tileX + 0.5f, obj.tileY + 0.5f);
-            if (obj.type == CampObjectType::DefenseTurret)
+            switch (obj.type)
+            {
+            case CampObjectType::DefenseTurret:
             {
                 sf::CircleShape t(9.0f, 3);
-                t.setOrigin(9.0f, 9.0f);
+                t.setOrigin({9.0f, 9.0f});
                 t.setPosition(pos);
                 t.setFillColor(sf::Color(210, 210, 70));
                 t.setOutlineThickness(1.5f);
                 t.setOutlineColor(sf::Color::Black);
                 window.draw(t);
+                break;
             }
-            else if (obj.type == CampObjectType::SupplyCrate)
+            case CampObjectType::SupplyCrate:
             {
                 sf::RectangleShape c({14.0f, 12.0f});
-                c.setOrigin(7.0f, 6.0f);
+                c.setOrigin({7.0f, 6.0f});
                 c.setPosition(pos);
                 c.setFillColor(sf::Color(80, 200, 110));
                 c.setOutlineThickness(1.0f);
                 c.setOutlineColor(sf::Color::Black);
                 window.draw(c);
+                break;
+            }
+            default:
+                break;
             }
         }
 
         // Превью строительства (Объёмный 3D снаппинг-бокс в духе Fallout 76)
         if (adv.camp.enabled())
         {
-            const auto &p = adv.camp.preview();
+            const auto& p = adv.camp.preview();
             sf::Color fillCol = p.isPlacementValid ? sf::Color(50, 240, 90, 85) : sf::Color(240, 50, 50, 85);
             sf::Color lineCol = p.isPlacementValid ? sf::Color(90, 255, 120) : sf::Color(255, 90, 90);
 
@@ -374,8 +378,8 @@ namespace bunker
 
             auto drawWire = [&](sf::Vector2f from, sf::Vector2f to)
             {
-                sf::Vertex line[] = {sf::Vertex(from, lineCol), sf::Vertex(to, lineCol)};
-                window.draw(line, 2, sf::Lines);
+                sf::Vertex line[] = {{from, lineCol}, {to, lineCol}};
+                window.draw(line, 2, sf::PrimitiveType::Lines);
             };
             drawWire(b0, t0);
             drawWire(b1, t1);
@@ -384,15 +388,14 @@ namespace bunker
         }
     }
 
-    void GameRenderer::renderAdvancedHUD(sf::RenderWindow &window,
-                                         const AdvancedMechanics &adv,
-                                         const sf::Font *font)
+    void GameRenderer::renderAdvancedHUD(sf::RenderWindow& window, const AdvancedMechanics& adv, const sf::Font* font)
     {
         // Погодный экранный фильтр (Внедрён GLSL-шейдер гибридной атмосферы: Эфирный Туман + Кислотный Дождь)
-        const auto &weather = adv.weather.state();
+        const auto& weather = adv.weather.state();
         if (weather.type != WeatherType::Clear)
         {
-            sf::RectangleShape overlay({static_cast<float>(Config::SCREEN_WIDTH), static_cast<float>(Config::SCREEN_HEIGHT)});
+            sf::RectangleShape overlay(
+                {static_cast<float>(Config::SCREEN_WIDTH), static_cast<float>(Config::SCREEN_HEIGHT)});
 
             static sf::Shader s_AtmosphericShader;
             static bool s_ShaderLoaded = false;
@@ -402,7 +405,7 @@ namespace bunker
             {
                 if (!s_ShaderLoaded)
                 {
-                    const char *ATMOSPHERIC_HAZARD_SHADER = R"(
+                    const char* ATMOSPHERIC_HAZARD_SHADER = R"(
                         uniform float u_time;
                         uniform float u_fogIntensity;
                         uniform float u_rainIntensity;
@@ -458,13 +461,18 @@ namespace bunker
                             gl_FragColor = finalColor;
                         }
                     )";
-                    s_ShaderLoaded = s_AtmosphericShader.loadFromMemory(ATMOSPHERIC_HAZARD_SHADER, sf::Shader::Fragment);
+                    s_ShaderLoaded =
+                        s_AtmosphericShader.loadFromMemory(ATMOSPHERIC_HAZARD_SHADER, sf::Shader::Type::Fragment);
                 }
 
                 if (s_ShaderLoaded)
                 {
-                    float fogInt = (weather.type == WeatherType::EtherFog || weather.type == WeatherType::EtherStorm) ? weather.intensity : 0.0f;
-                    float rainInt = (weather.type == WeatherType::AcidRain || weather.type == WeatherType::EtherStorm) ? weather.intensity : 0.0f;
+                    float fogInt = (weather.type == WeatherType::EtherFog || weather.type == WeatherType::EtherStorm)
+                                       ? weather.intensity
+                                       : 0.0f;
+                    float rainInt = (weather.type == WeatherType::AcidRain || weather.type == WeatherType::EtherStorm)
+                                        ? weather.intensity
+                                        : 0.0f;
                     if (weather.type == WeatherType::AshStorm)
                     {
                         fogInt = weather.intensity * 0.8f;
@@ -473,7 +481,9 @@ namespace bunker
                     s_AtmosphericShader.setUniform("u_time", s_HazardClock.getElapsedTime().asSeconds());
                     s_AtmosphericShader.setUniform("u_fogIntensity", fogInt);
                     s_AtmosphericShader.setUniform("u_rainIntensity", rainInt);
-                    s_AtmosphericShader.setUniform("u_resolution", sf::Glsl::Vec2(static_cast<float>(Config::SCREEN_WIDTH), static_cast<float>(Config::SCREEN_HEIGHT)));
+                    s_AtmosphericShader.setUniform("u_resolution",
+                                                   sf::Glsl::Vec2(static_cast<float>(Config::SCREEN_WIDTH),
+                                                                  static_cast<float>(Config::SCREEN_HEIGHT)));
 
                     window.draw(overlay, &s_AtmosphericShader);
                     return;
@@ -483,15 +493,15 @@ namespace bunker
             // Fallback для старых видеокарт без поддержки GLSL:
             if (weather.type == WeatherType::EtherFog)
             {
-                overlay.setFillColor(sf::Color(80, 120, 180, static_cast<sf::Uint8>(45 + 60 * weather.intensity)));
+                overlay.setFillColor(sf::Color(80, 120, 180, static_cast<std::uint8_t>(45 + 60 * weather.intensity)));
             }
             if (weather.type == WeatherType::AcidRain)
             {
-                overlay.setFillColor(sf::Color(70, 180, 70, static_cast<sf::Uint8>(35 + 55 * weather.intensity)));
+                overlay.setFillColor(sf::Color(70, 180, 70, static_cast<std::uint8_t>(35 + 55 * weather.intensity)));
             }
             if (weather.type == WeatherType::AshStorm)
             {
-                overlay.setFillColor(sf::Color(180, 120, 70, static_cast<sf::Uint8>(35 + 55 * weather.intensity)));
+                overlay.setFillColor(sf::Color(180, 120, 70, static_cast<std::uint8_t>(35 + 55 * weather.intensity)));
             }
             window.draw(overlay);
         }
@@ -499,35 +509,37 @@ namespace bunker
         if (!font)
             return;
 
-        sf::Text text;
-        text.setFont(*font);
-        text.setCharacterSize(14);
+        sf::Text text(*font, "", 14);
         text.setFillColor(sf::Color(230, 235, 210));
         text.setOutlineThickness(1.0f);
         text.setOutlineColor(sf::Color::Black);
 
-        const auto &tank = adv.tankUtility.runtime();
-        const auto &weapon = adv.survival.weapon();
+        const auto& tank = adv.tankUtility.runtime();
+        const auto& weapon = adv.survival.weapon();
 
         std::string util = "BucketRig";
-        if (tank.utility == TankUtilityMode::RamShield)
+        switch (tank.utility)
+        {
+        case TankUtilityMode::RamShield:
             util = "RamShield";
-        if (tank.utility == TankUtilityMode::TowCoupler)
+            break;
+        case TankUtilityMode::TowCoupler:
             util = "TowCoupler";
+            break;
+        default:
+            break;
+        }
 
         std::string seat = (tank.seat == TankSeat::Driver) ? "Driver" : "Gunner";
 
         std::ostringstream ss;
         ss << "ADVANCED MECHANICS\n"
            << "Weather: " << weather.banner << " " << static_cast<int>(weather.intensity * 100.0f) << "%\n"
-           << "Stress: " << static_cast<int>(adv.survival.stress())
-           << " | Ammo: " << weapon.magazine << "/" << weapon.reserveAmmo
-           << (weapon.isReloading ? " RELOADING" : "") << "\n"
-           << "Tank: " << util << " | Seat: " << seat
-           << " | Heat: " << static_cast<int>(tank.cannonThermalLoad)
+           << "Stress: " << static_cast<int>(adv.survival.stress()) << " | Ammo: " << weapon.magazine << "/"
+           << weapon.reserveAmmo << (weapon.isReloading ? " RELOADING" : "") << "\n"
+           << "Tank: " << util << " | Seat: " << seat << " | Heat: " << static_cast<int>(tank.cannonThermalLoad)
            << (tank.overheated ? " OVERHEATED" : "") << "\n"
-           << "CAMP[B]: " << (adv.camp.enabled() ? "ON" : "OFF")
-           << " | ToolGun[F7 mode/F8 use/F2 undo/F3 redo]\n";
+           << "CAMP[B]: " << (adv.camp.enabled() ? "ON" : "OFF") << " | ToolGun[F7 mode/F8 use/F2 undo/F3 redo]\n";
 
         if (!adv.story.lastEvent().empty())
             ss << "Story: " << adv.story.lastEvent() << "\n";
@@ -537,7 +549,7 @@ namespace bunker
             ss << adv.toolgun.lastValidation() << "\n";
 
         text.setString(ss.str());
-        text.setPosition(12.0f, 96.0f);
+        text.setPosition({12.0f, 96.0f});
         window.draw(text);
     }
 

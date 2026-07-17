@@ -1,12 +1,12 @@
 #pragma once
 
-#include "core/Types.hpp"
-#include "gameplay/GameState.hpp"
 #include "core/Constants.hpp"
-#include <vector>
-#include <string>
+#include "core/Types.hpp"
+#include "engine/Log.hpp"
+#include "gameplay/GameState.hpp"
 #include <cmath>
-#include <iostream>
+#include <string>
+#include <vector>
 
 namespace bunker
 {
@@ -41,20 +41,23 @@ namespace bunker
 
     class BossAISystem
     {
-    public:
+      public:
         BossAISystem() = default;
 
         void registerBoss(int enemyIndex, BossArchetype arch, Vector3D coverPos);
-        void updateBosses(GameState &gs, float dt);
-        void onBossDamaged(GameState &gs, int enemyIndex, float dmg);
-        const std::vector<BossEntity> &activeBosses() const { return m_Bosses; }
+        void updateBosses(GameState& gs, float dt);
+        void onBossDamaged(GameState& gs, int enemyIndex, float dmg);
+        const std::vector<BossEntity>& activeBosses() const
+        {
+            return m_Bosses;
+        }
 
-    private:
+      private:
         std::vector<BossEntity> m_Bosses;
 
-        void executeCoverTactics(GameState &gs, BossEntity &boss, Enemy &e, float dt);
-        void executeSwarmAmbush(GameState &gs, BossEntity &boss, const Vector3D &targetPos);
-        void triggerEmergencyVentingAOE(GameState &gs, BossEntity &boss, Enemy &e);
+        void executeCoverTactics(GameState& gs, BossEntity& boss, Enemy& e, float dt);
+        void executeSwarmAmbush(GameState& gs, BossEntity& boss, const Vector3D& targetPos);
+        void triggerEmergencyVentingAOE(GameState& gs, BossEntity& boss, Enemy& e);
     };
 
 } // namespace bunker

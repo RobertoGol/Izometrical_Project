@@ -1,26 +1,27 @@
 #include "ai/EnemySpawner.hpp"
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <filesystem>
+#include "engine/Log.hpp"
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
-#include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <map>
+#include <sstream>
 
 namespace bunker
 {
 
-    void EnemySpawner::scanAndLoadConfigs(const std::string &enemiesDir)
+    void EnemySpawner::scanAndLoadConfigs(const std::string& enemiesDir)
     {
         m_Registry.clear();
 
         if (!std::filesystem::exists(enemiesDir))
         {
-            std::cout << "[ENEMIES] Папка " << enemiesDir << " не найдена, пропускаем." << std::endl;
+            bunker::logInfo() << "[ENEMIES] Папка " << enemiesDir << " не найдена, пропускаем." << std::endl;
             return;
         }
 
-        for (const auto &entry : std::filesystem::directory_iterator(enemiesDir))
+        for (const auto& entry : std::filesystem::directory_iterator(enemiesDir))
         {
             if (!entry.is_directory())
                 continue;
@@ -43,18 +44,17 @@ namespace bunker
 
                 cfg.loaded = true;
                 m_Registry.push_back(cfg);
-                std::cout << "[ENEMIES] Зарегистрирован: " << cfg.displayName
-                          << " [" << cfg.id << "] hp=" << cfg.maxHealth
-                          << " spd=" << cfg.baseSpeed << std::endl;
+                bunker::logInfo() << "[ENEMIES] Зарегистрирован: " << cfg.displayName << " [" << cfg.id
+                                  << "] hp=" << cfg.maxHealth << " spd=" << cfg.baseSpeed << std::endl;
             }
         }
 
-        std::cout << "[ENEMIES] Всего типов врагов: " << m_Registry.size() << std::endl;
+        bunker::logInfo() << "[ENEMIES] Всего типов врагов: " << m_Registry.size() << std::endl;
     }
 
-    bool EnemySpawner::spawnByConfigId(GameState &gs, const std::string &configId, const Vector3D &pos)
+    bool EnemySpawner::spawnByConfigId(GameState& gs, const std::string& configId, const Vector3D& pos)
     {
-        const EnemyConfig *cfg = findConfig(configId);
+        const EnemyConfig* cfg = findConfig(configId);
         if (!cfg)
         {
             Enemy e;
@@ -77,39 +77,34 @@ namespace bunker
         return true;
     }
 
-    void EnemySpawner::updateWaveSpawning(GameState &gs, float dt)
+    void EnemySpawner::updateWaveSpawning(GameState& gs, float dt)
     {
         m_SpawnTimer += dt;
 
-        if (m_SpawnTimer >= Config::ENEMY_SPAWN_INTERVAL)
+        if (m_SpawnTimer < Config::ENEMY_SPAWN_INTERVAL)
+            return;
+
+        m_SpawnTimer = 0.0f;
+        if (static_cast<int>(gs.enemies.size()) >= Config::ENEMY_MAX_COUNT)
+            return;
+
+        Vector3D spawnPoints[4] = {{1.0f, 1.0f, 0.0f}, {18.0f, 1.0f, 0.0f}, {1.0f, 18.0f, 0.0f}, {18.0f, 18.0f, 0.0f}};
+
+        for (int i = 0; i < 4; ++i)
         {
-            m_SpawnTimer = 0.0f;
-
-            if (static_cast<int>(gs.enemies.size()) < Config::ENEMY_MAX_COUNT)
-            {
-                Vector3D spawnPoints[4] = {
-                    {1.0f, 1.0f, 0.0f},
-                    {18.0f, 1.0f, 0.0f},
-                    {1.0f, 18.0f, 0.0f},
-                    {18.0f, 18.0f, 0.0f}};
-
-                for (int i = 0; i < 4; ++i)
-                {
-                    Enemy e;
-                    e.position = spawnPoints[i];
-                    e.health = Config::ENEMY_BASE_HP;
-                    e.speed = 2.2f + static_cast<float>(rand() % 100) / 500.0f;
-                    e.isAlive = true;
-                    e.radius = 0.32f;
-                    gs.enemies.push_back(e);
-                }
-            }
+            Enemy e;
+            e.position = spawnPoints[i];
+            e.health = Config::ENEMY_BASE_HP;
+            e.speed = 2.2f + static_cast<float>(rand() % 100) / 500.0f;
+            e.isAlive = true;
+            e.radius = 0.32f;
+            gs.enemies.push_back(e);
         }
     }
 
-    void EnemySpawner::updateEnemyAI(GameState &gs, float dt)
+    void EnemySpawner::updateEnemyAI(GameState& gs, float dt)
     {
-        for (auto &e : gs.enemies)
+        for (auto& e : gs.enemies)
         {
             if (!e.isAlive)
                 continue;
@@ -142,20 +137,18 @@ namespace bunker
         }
 
         gs.enemies.erase(
-            std::remove_if(gs.enemies.begin(), gs.enemies.end(),
-                           [](const Enemy &e)
-                           { return !e.isAlive; }),
+            std::remove_if(gs.enemies.begin(), gs.enemies.end(), [](const Enemy& e) { return !e.isAlive; }),
             gs.enemies.end());
     }
 
-    void EnemySpawner::spawnTrainingZone(GameState &gs)
+    void EnemySpawner::spawnTrainingZone(GameState& gs)
     {
         spawnByConfigId(gs, "target_dummy", {14.0f, 14.0f, 0.0f});
         spawnByConfigId(gs, "punching_bag", {14.0f, 15.0f, 0.0f});
         spawnByConfigId(gs, "static_base", {15.0f, 14.0f, 0.0f});
     }
 
-    bool EnemySpawner::loadConfig(const std::string &path, EnemyConfig &cfg)
+    bool EnemySpawner::loadConfig(const std::string& path, EnemyConfig& cfg)
     {
         std::ifstream file(path);
         if (!file.is_open())
@@ -196,23 +189,24 @@ namespace bunker
                 cfg.soundDeathPath = val;
             else if (key == "type")
             {
-                if (val == "VerminSwarm")
-                    cfg.classType = EnemyClassType::VerminSwarm;
-                else if (val == "TargetDummy")
-                    cfg.classType = EnemyClassType::TargetDummy;
-                else if (val == "PunchingBag")
-                    cfg.classType = EnemyClassType::PunchingBag;
-                else if (val == "StaticBase")
-                    cfg.classType = EnemyClassType::StaticBase;
+                static const std::map<std::string, EnemyClassType> classTypes = {
+                    {"VerminSwarm", EnemyClassType::VerminSwarm},
+                    {"TargetDummy", EnemyClassType::TargetDummy},
+                    {"PunchingBag", EnemyClassType::PunchingBag},
+                    {"StaticBase", EnemyClassType::StaticBase},
+                };
+                const auto classType = classTypes.find(val);
+                if (classType != classTypes.end())
+                    cfg.classType = classType->second;
             }
         }
         file.close();
         return true;
     }
 
-    const EnemyConfig *EnemySpawner::findConfig(const std::string &id) const
+    const EnemyConfig* EnemySpawner::findConfig(const std::string& id) const
     {
-        for (const auto &cfg : m_Registry)
+        for (const auto& cfg : m_Registry)
         {
             if (cfg.id == id)
                 return &cfg;

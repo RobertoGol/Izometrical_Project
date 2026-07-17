@@ -3,7 +3,7 @@
 namespace bunker
 {
 
-    void TacticsManager::updateCooldowns(GameState &gs, float dt)
+    void TacticsManager::updateCooldowns(GameState& gs, float dt)
     {
         static bool firstFrame = true;
         if (firstFrame)
@@ -30,15 +30,13 @@ namespace bunker
 
         if (isTacticalActive && m_ActivePilotClass == PilotClass::Stim && !m_InsideVehicle)
         {
-            gs.playerHealth = std::min(gs.playerMaxHealth,
-                                       gs.playerHealth + Config::STIM_HEAL_RATE * dt);
+            gs.playerHealth = std::min(gs.playerMaxHealth, gs.playerHealth + Config::STIM_HEAL_RATE * dt);
         }
     }
 
-    void TacticsManager::activateTactical(GameState &gs, const Vector3D &mouseWorld)
+    void TacticsManager::activateTactical(GameState& gs, const Vector3D& mouseWorld)
     {
-        if (!gs.bunkerProgression.hasFoundPipPad || m_InsideVehicle ||
-            tacticalCooldown > 0.0f || isTacticalActive)
+        if (!gs.bunkerProgression.hasFoundPipPad || m_InsideVehicle || tacticalCooldown > 0.0f || isTacticalActive)
             return;
 
         isTacticalActive = true;
@@ -105,7 +103,7 @@ namespace bunker
         updateActiveStats();
     }
 
-    void TacticsManager::processGrapplePhysics(GameState &gs, float dt)
+    void TacticsManager::processGrapplePhysics(GameState& gs, float dt)
     {
         if (!grapple.isAttached || m_ActivePilotClass != PilotClass::Grapple || m_InsideVehicle)
             return;
@@ -243,6 +241,8 @@ namespace bunker
                 currentStats.maxHealth = 100.0f;
                 currentStats.moveSpeed = 5.5f;
                 currentStats.weaponLabel = "HOLO CARBINE";
+                break;
+            default:
                 break;
             }
         }

@@ -9,7 +9,7 @@ namespace bunker
         m_Seats[1] = {false, CockpitRole::Gunner};
     }
 
-    bool VehicleSeatController::tryMountPlayer(GameState &gs, CockpitRole role)
+    bool VehicleSeatController::tryMountPlayer(GameState& gs, CockpitRole role)
     {
         int idx = (role == CockpitRole::Driver) ? 0 : 1;
         if (m_Seats[idx].isOccupied)
@@ -20,19 +20,19 @@ namespace bunker
         gs.playerMode = UnitMode::Titan;
         gs.titan.isPiloted = true;
 
-        std::cout << "[COCKPIT] Пилот занял место: "
-                  << ((role == CockpitRole::Driver) ? "ВОДИТЕЛЬ (Орудие XO-16)" : "СТРЕЛОК (Пулемёты турели)")
-                  << std::endl;
+        bunker::logInfo() << "[COCKPIT] Пилот занял место: "
+                          << ((role == CockpitRole::Driver) ? "ВОДИТЕЛЬ (Орудие XO-16)" : "СТРЕЛОК (Пулемёты турели)")
+                          << std::endl;
         return true;
     }
 
-    void VehicleSeatController::dismountPlayer(GameState &gs)
+    void VehicleSeatController::dismountPlayer(GameState& gs)
     {
         m_Seats[0].isOccupied = false;
         m_Seats[1].isOccupied = false;
         gs.playerMode = UnitMode::Scout;
         gs.titan.isPiloted = false;
-        std::cout << "[COCKPIT] Пилот спешился из кабины БТ-7274." << std::endl;
+        bunker::logInfo() << "[COCKPIT] Пилот спешился из кабины БТ-7274." << std::endl;
     }
 
     void VehicleSeatController::swapPlayerRole()
@@ -42,14 +42,14 @@ namespace bunker
             m_Seats[0].isOccupied = false;
             m_Seats[1].isOccupied = true;
             m_ActivePlayerRole = CockpitRole::Gunner;
-            std::cout << "[SEAT SWAP] Пересадка на место СТРЕЛКА." << std::endl;
+            bunker::logInfo() << "[SEAT SWAP] Пересадка на место СТРЕЛКА." << std::endl;
         }
         else
         {
             m_Seats[1].isOccupied = false;
             m_Seats[0].isOccupied = true;
             m_ActivePlayerRole = CockpitRole::Driver;
-            std::cout << "[SEAT SWAP] Пересадка на место ВОДИТЕЛЯ." << std::endl;
+            bunker::logInfo() << "[SEAT SWAP] Пересадка на место ВОДИТЕЛЯ." << std::endl;
         }
     }
 

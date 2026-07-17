@@ -6,18 +6,16 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "engine/Log.hpp"
 #include <cstdlib>
 #include <ctime>
-#include <iostream>
 
 namespace bunker
 {
 
     GameApplication::GameApplication()
-        : m_Window(
-              sf::VideoMode(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT),
-              "Bunker Protocol ISO",
-              sf::Style::Close | sf::Style::Titlebar)
+        : m_Window(sf::VideoMode({Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT}), "Bunker Protocol ISO",
+                   sf::Style::Close | sf::Style::Titlebar)
     {
         m_Window.setFramerateLimit(60);
         m_GameState.hostileAI = &m_HostileAI;
@@ -27,7 +25,7 @@ namespace bunker
     {
         initialize();
 
-        std::cout << "[SYSTEM] Bunker Protocol ISO запущен." << std::endl;
+        bunker::logInfo() << "[SYSTEM] Bunker Protocol ISO запущен." << std::endl;
 
         while (m_Window.isOpen() && m_GameState.isRunning)
         {
@@ -54,7 +52,7 @@ namespace bunker
     void GameApplication::shutdown()
     {
         SaveSystem::writeSave(1, m_GameState, m_Inventory);
-        std::cout << "[SYSTEM] Автосохранение при выходе. До встречи, Пилот." << std::endl;
+        bunker::logInfo() << "[SYSTEM] Автосохранение при выходе. До встречи, Пилот." << std::endl;
     }
 
     void GameApplication::generateAndLoadContent()
@@ -105,13 +103,13 @@ namespace bunker
         if (SaveSystem::saveExists(1))
         {
             SaveSystem::readSave(1, m_GameState, m_Inventory);
-            std::cout << "[SYSTEM] Сохранение восстановлено." << std::endl;
+            bunker::logInfo() << "[SYSTEM] Сохранение восстановлено." << std::endl;
         }
     }
 
     void GameApplication::loadFonts()
     {
-        m_FontLoaded = m_GlobalFont.loadFromFile(AssetPaths::DefaultFont);
+        m_FontLoaded = m_GlobalFont.openFromFile(AssetPaths::DefaultFont);
         m_Hud.loadFont(AssetPaths::DefaultFont);
         if (m_FontLoaded)
         {
@@ -165,89 +163,93 @@ namespace bunker
         renderGameplayFrame();
     }
 
-    void GameApplication::processEdgeHotkeys(const InputSnapshot &input)
+    void GameApplication::processEdgeHotkeys(const InputSnapshot& input)
     {
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::I), m_EdgeKeys.pipTabInv))
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::I), m_EdgeKeys.pipTabInv))
         {
             m_PipPad.toggleTab(m_GameState, 0);
         }
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::J), m_EdgeKeys.pipTabMap))
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::J), m_EdgeKeys.pipTabMap))
         {
             m_PipPad.toggleTab(m_GameState, 1);
         }
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::O), m_EdgeKeys.pipTabTapes))
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::O), m_EdgeKeys.pipTabTapes))
         {
             m_PipPad.toggleTab(m_GameState, 2);
         }
 
         // Доп. клавиши, которые раньше терялись из-за двойного pollEvent.
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::M), m_EdgeKeys.map))
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::M), m_EdgeKeys.map))
         {
             m_MapScreen.toggle();
         }
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::T), m_EdgeKeys.timeShift))
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::T), m_EdgeKeys.timeShift))
         {
             m_TimeShift.tryShift(m_GameState);
         }
 
         // Advanced hotkeys. Всё edge-triggered, чтобы не срабатывало 60 раз/сек.
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::H), m_EdgeKeys.heal))
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::H), m_EdgeKeys.heal))
         {
             m_Advanced.survival.useStim(m_GameState, m_Inventory);
         }
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Y), m_EdgeKeys.ration))
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y), m_EdgeKeys.ration))
         {
             m_Advanced.survival.eatRation(m_GameState, m_Inventory, RationKind::Stamina);
         }
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::R), m_EdgeKeys.reload))
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::R), m_EdgeKeys.reload))
         {
-            if (m_GameState.playerMode == UnitMode::Scout)
+            switch (m_GameState.playerMode)
             {
+            case UnitMode::Scout:
                 m_Advanced.survival.startReload(m_Inventory);
-            }
-            else if (m_GameState.playerMode == UnitMode::Titan)
-            {
+                break;
+            case UnitMode::Titan:
                 m_TitanAI.cycleCockpitFireMode();
+                break;
+            default:
+                break;
             }
         }
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::G), m_EdgeKeys.seatSwap) &&
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::G), m_EdgeKeys.seatSwap) &&
             m_GameState.playerMode == UnitMode::Titan)
         {
             m_Advanced.tankUtility.swapSeat();
-            std::cout << "[COCKPIT] Место в кабине изменено → "
-                      << (m_Advanced.tankUtility.runtime().seat == TankSeat::Driver ? "Водитель" : "Стрелок") << std::endl;
+            bunker::logInfo() << "[COCKPIT] Место в кабине изменено → "
+                              << (m_Advanced.tankUtility.runtime().seat == TankSeat::Driver ? "Водитель" : "Стрелок")
+                              << std::endl;
         }
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::C), m_EdgeKeys.campCycle))
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::C), m_EdgeKeys.campCycle))
         {
             m_Advanced.camp.cycleType();
         }
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::U), m_EdgeKeys.useUtility) &&
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::U), m_EdgeKeys.useUtility) &&
             m_GameState.playerMode == UnitMode::Titan)
         {
             m_Advanced.tankUtility.useUtility(m_GameState);
         }
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::L), m_EdgeKeys.tape))
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::L), m_EdgeKeys.tape))
         {
-            std::cout << m_Advanced.radio.playNextUnplayed() << std::endl;
+            bunker::logInfo() << m_Advanced.radio.playNextUnplayed() << std::endl;
         }
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::F7), m_EdgeKeys.toolMode))
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F7), m_EdgeKeys.toolMode))
         {
             m_Advanced.toolgun.cycleMode();
         }
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::F8), m_EdgeKeys.toolUse) &&
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F8), m_EdgeKeys.toolUse) &&
             m_Inventory.hasItem(777))
         {
             m_Advanced.toolgun.apply(m_GameState, m_GameState.mouseWorldPos, m_Advanced.prefabs);
         }
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::F2), m_EdgeKeys.undo))
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F2), m_EdgeKeys.undo))
         {
             m_Advanced.toolgun.undo(m_GameState);
         }
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::F3), m_EdgeKeys.redo))
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F3), m_EdgeKeys.redo))
         {
             m_Advanced.toolgun.redo(m_GameState);
         }
-        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::F6), m_EdgeKeys.delivery))
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F6), m_EdgeKeys.delivery))
         {
             m_Advanced.lanline.requestDelivery("ammo", m_GameState.playerPos);
         }
@@ -266,7 +268,7 @@ namespace bunker
         m_Window.display();
     }
 
-    void GameApplication::updateGameplayFrame(const InputSnapshot &input, float dt)
+    void GameApplication::updateGameplayFrame(const InputSnapshot& input, float dt)
     {
         updateMouseWorldPosition(input);
         processSaveLoadInput(input);
@@ -275,12 +277,12 @@ namespace bunker
         updateGameplaySystems(input, dt);
     }
 
-    void GameApplication::updateMouseWorldPosition(const InputSnapshot &input)
+    void GameApplication::updateMouseWorldPosition(const InputSnapshot& input)
     {
         m_GameState.mouseWorldPos = m_Camera.screenToWorld(m_Window, input.mousePixelPos);
     }
 
-    void GameApplication::processSaveLoadInput(const InputSnapshot &input)
+    void GameApplication::processSaveLoadInput(const InputSnapshot& input)
     {
         if (input.saveGame)
         {
@@ -292,7 +294,7 @@ namespace bunker
         }
     }
 
-    void GameApplication::processModeSwitchInput(const InputSnapshot &input)
+    void GameApplication::processModeSwitchInput(const InputSnapshot& input)
     {
         if (!input.switchMode)
             return;
@@ -311,18 +313,15 @@ namespace bunker
         }
     }
 
-    void GameApplication::processPilotClassInput(const InputSnapshot &input)
+    void GameApplication::processPilotClassInput(const InputSnapshot& input)
     {
         if (m_GameState.playerMode != UnitMode::Scout || m_VehicleManager.isPlayerInVehicle())
         {
             return;
         }
 
-        PilotClass classes[] = {
-            PilotClass::Grapple, PilotClass::Cloak,
-            PilotClass::Stim, PilotClass::PhaseShift,
-            PilotClass::HoloPilot, PilotClass::AWall,
-            PilotClass::PulseBlade};
+        PilotClass classes[] = {PilotClass::Grapple,   PilotClass::Cloak, PilotClass::Stim,      PilotClass::PhaseShift,
+                                PilotClass::HoloPilot, PilotClass::AWall, PilotClass::PulseBlade};
 
         for (int i = 0; i < 7; ++i)
         {
@@ -333,7 +332,7 @@ namespace bunker
         }
     }
 
-    void GameApplication::updateGameplaySystems(const InputSnapshot &input, float dt)
+    void GameApplication::updateGameplaySystems(const InputSnapshot& input, float dt)
     {
         m_TimeShift.update(dt);
 
@@ -349,7 +348,7 @@ namespace bunker
         m_Camera.update(m_GameState.playerPos, m_GameState.mouseWorldPos, m_GameState.isAiming, dt);
     }
 
-    void GameApplication::updateMovementAndInteraction(const InputSnapshot &input, float dt)
+    void GameApplication::updateMovementAndInteraction(const InputSnapshot& input, float dt)
     {
         if (m_VehicleManager.isPlayerInVehicle())
         {
@@ -378,12 +377,11 @@ namespace bunker
         }
     }
 
-    void GameApplication::updateTactics(const InputSnapshot &input, float dt)
+    void GameApplication::updateTactics(const InputSnapshot& input, float dt)
     {
         m_Tactics.updateCooldowns(m_GameState, dt);
 
-        if (input.activateTactical &&
-            m_GameState.playerMode == UnitMode::Scout &&
+        if (input.activateTactical && m_GameState.playerMode == UnitMode::Scout &&
             !m_VehicleManager.isPlayerInVehicle())
         {
             m_Tactics.activateTactical(m_GameState, m_GameState.mouseWorldPos);
@@ -392,13 +390,17 @@ namespace bunker
         m_Tactics.processGrapplePhysics(m_GameState, dt);
     }
 
-    void GameApplication::updateCombat(const InputSnapshot &input, float dt)
+    void GameApplication::updateCombat(const InputSnapshot& input, float dt)
     {
         if (input.isShooting && m_GameState.fireCooldown <= 0.0f)
         {
-            if (m_GameState.playerMode == UnitMode::Scout && !m_VehicleManager.isPlayerInVehicle())
+            switch (m_GameState.playerMode)
             {
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::F10))
+            case UnitMode::Scout:
+                if (m_VehicleManager.isPlayerInVehicle())
+                    break;
+
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F10))
                 {
                     m_BulletSystem.fireDebugGunChainLightning(m_GameState);
                 }
@@ -413,14 +415,18 @@ namespace bunker
                         m_Advanced.survival.startReload(m_Inventory);
                     }
                 }
-            }
-            else if (m_GameState.playerMode == UnitMode::Titan)
+                break;
+            case UnitMode::Titan:
             {
                 float heat = m_GameState.titan.currentWeapon == TankWeaponMode::Cannon ? 24.0f : 7.0f;
                 if (m_Advanced.tankUtility.registerCannonShot(m_GameState, heat))
                 {
                     m_TitanAI.fireFromCockpit(m_GameState);
                 }
+                break;
+            }
+            default:
+                break;
             }
         }
 
@@ -437,7 +443,7 @@ namespace bunker
         m_BulletSystem.update(m_GameState, dt);
     }
 
-    void GameApplication::updateWorldSystems(const InputSnapshot &input, float dt)
+    void GameApplication::updateWorldSystems(const InputSnapshot& input, float dt)
     {
         // Враги: спавнер отвечает за волны, поведение врагов ведёт HostileAISystem.
         m_EnemySpawner.updateWaveSpawning(m_GameState, dt);
@@ -500,7 +506,7 @@ namespace bunker
         m_Window.display();
     }
 
-    bool GameApplication::consumeEdge(bool isPressedNow, bool &wasPressedBefore)
+    bool GameApplication::consumeEdge(bool isPressedNow, bool& wasPressedBefore)
     {
         bool edge = isPressedNow && !wasPressedBefore;
         wasPressedBefore = isPressedNow;

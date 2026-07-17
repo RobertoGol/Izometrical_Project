@@ -1,16 +1,17 @@
+#include "engine/Log.hpp"
 #include "ui/PipPad.hpp"
-#include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 
 namespace bunker
 {
 
-    void PipPadUI::toggleTab(GameState &gs, int tabIndex)
+    void PipPadUI::toggleTab(GameState& gs, int tabIndex)
     {
         if (!gs.bunkerProgression.hasFoundPipPad)
         {
-            std::cout << "[PIP-BOY] Наручный гаджет Пилота не найден на полу бункера!" << std::endl;
+            bunker::logInfo() << "[PIP-BOY] Наручный гаджет Пилота не найден на полу бункера!" << std::endl;
             return;
         }
 
@@ -18,17 +19,29 @@ namespace bunker
         {
             m_TabletOpen = true;
             m_ActiveTab = tabIndex;
-            std::cout << "[PIP-BOY] Активирован наручный планшет (Вкладка: "
-                      << (tabIndex == 0 ? "TACTICAL INVENTORY & BUFFS" : (tabIndex == 1 ? "VAULT 17 MAP ARCHIVE" : "ROBCO COLLECTIBLE TAPES LOG")) << ")." << std::endl;
+            const char* tabName = "ROBCO COLLECTIBLE TAPES LOG";
+            switch (tabIndex)
+            {
+            case 0:
+                tabName = "TACTICAL INVENTORY & BUFFS";
+                break;
+            case 1:
+                tabName = "VAULT 17 MAP ARCHIVE";
+                break;
+            default:
+                break;
+            }
+            bunker::logInfo() << "[PIP-BOY] Активирован наручный планшет (Вкладка: " << tabName << ")." << std::endl;
         }
         else
         {
             m_TabletOpen = false;
-            std::cout << "[PIP-BOY] Планшет сложен (Возврат в тактический обзор арены без миникарты)." << std::endl;
+            bunker::logInfo() << "[PIP-BOY] Планшет сложен (Возврат в тактический обзор арены без миникарты)."
+                              << std::endl;
         }
     }
 
-    void PipPadUI::update(GameState &gs, float dt)
+    void PipPadUI::update(GameState& gs, float dt)
     {
         if (!gs.bunkerProgression.hasFoundPipPad)
         {
@@ -37,7 +50,7 @@ namespace bunker
             return;
         }
 
-        bool holdTab = sf::Keyboard::isKeyPressed(sf::Keyboard::Tab);
+        bool holdTab = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Tab);
         if (holdTab && !m_FlashlightActive && m_BatteryLevel > 0.0f)
         {
             m_FlashlightActive = true;
@@ -59,7 +72,7 @@ namespace bunker
         }
     }
 
-    void PipPadUI::renderFlashlight(sf::RenderWindow &window, const GameState &gs) const
+    void PipPadUI::renderFlashlight(sf::RenderWindow& window, const GameState& gs) const
     {
         if (!m_FlashlightActive || !gs.bunkerProgression.hasFoundPipPad)
             return;
@@ -70,15 +83,16 @@ namespace bunker
         const float playerScreenY = gs.playerPos.y * cellH;
 
         sf::CircleShape lightBeam(cellW * 4.5f);
-        lightBeam.setOrigin(cellW * 4.5f, cellH * 4.5f);
-        lightBeam.setPosition(playerScreenX, playerScreenY);
+        lightBeam.setOrigin({cellW * 4.5f, cellH * 4.5f});
+        lightBeam.setPosition({playerScreenX, playerScreenY});
 
-        sf::Uint8 alpha = static_cast<sf::Uint8>(std::clamp(m_BatteryLevel * 0.45f + 15.0f, 20.0f, 65.0f));
+        std::uint8_t alpha = static_cast<std::uint8_t>(std::clamp(m_BatteryLevel * 0.45f + 15.0f, 20.0f, 65.0f));
         lightBeam.setFillColor(sf::Color(180, 255, 190, alpha));
         window.draw(lightBeam);
     }
 
-    void PipPadUI::renderTablet(sf::RenderWindow &window, const GameState &gs, const PlayerInventory &inv, const AdvancedMechanics &adv, const sf::Font *font) const
+    void PipPadUI::renderTablet(sf::RenderWindow& window, const GameState& gs, const PlayerInventory& inv,
+                                const AdvancedMechanics& adv, const sf::Font* font) const
     {
         (void)inv;
         (void)adv;
@@ -88,7 +102,7 @@ namespace bunker
         const float W = gs.windowWidth;
         const float H = gs.windowHeight;
         sf::RectangleShape tabletBg({W - 180.0f, H - 160.0f});
-        tabletBg.setPosition(90.0f, 80.0f);
+        tabletBg.setPosition({90.0f, 80.0f});
 
         bool isPaperMapStyle = (gs.characterProg.level <= 1);
         sf::Color textColor = sf::Color(50, 240, 90);
@@ -111,47 +125,57 @@ namespace bunker
         if (!font)
             return;
 
-        auto drawTxt = [&](const std::string &s, float x, float y, int sz, sf::Color c)
+        auto drawTxt = [&](const std::string& s, float x, float y, int sz, sf::Color c)
         {
-            sf::Text t;
-            t.setFont(*font);
-            t.setString(s);
-            t.setCharacterSize(sz);
+            sf::Text t(*font, s, static_cast<unsigned int>(sz));
             t.setFillColor(c);
-            t.setPosition(x, y);
+            t.setPosition({x, y});
             window.draw(t);
         };
 
         float sx = 120.0f, sy = 110.0f;
 
-        if (m_ActiveTab == 0)
+        switch (m_ActiveTab)
+        {
+        case 0:
         {
             drawTxt("PIP-BOY WEARABLE — TACTICAL INVENTORY (V17)", sx, sy, 16, sf::Color(50, 255, 100));
             drawTxt("===========================================", sx, sy + 22, 16, sf::Color(30, 180, 70));
 
             int row = 0;
-            for (const auto &slot : inv.getSlots())
+            for (const auto& slot : inv.getSlots())
             {
-                std::string l = "> [" + std::to_string(slot.quantity) + "x] " + slot.displayName + " (wt: " + std::to_string(slot.weightPerUnit) + ")";
-                if (slot.itemID == 520)
+                std::string l = "> [" + std::to_string(slot.quantity) + "x] " + slot.displayName +
+                                " (wt: " + std::to_string(slot.weightPerUnit) + ")";
+                switch (slot.itemID)
+                {
+                case 520:
                     l += " [JAKE RAYMOR ART: +35% SPEED NUKASHINE BUFF]";
-                if (slot.itemID == 521)
+                    break;
+                case 521:
                     l += " [JAKE RAYMOR ART: WEIGHT BE-GONE POTION]";
-                if (slot.itemID == 710)
+                    break;
+                case 710:
                     l += " [JAKE RAYMOR ART: SHEEPSQUATCH CLUB]";
-                if (slot.itemID == 810)
+                    break;
+                case 810:
                     l += " [JAKE RAYMOR ART: SPACE EXPLORER BACKPACK]";
+                    break;
+                default:
+                    break;
+                }
 
                 drawTxt(l, sx, sy + 60 + row * 24, 14, sf::Color(180, 255, 190));
                 row++;
             }
-            drawTxt("[I] Сложить планшет на запястье | На основном экране миникарты нет", sx, H - 120.0f, 13, sf::Color(120, 200, 130));
+            drawTxt("[I] Сложить планшет на запястье | На основном экране миникарты нет", sx, H - 120.0f, 13,
+                    sf::Color(120, 200, 130));
         }
-        else if (m_ActiveTab == 1)
+        break;
+        case 1:
         {
-            std::string title = isPaperMapStyle
-                                    ? "VAULT 17 — TOPOGRAPHIC PAPER MAP (PIP-BOY MARK I)"
-                                    : "VAULT 17 — ELECTRONIC VECTOR CRT RADAR (PIP-BOY MARK II)";
+            std::string title = isPaperMapStyle ? "VAULT 17 — TOPOGRAPHIC PAPER MAP (PIP-BOY MARK I)"
+                                                : "VAULT 17 — ELECTRONIC VECTOR CRT RADAR (PIP-BOY MARK II)";
             drawTxt(title, sx, sy, 16, textColor);
             drawTxt("==================================================", sx, sy + 22, 16, textColor);
 
@@ -164,26 +188,27 @@ namespace bunker
                     if (gs.sectorMap[x][y] == 1)
                     {
                         sf::RectangleShape w({cw - 1.0f, ch - 1.0f});
-                        w.setPosition(sx + x * cw, sy + 60 + y * ch);
+                        w.setPosition({sx + x * cw, sy + 60 + y * ch});
                         w.setFillColor(isPaperMapStyle ? sf::Color(55, 42, 28) : sf::Color(35, 210, 70));
                         window.draw(w);
                     }
                 }
             }
             sf::CircleShape pm(cw * 0.4f);
-            pm.setPosition(sx + gs.playerPos.x * cw - cw * 0.4f, sy + 60 + gs.playerPos.y * ch - ch * 0.4f);
+            pm.setPosition({sx + gs.playerPos.x * cw - cw * 0.4f, sy + 60 + gs.playerPos.y * ch - ch * 0.4f});
             pm.setFillColor(isPaperMapStyle ? sf::Color(200, 30, 30) : sf::Color(100, 255, 255));
             window.draw(pm);
 
             drawTxt("[M] Сложить карту прибора в тактический походный режим", sx, H - 120.0f, 13, textColor);
         }
-        else if (m_ActiveTab == 2)
+        break;
+        case 2:
         {
             drawTxt("PIP-BOY WEARABLE — ROBCO COLLECTIBLE TAPES LOG", sx, sy, 16, sf::Color(255, 220, 80));
             drawTxt("==================================================", sx, sy + 22, 16, sf::Color(200, 180, 50));
 
             int row = 0;
-            for (const auto &t : adv.radio.tapes())
+            for (const auto& t : adv.radio.tapes())
             {
                 std::string st = t.found ? (t.played ? "[PLAYED]" : "[FOUND - UNPLAYED]") : "[UNKNOWN DATA ENCRYPTION]";
                 std::string l = "> " + t.id + ": " + (t.found ? t.title : "???") + " " + st;
@@ -194,7 +219,12 @@ namespace bunker
                 }
                 row++;
             }
-            drawTxt("[O] Закрыть архив аудиозаписей РобКо | На основном экране миникарты нет", sx, H - 120.0f, 13, sf::Color(200, 200, 100));
+            drawTxt("[O] Закрыть архив аудиозаписей РобКо | На основном экране миникарты нет", sx, H - 120.0f, 13,
+                    sf::Color(200, 200, 100));
+        }
+        break;
+        default:
+            break;
         }
     }
 

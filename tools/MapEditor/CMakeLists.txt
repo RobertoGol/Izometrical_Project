@@ -1,29 +1,67 @@
 cmake_minimum_required(VERSION 3.15)
 project(MapEditor CXX)
 
-# ПРИНУДИТЕЛЬНО подключаем vcpkg (Добавьте эту строку!)
-set(CMAKE_TOOLCHAIN_FILE "F:/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "" FORCE)
-
-# Включаем современный стандарт C++
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Экспортируем команды для IntelliSense/Clangd
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Поиск SFML 3 и ImGui
-find_package(SFML 3 COMPONENTS Graphics Window System REQUIRED)
-find_package(ImGui-SFML CONFIG REQUIRED)
+set(PROJECT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../.." CACHE PATH "Repository root")
+set(SFML_ROOT "${PROJECT_ROOT}/source/SFML-3.1.0" CACHE PATH "Bundled SFML root")
+set(SFML_DIR "${SFML_ROOT}/lib/cmake/SFML" CACHE PATH "SFML CMake package directory")
+set(IMGUI_DIR "${PROJECT_ROOT}/source/ImGui")
 
-add_executable(${PROJECT_NAME}
-    src/main.cpp 
-    src/PlacementSystem.cpp
+find_package(SFML 3.1 CONFIG REQUIRED COMPONENTS Graphics Window System)
+find_package(OpenGL REQUIRED)
+
+add_library(map_editor_imgui_sfml STATIC
+    "${IMGUI_DIR}/imgui.cpp"
+    "${IMGUI_DIR}/imgui_draw.cpp"
+    "${IMGUI_DIR}/imgui_tables.cpp"
+    "${IMGUI_DIR}/imgui_widgets.cpp"
+    "${IMGUI_DIR}/imgui-SFML.cpp"
 )
 
-# Передаем пути и библиотеки в проект
-target_link_libraries(${PROJECT_NAME} PRIVATE
+target_include_directories(map_editor_imgui_sfml PUBLIC
+    "${IMGUI_DIR}"
+)
+
+target_link_libraries(map_editor_imgui_sfml PUBLIC
     SFML::Graphics
     SFML::Window
     SFML::System
-    ImGui-SFML::ImGui-SFML
+    OpenGL::GL
 )
+
+add_executable(${PROJECT_NAME}
+    src/main.cpp
+    src/MapEditorConsole.cpp
+    src/MapEditorInput.cpp
+    src/MapEditorPanels.cpp
+    src/MapEditorPlacement.cpp
+    src/MapEditorView.cpp
+    src/PlacementSystem.cpp
+)
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    map_editor_imgui_sfml
+)
+
+if(MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive-)
+else()
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+
+if(EXISTS "${SFML_ROOT}/bin")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${SFML_ROOT}/bin"
+        "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+        COMMENT "Copying SFML runtime DLLs to build directory..."
+    )
+endif()

@@ -1,14 +1,14 @@
 #pragma once
 
-#include "core/Types.hpp"
 #include "content/Workstations.hpp"
+#include "core/Types.hpp"
+#include "engine/Log.hpp"
 #include "gameplay/GameState.hpp"
 #include "persistence/Inventory.hpp"
-#include <string>
-#include <vector>
-#include <unordered_map>
-#include <iostream>
 #include <algorithm>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace bunker
 {
@@ -76,8 +76,15 @@ namespace bunker
         TankPartPlating frontalArmor = {"Frontal Plating Shield", 400.0f, 400.0f, 0.85f};
         TankPartPlating rearArmor = {"Rear Engine Plating", 120.0f, 120.0f, 0.15f};
 
-        bool isMobilityCrippled() const { return leftTrack.status() == TankModuleStatus::Crippled || rightTrack.status() == TankModuleStatus::Crippled; }
-        bool isCannonBroken() const { return mainCannon.status() == TankModuleStatus::Crippled; }
+        bool isMobilityCrippled() const
+        {
+            return leftTrack.status() == TankModuleStatus::Crippled ||
+                   rightTrack.status() == TankModuleStatus::Crippled;
+        }
+        bool isCannonBroken() const
+        {
+            return mainCannon.status() == TankModuleStatus::Crippled;
+        }
     };
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -103,7 +110,7 @@ namespace bunker
         inline constexpr unsigned int ScrapMetal = 201;
         inline constexpr unsigned int Circuits = 202;
         inline constexpr unsigned int CoreEnergyCell = 203;
-    }
+    } // namespace CraftItemIDs
 
     enum class CraftResult
     {
@@ -116,7 +123,7 @@ namespace bunker
 
     class ModularEquipmentSystem
     {
-    public:
+      public:
         ModularEquipmentSystem();
 
         void initializeDatabase();
@@ -124,15 +131,24 @@ namespace bunker
         // Полная проверка ресурсов (Scrap/Circuits/CoreEnergy) выполняется ДО
         // любого списания. Списание начинается только если все проверки прошли,
         // поэтому частичное/поломанное состояние инвентаря невозможно.
-        CraftResult craftItem(PlayerInventory &inv, int recipeIndex);
-        void applyPlatingDamage(ModularTankChassis &tank, const Vector3D &hitDir, float damage);
+        CraftResult craftItem(PlayerInventory& inv, int recipeIndex);
+        void applyPlatingDamage(ModularTankChassis& tank, const Vector3D& hitDir, float damage);
 
         std::vector<CraftingRecipe> getRecipesForStation(WorkstationType stationType) const;
-        const std::vector<ArmorItemDef> &armorDatabase() const { return m_ArmorRegistry; }
-        const std::vector<CraftingRecipe> &recipes() const { return m_Recipes; }
-        ModularTankChassis &titanRuntimeChassis() { return m_ActiveTank; }
+        const std::vector<ArmorItemDef>& armorDatabase() const
+        {
+            return m_ArmorRegistry;
+        }
+        const std::vector<CraftingRecipe>& recipes() const
+        {
+            return m_Recipes;
+        }
+        ModularTankChassis& titanRuntimeChassis()
+        {
+            return m_ActiveTank;
+        }
 
-    private:
+      private:
         std::vector<ArmorItemDef> m_ArmorRegistry;
         std::vector<CraftingRecipe> m_Recipes;
         ModularTankChassis m_ActiveTank;

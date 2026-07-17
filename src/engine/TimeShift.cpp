@@ -1,21 +1,22 @@
 #include "engine/TimeShift.hpp"
 #include "ai/EnemySpawner.hpp"
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <cstdint>
 
 namespace bunker
 {
 
-    void TimeShift::initialize(GameState &gs, EnemySpawner &spawner)
+    void TimeShift::initialize(GameState& gs, EnemySpawner& spawner)
     {
         savePresentFromGameState(gs);
         generatePastTimeline(gs, spawner);
         m_CurrentTimeline = Timeline::Present;
         m_Initialized = true;
-        std::cout << "[TIMESHIFT] Два таймлайна инициализированы." << std::endl;
+        bunker::logInfo() << "[TIMESHIFT] Два таймлайна инициализированы." << std::endl;
     }
 
-    bool TimeShift::tryShift(GameState &gs)
+    bool TimeShift::tryShift(GameState& gs)
     {
         if (!m_Initialized)
             return false;
@@ -26,7 +27,7 @@ namespace bunker
 
         if (m_CurrentTimeline == Timeline::Present && m_DeviceCharge < 5.0f)
         {
-            std::cout << "[TIMESHIFT] Устройство разряжено!" << std::endl;
+            bunker::logInfo() << "[TIMESHIFT] Устройство разряжено!" << std::endl;
             return false;
         }
 
@@ -38,14 +39,14 @@ namespace bunker
             savePresentFromGameState(gs);
             loadPastToGameState(gs);
             m_CurrentTimeline = Timeline::Past;
-            std::cout << "[TIMESHIFT] ПЕРЕНОС В ПРОШЛОЕ (Целое Убежище 17)" << std::endl;
+            bunker::logInfo() << "[TIMESHIFT] ПЕРЕНОС В ПРОШЛОЕ (Целое Убежище 17)" << std::endl;
         }
         else
         {
             savePastFromGameState(gs);
             loadPresentToGameState(gs);
             m_CurrentTimeline = Timeline::Present;
-            std::cout << "[TIMESHIFT] ВОЗВРАТ В НАСТОЯЩЕЕ (Разрушенное Убежище 17)" << std::endl;
+            bunker::logInfo() << "[TIMESHIFT] ВОЗВРАТ В НАСТОЯЩЕЕ (Разрушенное Убежище 17)" << std::endl;
         }
 
         m_ShiftCooldown = m_ShiftCooldownMax;
@@ -78,7 +79,7 @@ namespace bunker
             m_DeviceCharge = std::max(0.0f, m_DeviceCharge - m_DrainRate * dt);
             if (m_DeviceCharge <= 0.0f)
             {
-                std::cout << "[TIMESHIFT] Критический разряд! Автоматический возврат в настоящее." << std::endl;
+                bunker::logInfo() << "[TIMESHIFT] Критический разряд! Автоматический возврат в настоящее." << std::endl;
             }
         }
         else
@@ -87,7 +88,7 @@ namespace bunker
         }
     }
 
-    void TimeShift::renderTransitionEffect(sf::RenderWindow &window) const
+    void TimeShift::renderTransitionEffect(sf::RenderWindow& window) const
     {
         if (!m_IsTransitioning)
             return;
@@ -95,24 +96,21 @@ namespace bunker
         float alpha = (m_TransitionTimer / m_TransitionDuration) * 180.0f;
         alpha = std::clamp(alpha, 0.0f, 255.0f);
 
-        sf::RectangleShape flash({static_cast<float>(Config::SCREEN_WIDTH),
-                                  static_cast<float>(Config::SCREEN_HEIGHT)});
-        flash.setFillColor(sf::Color(100, 200, 255, static_cast<sf::Uint8>(alpha)));
+        sf::RectangleShape flash({static_cast<float>(Config::SCREEN_WIDTH), static_cast<float>(Config::SCREEN_HEIGHT)});
+        flash.setFillColor(sf::Color(100, 200, 255, static_cast<std::uint8_t>(alpha)));
         window.draw(flash);
     }
 
-    void TimeShift::renderHUD(sf::RenderWindow &window, const sf::Font *font) const
+    void TimeShift::renderHUD(sf::RenderWindow& window, const sf::Font* font) const
     {
         if (!font)
             return;
 
         float W = static_cast<float>(Config::SCREEN_WIDTH);
 
-        sf::Text text;
-        text.setFont(*font);
-        text.setCharacterSize(12);
+        sf::Text text(*font, "", 12);
         text.setFillColor(isPast() ? sf::Color(100, 220, 255) : sf::Color(255, 180, 50));
-        text.setPosition(W / 2 - 60, 15);
+        text.setPosition({W / 2 - 60, 15});
 
         std::string line = isPast() ? "TIMELINE: PAST (Pre-War)" : "TIMELINE: PRESENT";
         text.setString(line);
@@ -120,30 +118,27 @@ namespace bunker
 
         float pct = getChargePercent();
         sf::RectangleShape bg({120.0f, 6.0f});
-        bg.setPosition(W / 2 - 60, 32);
+        bg.setPosition({W / 2 - 60, 32});
         bg.setFillColor(sf::Color(40, 40, 40, 150));
         bg.setOutlineThickness(1.0f);
         bg.setOutlineColor(sf::Color::Black);
         window.draw(bg);
 
         sf::RectangleShape fill({120.0f * pct, 6.0f});
-        fill.setPosition(W / 2 - 60, 32);
+        fill.setPosition({W / 2 - 60, 32});
         fill.setFillColor(isPast() ? sf::Color(80, 200, 255) : sf::Color(255, 160, 40));
         window.draw(fill);
 
         if (m_ShiftCooldown > 0.0f)
         {
-            sf::Text cd;
-            cd.setFont(*font);
-            cd.setCharacterSize(9);
-            cd.setString("CD:" + std::to_string(static_cast<int>(m_ShiftCooldown * 10) / 10) + "s");
+            sf::Text cd(*font, "CD:" + std::to_string(static_cast<int>(m_ShiftCooldown * 10) / 10) + "s", 9);
             cd.setFillColor(sf::Color(150, 150, 150));
-            cd.setPosition(W / 2 - 15, 45);
+            cd.setPosition({W / 2 - 15, 45});
             window.draw(cd);
         }
     }
 
-    void TimeShift::savePresentFromGameState(const GameState &gs)
+    void TimeShift::savePresentFromGameState(const GameState& gs)
     {
         m_PresentSnapshot.sectorMap = gs.sectorMap;
         m_PresentSnapshot.wallDurability = gs.wallDurability;
@@ -152,7 +147,7 @@ namespace bunker
         m_PresentSnapshot.lootContainers = gs.lootContainers;
     }
 
-    void TimeShift::savePastFromGameState(const GameState &gs)
+    void TimeShift::savePastFromGameState(const GameState& gs)
     {
         m_PastSnapshot.sectorMap = gs.sectorMap;
         m_PastSnapshot.wallDurability = gs.wallDurability;
@@ -161,7 +156,7 @@ namespace bunker
         m_PastSnapshot.lootContainers = gs.lootContainers;
     }
 
-    void TimeShift::loadPresentToGameState(GameState &gs)
+    void TimeShift::loadPresentToGameState(GameState& gs)
     {
         gs.sectorMap = m_PresentSnapshot.sectorMap;
         gs.wallDurability = m_PresentSnapshot.wallDurability;
@@ -170,7 +165,7 @@ namespace bunker
         gs.lootContainers = m_PresentSnapshot.lootContainers;
     }
 
-    void TimeShift::loadPastToGameState(GameState &gs)
+    void TimeShift::loadPastToGameState(GameState& gs)
     {
         gs.sectorMap = m_PastSnapshot.sectorMap;
         gs.wallDurability = m_PastSnapshot.wallDurability;
@@ -179,8 +174,9 @@ namespace bunker
         gs.lootContainers = m_PastSnapshot.lootContainers;
     }
 
-    void TimeShift::generatePastTimeline(GameState &gs, EnemySpawner &)
+    void TimeShift::generatePastTimeline(GameState& gs, EnemySpawner&)
     {
+        (void)gs;
         for (int x = 0; x < Config::MAP_WIDTH; ++x)
         {
             for (int y = 0; y < Config::MAP_HEIGHT; ++y)
@@ -218,19 +214,20 @@ namespace bunker
             m_PastSnapshot.wallDurability[x][12] = 150;
         }
 
-        int doors[][2] = {
-            {8, 5}, {8, 10}, {8, 14}, {12, 5}, {12, 10}, {12, 14}, {5, 8}, {10, 8}, {14, 8}, {5, 12}, {10, 12}, {14, 12}, {9, 3}, {9, 16}};
-        for (auto &d : doors)
+        int doors[][2] = {{8, 5},  {8, 10}, {8, 14}, {12, 5},  {12, 10}, {12, 14}, {5, 8},
+                          {10, 8}, {14, 8}, {5, 12}, {10, 12}, {14, 12}, {9, 3},   {9, 16}};
+        for (auto& d : doors)
         {
             m_PastSnapshot.sectorMap[d[0]][d[1]] = 0;
         }
 
         m_PastSnapshot.enemies.clear();
 
-        Vector3D robotPositions[] = {
-            {5.0f, 5.0f, 0.0f}, {10.0f, 5.0f, 0.0f}, {14.0f, 5.0f, 0.0f}, {5.0f, 10.0f, 0.0f}, {14.0f, 10.0f, 0.0f}, {5.0f, 14.0f, 0.0f}, {10.0f, 14.0f, 0.0f}, {14.0f, 14.0f, 0.0f}};
+        Vector3D robotPositions[] = {{5.0f, 5.0f, 0.0f},   {10.0f, 5.0f, 0.0f},  {14.0f, 5.0f, 0.0f},
+                                     {5.0f, 10.0f, 0.0f},  {14.0f, 10.0f, 0.0f}, {5.0f, 14.0f, 0.0f},
+                                     {10.0f, 14.0f, 0.0f}, {14.0f, 14.0f, 0.0f}};
 
-        for (const auto &pos : robotPositions)
+        for (const auto& pos : robotPositions)
         {
             Enemy robot;
             robot.position = pos;
@@ -257,9 +254,8 @@ namespace bunker
         pastCrate2.containsItems.push_back({102, ItemType::Weapon, 1, 2.0f, "PROTOTYPE XO-16"});
         m_PastSnapshot.lootContainers.push_back(pastCrate2);
 
-        std::cout << "[TIMESHIFT] Прошлое сгенерировано: "
-                  << m_PastSnapshot.enemies.size() << " роботов, "
-                  << m_PastSnapshot.lootContainers.size() << " контейнеров." << std::endl;
+        bunker::logInfo() << "[TIMESHIFT] Прошлое сгенерировано: " << m_PastSnapshot.enemies.size() << " роботов, "
+                          << m_PastSnapshot.lootContainers.size() << " контейнеров." << std::endl;
     }
 
 } // namespace bunker

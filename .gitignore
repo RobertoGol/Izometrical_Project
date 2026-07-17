@@ -5,5 +5,20 @@ source/mingw64/
 *.o
 *.exe
 *.a
+*.obj
+*.lib
+*.pdb
+*.ilk
+*.dll
+
+# Ignore local CMake build output
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+compile_flags.txt
+build/
+build-*/
+out/
 
 manuals/

@@ -1,12 +1,12 @@
 #include "Workstations.hpp"
 #include "RecipeDatabase.hpp"
 #include "ResourceManager.hpp"
-#include <iostream>
+#include "engine/Log.hpp"
 
 WorkstationUIState Workstations::CreateWorkstationUIState(WorkstationType stationType)
 {
     WorkstationUIState state;
-    const WorkstationDef *def = WorkstationDatabase::findByType(stationType);
+    const WorkstationDef* def = WorkstationDatabase::findByType(stationType);
 
     if (def)
     {
@@ -33,17 +33,17 @@ WorkstationUIState Workstations::OpenWorkstationUI(WorkstationType stationType)
     }
 
     // Показываем список доступных действий
-    std::cout << "=== " << state.uiTitle << " ===" << std::endl;
+    bunker::logInfo() << "=== " << state.uiTitle << " ===" << std::endl;
     for (size_t i = 0; i < state.supportedActions.size(); ++i)
     {
-        std::cout << i << ". Action: " << static_cast<int>(state.supportedActions[i]) << std::endl;
+        bunker::logInfo() << i << ". Action: " << static_cast<int>(state.supportedActions[i]) << std::endl;
     }
 
     state.statusMessage = "Select an action.";
     return state;
 }
 
-void Workstations::DispatchStationAction(WorkstationUIState &state, StationActionType action, int recipeIndex)
+void Workstations::DispatchStationAction(WorkstationUIState& state, StationActionType action, int recipeIndex)
 {
     switch (action)
     {
@@ -74,7 +74,7 @@ void Workstations::DispatchStationAction(WorkstationUIState &state, StationActio
     }
 }
 
-void Workstations::HandleCraftAction(WorkstationUIState &state, int recipeIndex)
+void Workstations::HandleCraftAction(WorkstationUIState& state, int recipeIndex)
 {
     if (recipeIndex < 0)
     {
@@ -90,9 +90,9 @@ void Workstations::HandleCraftAction(WorkstationUIState &state, int recipeIndex)
         return;
     }
 
-    const auto &recipe = recipes[recipeIndex];
+    const auto& recipe = recipes[recipeIndex];
 
-    auto &resources = ResourceManager::Get();
+    auto& resources = ResourceManager::Get();
     if (!resources.HasResources(recipe.requiredScrap, recipe.requiredCircuits, recipe.requiredCoreEnergy))
     {
         state.statusMessage = "Not enough resources.";
@@ -110,32 +110,32 @@ void Workstations::HandleCraftAction(WorkstationUIState &state, int recipeIndex)
     }
 }
 
-void Workstations::HandleRepairAction(WorkstationUIState &state)
+void Workstations::HandleRepairAction(WorkstationUIState& state)
 {
     state.statusMessage = "Repair action executed.";
 }
 
-void Workstations::HandleModifyAction(WorkstationUIState &state)
+void Workstations::HandleModifyAction(WorkstationUIState& state)
 {
     state.statusMessage = "Modify action executed.";
 }
 
-void Workstations::HandleScrapAction(WorkstationUIState &state)
+void Workstations::HandleScrapAction(WorkstationUIState& state)
 {
     state.statusMessage = "Scrap action executed.";
 }
 
-void Workstations::HandleDiagnoseAction(WorkstationUIState &state)
+void Workstations::HandleDiagnoseAction(WorkstationUIState& state)
 {
     state.statusMessage = "Diagnosis complete.";
 }
 
-void Workstations::HandleAccessTerminalAction(WorkstationUIState &state)
+void Workstations::HandleAccessTerminalAction(WorkstationUIState& state)
 {
     state.statusMessage = "Terminal access granted.";
 }
 
-void Workstations::HandleOpenStorageAction(WorkstationUIState &state)
+void Workstations::HandleOpenStorageAction(WorkstationUIState& state)
 {
     state.statusMessage = "Storage opened.";
 }

@@ -12,23 +12,23 @@ namespace bunker
         m_Timer.state = st;
         m_Timer.duration = durSec;
         m_Timer.timeRemaining = durSec;
-        std::cout << "[ACTION] Начато прерываемое действие (" << durSec << "с): "
-                  << ((st == PilotActionState::HealingStim) ? "ВВОД СТИМ-ИНЖЕКТОРА" : "ПЕРЕЗАРЯДКА ОРУЖИЯ")
-                  << std::endl;
+        bunker::logInfo() << "[ACTION] Начато прерываемое действие (" << durSec << "с): "
+                          << ((st == PilotActionState::HealingStim) ? "ВВОД СТИМ-ИНЖЕКТОРА" : "ПЕРЕЗАРЯДКА ОРУЖИЯ")
+                          << std::endl;
         return true;
     }
 
-    void StatefulActionsController::interruptAction(const char *reason)
+    void StatefulActionsController::interruptAction(const char* reason)
     {
         if (!isBusy())
             return;
 
-        std::cout << "[ACTION INTERRUPTED] Действие сорвано! Причина: " << reason << std::endl;
+        bunker::logInfo() << "[ACTION INTERRUPTED] Действие сорвано! Причина: " << reason << std::endl;
         m_Timer.state = PilotActionState::Ready;
         m_Timer.timeRemaining = 0.0f;
     }
 
-    void StatefulActionsController::update(GameState &gs, float dt)
+    void StatefulActionsController::update(GameState& gs, float dt)
     {
         if (!isBusy())
             return;
@@ -40,20 +40,24 @@ namespace bunker
         float bobAnimOffset = std::sin(progress * 3.14159265f) * 0.15f;
         gs.playerPos.z = bobAnimOffset; // Визуальный подъем/опускание рук в изометрии
 
-        if (m_Timer.timeRemaining <= 0.0f)
+        if (m_Timer.timeRemaining > 0.0f)
+            return;
+
+        switch (m_Timer.state)
         {
-            if (m_Timer.state == PilotActionState::HealingStim)
-            {
-                gs.playerHealth = std::min(gs.playerMaxHealth, gs.playerHealth + 45.0f);
-                std::cout << "[ACTION COMPLETE] Здоровье Пилота восстановлено!" << std::endl;
-            }
-            else if (m_Timer.state == PilotActionState::ReloadingWeapon)
-            {
-                std::cout << "[ACTION COMPLETE] Боекомплект успешно перезаряжен!" << std::endl;
-            }
-            gs.playerPos.z = 0.0f;
-            m_Timer.state = PilotActionState::Ready;
+        case PilotActionState::HealingStim:
+            gs.playerHealth = std::min(gs.playerMaxHealth, gs.playerHealth + 45.0f);
+            bunker::logInfo() << "[ACTION COMPLETE] Здоровье Пилота восстановлено!" << std::endl;
+            break;
+        case PilotActionState::ReloadingWeapon:
+            bunker::logInfo() << "[ACTION COMPLETE] Боекомплект успешно перезаряжен!" << std::endl;
+            break;
+        default:
+            break;
         }
+
+        gs.playerPos.z = 0.0f;
+        m_Timer.state = PilotActionState::Ready;
     }
 
 } // namespace bunker

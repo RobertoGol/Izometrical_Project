@@ -1,15 +1,15 @@
 #pragma once
 
-#include "core/Types.hpp"
-#include "gameplay/GameState.hpp"
-#include "entities/Collisions.hpp"
 #include "core/Constants.hpp"
+#include "core/Types.hpp"
 #include "engine/InputManager.hpp"
+#include "engine/Log.hpp"
+#include "entities/Collisions.hpp"
+#include "gameplay/GameState.hpp"
 #include <SFML/Graphics.hpp>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
-#include <iostream>
 #include <string>
 
 namespace bunker
@@ -53,7 +53,7 @@ namespace bunker
 
     class TitanAI
     {
-    private:
+      private:
         const float m_TitanAcceleration = 4.0f;
         const float m_TitanDeceleration = 6.0f;
         const float m_ExclusionRadiusSq = 36.0f;
@@ -80,44 +80,78 @@ namespace bunker
         CockpitFireMode m_FireMode = CockpitFireMode::DuplexTwinSalvo;
         bool m_IsGunnerMounted = false;
 
-    public:
+      public:
         TitanAI();
 
-        bool tryMount(GameState &gs);
-        void dismount(GameState &gs);
-        void update(GameState &gs, const InputSnapshot &input, float dt);
-        void fireFromCockpit(GameState &gs);
-        void autoFire(GameState &gs);
-        PilotInputControls filterAndStabilizeInputs(const PilotInputControls &rawInput, const TerrainFrictionData &terrain);
+        bool tryMount(GameState& gs);
+        void dismount(GameState& gs);
+        void update(GameState& gs, const InputSnapshot& input, float dt);
+        void fireFromCockpit(GameState& gs);
+        void autoFire(GameState& gs);
+        PilotInputControls filterAndStabilizeInputs(const PilotInputControls& rawInput,
+                                                    const TerrainFrictionData& terrain);
 
         void cycleCockpitFireMode();
-        bool tryMountGunner(GameState &gs);
-        void dismountGunner(GameState &gs);
-        bool isGunnerMounted() const { return m_IsGunnerMounted; }
-        CockpitFireMode getCockpitFireMode() const { return m_FireMode; }
+        bool tryMountGunner(GameState& gs);
+        void dismountGunner(GameState& gs);
+        bool isGunnerMounted() const
+        {
+            return m_IsGunnerMounted;
+        }
+        CockpitFireMode getCockpitFireMode() const
+        {
+            return m_FireMode;
+        }
         std::string getFireModeBanner() const;
 
-        bool isVortexActive() const { return m_VortexActive; }
-        float getVortexEnergy() const { return m_VortexEnergy; }
-        bool isCoreActive() const { return m_CoreOverdriveActive; }
-        float getCoreCharge() const { return m_CoreChargePercent; }
-        AncientLoadout getLoadout() const { return m_ActiveLoadout; }
-        bool isReMapping() const { return m_IsReMapping; }
-        float getBoilerPressure() const { return m_BoilerSteamPressure; }
-        float getCoolantTemp() const { return m_CoolantTemperature; }
-        float getPilotStress() const { return m_PilotStress; }
+        bool isVortexActive() const
+        {
+            return m_VortexActive;
+        }
+        float getVortexEnergy() const
+        {
+            return m_VortexEnergy;
+        }
+        bool isCoreActive() const
+        {
+            return m_CoreOverdriveActive;
+        }
+        float getCoreCharge() const
+        {
+            return m_CoreChargePercent;
+        }
+        AncientLoadout getLoadout() const
+        {
+            return m_ActiveLoadout;
+        }
+        bool isReMapping() const
+        {
+            return m_IsReMapping;
+        }
+        float getBoilerPressure() const
+        {
+            return m_BoilerSteamPressure;
+        }
+        float getCoolantTemp() const
+        {
+            return m_CoolantTemperature;
+        }
+        float getPilotStress() const
+        {
+            return m_PilotStress;
+        }
         std::string getLoadoutName() const;
 
-    private:
+      private:
         void updateBoiler(float dt);
-        void updatePilotStress(const GameState &gs, float dt);
-        void triggerReMap(GameState &gs, AncientLoadout newWeapon);
-        void updateVortexShield(GameState &gs, bool isHoldingQ, float dt);
-        bool validateCoreOverdriveTrigger(const GameState &gs);
+        void updatePilotStress(const GameState& gs, float dt);
+        void triggerReMap(GameState& gs, AncientLoadout newWeapon);
+        void updateVortexShield(GameState& gs, bool isHoldingQ, float dt);
+        bool validateCoreOverdriveTrigger(const GameState& gs);
         void executeCoreOverdrive();
-        void updateAutonomousMode(GameState &gs, float dt);
-        void updatePilotedMode(GameState &gs, const InputSnapshot &input, float dt);
-        Vector3D calculateCombatAnchor(const GameState &gs);
+        void updateAutonomousMode(GameState& gs, float dt);
+        void updatePilotedMode(GameState& gs, const InputSnapshot& input, float dt);
+        Vector3D calculateCombatAnchor(const GameState& gs);
     };
 
 } // namespace bunker

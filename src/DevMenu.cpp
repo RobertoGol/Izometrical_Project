@@ -2,10 +2,10 @@
 
 #ifdef DEV_BUILD
 
+#include "engine/Log.hpp"
 #include <imgui.h>
-#include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 
 // ==================== LUA (заглушка) ====================
 // В будущем здесь будет полноценная интеграция через sol2 или lua.hpp
@@ -15,12 +15,12 @@ static bool luaInitialized = false;
 
 void DevMenu::LoadScripts()
 {
-    std::cout << "[DevMenu] Loading Lua scripts from dev/..." << std::endl;
+    bunker::logInfo() << "[DevMenu] Loading Lua scripts from dev/..." << std::endl;
     // TODO: Загрузка dev/DevMenu.lua
     luaInitialized = true;
 }
 
-void DevMenu::ExecuteLuaCommand(const std::string &cmd)
+void DevMenu::ExecuteLuaCommand(const std::string& cmd)
 {
     if (!luaInitialized)
     {
@@ -33,7 +33,7 @@ void DevMenu::ExecuteLuaCommand(const std::string &cmd)
 
 // ==================== ОСТАЛЬНОЙ КОД ====================
 
-DevMenu &DevMenu::Get()
+DevMenu& DevMenu::Get()
 {
     static DevMenu instance;
     return instance;
@@ -41,7 +41,7 @@ DevMenu &DevMenu::Get()
 
 void DevMenu::Initialize()
 {
-    std::cout << "[DevMenu] DevMenu initialized (DEV_BUILD)" << std::endl;
+    bunker::logInfo() << "[DevMenu] DevMenu initialized (DEV_BUILD)" << std::endl;
     LoadScripts();
 
     for (int i = 0; i < 5; ++i)
@@ -136,14 +136,14 @@ void DevMenu::RenderConsoleTab()
     }
 
     ImGui::BeginChild("History", ImVec2(0, 500), true);
-    for (const auto &line : consoleHistory)
+    for (const auto& line : consoleHistory)
     {
         ImGui::TextUnformatted(line.c_str());
     }
     ImGui::EndChild();
 }
 
-void DevMenu::ExecuteCommand(const std::string &cmd)
+void DevMenu::ExecuteCommand(const std::string& cmd)
 {
     consoleHistory.push_back("> " + cmd);
 
@@ -291,7 +291,7 @@ void DevMenu::RenderMapToolsTab()
     ImGui::Text("Map Layers");
     ImGui::Separator();
 
-    const char *layers[] = {"Ground", "Objects", "Entities", "Triggers", "Effects"};
+    const char* layers[] = {"Ground", "Objects", "Entities", "Triggers", "Effects"};
 
     for (int i = 0; i < 5; ++i)
     {
@@ -348,13 +348,13 @@ bool DevMenu::IsLayerVisible(int layer) const
     return it != layerVisibility.end() ? it->second : true;
 }
 
-bool DevMenu::SaveMap(const std::string &filepath)
+bool DevMenu::SaveMap(const std::string& filepath)
 {
     consoleHistory.push_back("[Map] Saving to: " + filepath);
     return true;
 }
 
-bool DevMenu::LoadMap(const std::string &filepath)
+bool DevMenu::LoadMap(const std::string& filepath)
 {
     consoleHistory.push_back("[Map] Loading from: " + filepath);
     return true;

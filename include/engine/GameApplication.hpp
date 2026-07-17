@@ -1,7 +1,7 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include "gameplay/SpatialGrid.hpp"
+#include <SFML/Graphics.hpp>
 
 #include "AdvancedMechanics.hpp"
 #include "BulletSystem.hpp"
@@ -9,29 +9,29 @@
 #include "EnemySpawner.hpp"
 #include "GameState.hpp"
 #include "HUD.hpp"
-#include "ui/TerminalUI.hpp"
-#include "ui/PipPad.hpp"
 #include "HostileAISystem.hpp"
-#include "ai/BossAISystem.hpp"
-#include "ai/PerceptionSystem.hpp"
 #include "InputManager.hpp"
 #include "Inventory.hpp"
 #include "MapScreen.hpp"
 #include "PlayerController.hpp"
 #include "Progression.hpp"
 #include "SaveSystem.hpp"
-#include "persistence/ModularEquipmentSystem.hpp"
 #include "Tactics.hpp"
-#include "TextureGenerator.hpp"
 #include "TimeShift.hpp"
 #include "TitanAI.hpp"
 #include "VehicleManager.hpp"
 #include "WorldSession.hpp"
+#include "ai/BossAISystem.hpp"
+#include "ai/PerceptionSystem.hpp"
+#include "content/TextureGenerator.hpp"
 #include "engine/AudioController.hpp"
+#include "persistence/ModularEquipmentSystem.hpp"
+#include "persistence/StoryFlagRegistry.hpp"
+#include "ui/PipPad.hpp"
+#include "ui/TerminalUI.hpp"
 #include "vehicles/ThermalLoadSystem.hpp"
 #include "vehicles/VehicleSeatController.hpp"
 #include "world/CampPlacementValidator.hpp"
-#include "persistence/StoryFlagRegistry.hpp"
 #include "world/StoryEventManager.hpp"
 
 namespace bunker
@@ -41,12 +41,12 @@ namespace bunker
     // dispatch to gameplay/render subsystems. main.cpp intentionally stays thin.
     class GameApplication
     {
-    public:
+      public:
         GameApplication();
 
         int run();
 
-    private:
+      private:
         struct EdgeKeyState
         {
             bool map = false;
@@ -115,23 +115,23 @@ namespace bunker
         void spawnInitialVehicles();
 
         void runFrame();
-        void processEdgeHotkeys(const InputSnapshot &input);
+        void processEdgeHotkeys(const InputSnapshot& input);
         void renderMapFrame(float dt);
-        void updateGameplayFrame(const InputSnapshot &input, float dt);
+        void updateGameplayFrame(const InputSnapshot& input, float dt);
         void renderGameplayFrame();
 
-        void updateMouseWorldPosition(const InputSnapshot &input);
-        void processSaveLoadInput(const InputSnapshot &input);
-        void processModeSwitchInput(const InputSnapshot &input);
-        void processPilotClassInput(const InputSnapshot &input);
+        void updateMouseWorldPosition(const InputSnapshot& input);
+        void processSaveLoadInput(const InputSnapshot& input);
+        void processModeSwitchInput(const InputSnapshot& input);
+        void processPilotClassInput(const InputSnapshot& input);
 
-        void updateGameplaySystems(const InputSnapshot &input, float dt);
-        void updateMovementAndInteraction(const InputSnapshot &input, float dt);
-        void updateTactics(const InputSnapshot &input, float dt);
-        void updateCombat(const InputSnapshot &input, float dt);
-        void updateWorldSystems(const InputSnapshot &input, float dt);
+        void updateGameplaySystems(const InputSnapshot& input, float dt);
+        void updateMovementAndInteraction(const InputSnapshot& input, float dt);
+        void updateTactics(const InputSnapshot& input, float dt);
+        void updateCombat(const InputSnapshot& input, float dt);
+        void updateWorldSystems(const InputSnapshot& input, float dt);
 
-        static bool consumeEdge(bool isPressedNow, bool &wasPressedBefore);
+        static bool consumeEdge(bool isPressedNow, bool& wasPressedBefore);
         static float clampDeltaTime(float dt);
     };
 

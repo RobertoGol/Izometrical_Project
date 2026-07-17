@@ -1,7 +1,7 @@
 #pragma once
 
+#include "engine/Log.hpp"
 #include "gameplay/GameState.hpp"
-#include <iostream>
 #include <cmath>
 
 namespace bunker
@@ -28,19 +28,28 @@ namespace bunker
 
     class StatefulActionsController
     {
-    private:
+      private:
         ActionTimer m_Timer;
 
-    public:
+      public:
         StatefulActionsController() = default;
 
         bool startAction(PilotActionState st, float durSec);
-        void interruptAction(const char *reason);
-        void update(GameState &gs, float dt);
+        void interruptAction(const char* reason);
+        void update(GameState& gs, float dt);
 
-        bool isBusy() const { return m_Timer.state != PilotActionState::Ready; }
-        PilotActionState currentState() const { return m_Timer.state; }
-        float getProceduralAnimProgress() const { return (m_Timer.duration > 0.0f) ? (1.0f - m_Timer.timeRemaining / m_Timer.duration) : 0.0f; }
+        bool isBusy() const
+        {
+            return m_Timer.state != PilotActionState::Ready;
+        }
+        PilotActionState currentState() const
+        {
+            return m_Timer.state;
+        }
+        float getProceduralAnimProgress() const
+        {
+            return (m_Timer.duration > 0.0f) ? (1.0f - m_Timer.timeRemaining / m_Timer.duration) : 0.0f;
+        }
     };
 
 } // namespace bunker

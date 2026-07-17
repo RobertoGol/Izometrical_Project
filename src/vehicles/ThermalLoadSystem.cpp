@@ -1,11 +1,11 @@
 #include "vehicles/ThermalLoadSystem.hpp"
+#include "engine/Log.hpp"
 #include <algorithm>
-#include <iostream>
 
 namespace bunker
 {
 
-    void ThermalLoadSystem::updateThermodynamics(GameState &gs, float dt)
+    void ThermalLoadSystem::updateThermodynamics(GameState& gs, float dt)
     {
         if (m_WeaponLockTimer > 0.0f)
             m_WeaponLockTimer -= dt;
@@ -19,7 +19,8 @@ namespace bunker
             m_CoolantTempC = 190.0f;  // Сброс пара охлаждает котел
             m_WeaponLockTimer = 2.5f; // Блокировка основного орудия на 2.5 секунды
             DamageSystem::applyRadiusDamage(gs, gs.titan.position, 3.5f, 45.0f, DamageType::Thermal);
-            std::cout << "[THERMAL] !! АВАРИЙНЫЙ СБРОС ПАРА !! Перегрев > 250°C! Орудие заблокировано на 2.5с!" << std::endl;
+            bunker::logInfo() << "[THERMAL] !! АВАРИЙНЫЙ СБРОС ПАРА !! Перегрев > 250°C! Орудие заблокировано на 2.5с!"
+                              << std::endl;
         }
     }
 

@@ -1,9 +1,10 @@
 #pragma once
 
 #include <SFML/Audio.hpp>
+#include <optional>
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include <string>
 
 namespace bunker
 {
@@ -66,15 +67,15 @@ namespace bunker
 
     class SoundEffectsBank
     {
-    private:
+      private:
         static std::unordered_map<SoundEffectType, sf::SoundBuffer> s_Buffers;
-        static sf::Sound s_SoundPlayer;
+        static std::optional<sf::Sound> s_SoundPlayer;
 
-    public:
+      public:
         static void initializeFast();
         static void play(SoundEffectType type, float volume = 100.0f);
 
-    private:
+      private:
         static sf::SoundBuffer makeConcreteStep();
         static sf::SoundBuffer makeWaterStep();
         static sf::SoundBuffer makeGratingStep();

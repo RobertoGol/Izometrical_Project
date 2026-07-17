@@ -1,7 +1,8 @@
 #include "world/MapScreen.hpp"
 #include "core/IsoMath.hpp"
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <cstdint>
 
 namespace bunker
 {
@@ -16,21 +17,20 @@ namespace bunker
         }
     }
 
-    void MapScreen::handleInput(const sf::Event &event, float)
+    void MapScreen::handleInput(const sf::Event& event, float)
     {
         if (!m_IsOpen)
             return;
 
-        if (event.type == sf::Event::MouseWheelScrolled)
+        if (const auto* mouseWheelScrolled = event.getIf<sf::Event::MouseWheelScrolled>())
         {
-            m_Zoom += event.mouseWheelScroll.delta * 0.15f;
+            m_Zoom += mouseWheelScrolled->delta * 0.15f;
             m_Zoom = std::clamp(m_Zoom, m_MinZoom, m_MaxZoom);
         }
 
-        if (event.type == sf::Event::KeyPressed)
+        if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
         {
-            if (event.key.code == sf::Keyboard::Escape ||
-                event.key.code == sf::Keyboard::M)
+            if (keyPressed->code == sf::Keyboard::Key::Escape || keyPressed->code == sf::Keyboard::Key::M)
             {
                 close();
             }
@@ -43,21 +43,17 @@ namespace bunker
             return;
 
         float panSpeed = 300.0f * dt / m_Zoom;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
             m_PanOffset.y += panSpeed;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
             m_PanOffset.y -= panSpeed;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
             m_PanOffset.x += panSpeed;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
             m_PanOffset.x -= panSpeed;
     }
 
-    void MapScreen::render(sf::RenderWindow &window, const GameState &gs)
+    void MapScreen::render(sf::RenderWindow& window, const GameState& gs)
     {
         if (!m_IsOpen)
             return;
@@ -80,7 +76,7 @@ namespace bunker
         m_TileSize = (m_MapScreenSize * m_Zoom) / static_cast<float>(Config::MAP_WIDTH);
 
         sf::RectangleShape border({m_MapScreenSize, m_MapScreenSize});
-        border.setPosition(m_MapX, m_MapY);
+        border.setPosition({m_MapX, m_MapY});
         border.setFillColor(sf::Color(15, 25, 15));
         border.setOutlineThickness(2.0f);
         border.setOutlineColor(sf::Color(50, 180, 50));
@@ -92,50 +88,46 @@ namespace bunker
         renderMarkers(window);
 
         drawText(window, "VAULT 17 — TACTICAL MAP", m_MapX, m_MapY - 25, 16, sf::Color(50, 220, 50));
-        std::string posStr = "SEC: [" + std::to_string(static_cast<int>(gs.playerPos.x)) +
-                             ", " + std::to_string(static_cast<int>(gs.playerPos.y)) + "]";
+        std::string posStr = "SEC: [" + std::to_string(static_cast<int>(gs.playerPos.x)) + ", " +
+                             std::to_string(static_cast<int>(gs.playerPos.y)) + "]";
         drawText(window, posStr, m_MapX + m_MapScreenSize - 100, m_MapY - 22, 12, sf::Color(150, 200, 150));
 
         renderLegend(window, W, H);
     }
 
-    void MapScreen::collectMarkers(const GameState &gs)
+    void MapScreen::collectMarkers(const GameState& gs)
     {
         m_Markers.clear();
 
-        m_Markers.push_back({gs.playerPos, "You", sf::Color(50, 255, 50),
-                             MapMarker::Shape::Triangle, 7.0f, false});
+        m_Markers.push_back({gs.playerPos, "You", sf::Color(50, 255, 50), MapMarker::Shape::Triangle, 7.0f, false});
 
-        m_Markers.push_back({gs.titan.position, "BT-7274", sf::Color(230, 115, 25),
-                             MapMarker::Shape::Diamond, 8.0f, gs.titan.health < 300.0f});
+        m_Markers.push_back({gs.titan.position, "BT-7274", sf::Color(230, 115, 25), MapMarker::Shape::Diamond, 8.0f,
+                             gs.titan.health < 300.0f});
 
-        m_Markers.push_back({gs.towerPosition, "Relay Tower", sf::Color::White,
-                             MapMarker::Shape::Square, 6.0f, false});
+        m_Markers.push_back({gs.towerPosition, "Relay Tower", sf::Color::White, MapMarker::Shape::Square, 6.0f, false});
 
         if (!gs.bunkerProgression.hasFoundPipPad)
         {
-            m_Markers.push_back({gs.bunkerProgression.pipPadSpawnPos, "Pip-Pad",
-                                 sf::Color(255, 255, 50), MapMarker::Shape::Diamond, 6.0f, true});
+            m_Markers.push_back({gs.bunkerProgression.pipPadSpawnPos, "Pip-Pad", sf::Color(255, 255, 50),
+                                 MapMarker::Shape::Diamond, 6.0f, true});
         }
 
-        for (const auto &e : gs.enemies)
+        for (const auto& e : gs.enemies)
         {
             if (!e.isAlive)
                 continue;
-            m_Markers.push_back({e.position, "", sf::Color(255, 50, 50, 200),
-                                 MapMarker::Shape::Circle, 4.0f, false});
+            m_Markers.push_back({e.position, "", sf::Color(255, 50, 50, 200), MapMarker::Shape::Circle, 4.0f, false});
         }
 
-        for (const auto &c : gs.lootContainers)
+        for (const auto& c : gs.lootContainers)
         {
             if (c.isOpened)
                 continue;
-            m_Markers.push_back({c.position, "", sf::Color(180, 140, 60),
-                                 MapMarker::Shape::Square, 4.0f, false});
+            m_Markers.push_back({c.position, "", sf::Color(180, 140, 60), MapMarker::Shape::Square, 4.0f, false});
         }
     }
 
-    sf::Vector2f MapScreen::worldToMapPixel(const Vector3D &wPos) const
+    sf::Vector2f MapScreen::worldToMapPixel(const Vector3D& wPos) const
     {
         float normX = wPos.x / static_cast<float>(Config::MAP_WIDTH);
         float normY = wPos.y / static_cast<float>(Config::MAP_HEIGHT);
@@ -145,7 +137,7 @@ namespace bunker
         return {px, py};
     }
 
-    void MapScreen::renderGrid(sf::RenderWindow &window, const GameState &gs)
+    void MapScreen::renderGrid(sf::RenderWindow& window, const GameState& gs)
     {
         for (int x = 0; x < Config::MAP_WIDTH; ++x)
         {
@@ -156,11 +148,11 @@ namespace bunker
                     sf::Vector2f p1 = worldToMapPixel({static_cast<float>(x), static_cast<float>(y), 0});
                     sf::Vector2f p2 = worldToMapPixel({static_cast<float>(x + 1), static_cast<float>(y + 1), 0});
 
-                    if (p2.x >= m_MapX && p1.x <= m_MapX + m_MapScreenSize &&
-                        p2.y >= m_MapY && p1.y <= m_MapY + m_MapScreenSize)
+                    if (p2.x >= m_MapX && p1.x <= m_MapX + m_MapScreenSize && p2.y >= m_MapY &&
+                        p1.y <= m_MapY + m_MapScreenSize)
                     {
                         sf::RectangleShape block({p2.x - p1.x, p2.y - p1.y});
-                        block.setPosition(std::max(p1.x, m_MapX), std::max(p1.y, m_MapY));
+                        block.setPosition({std::max(p1.x, m_MapX), std::max(p1.y, m_MapY)});
                         window.draw(block);
                     }
                 }
@@ -168,7 +160,7 @@ namespace bunker
         }
     }
 
-    void MapScreen::renderErosion(sf::RenderWindow &window, const GameState &gs)
+    void MapScreen::renderErosion(sf::RenderWindow& window, const GameState& gs)
     {
         for (int x = 0; x < Config::MAP_WIDTH; ++x)
         {
@@ -181,29 +173,29 @@ namespace bunker
                     sf::Vector2f p2 = worldToMapPixel({static_cast<float>(x + 1), static_cast<float>(y + 1), 0});
 
                     sf::RectangleShape zone({p2.x - p1.x, p2.y - p1.y});
-                    zone.setPosition(p1.x, p1.y);
-                    zone.setFillColor(sf::Color(100, 30, 160, static_cast<sf::Uint8>(std::min(er * 2.0f, 160.0f))));
+                    zone.setPosition({p1.x, p1.y});
+                    zone.setFillColor(sf::Color(100, 30, 160, static_cast<std::uint8_t>(std::min(er * 2.0f, 160.0f))));
                     window.draw(zone);
                 }
             }
         }
     }
 
-    void MapScreen::renderMarkers(sf::RenderWindow &window)
+    void MapScreen::renderMarkers(sf::RenderWindow& window)
     {
-        for (const auto &marker : m_Markers)
+        for (const auto& marker : m_Markers)
         {
             sf::Vector2f pos = worldToMapPixel(marker.worldPos);
 
-            if (pos.x < m_MapX || pos.x > m_MapX + m_MapScreenSize ||
-                pos.y < m_MapY || pos.y > m_MapY + m_MapScreenSize)
+            if (pos.x < m_MapX || pos.x > m_MapX + m_MapScreenSize || pos.y < m_MapY ||
+                pos.y > m_MapY + m_MapScreenSize)
                 continue;
 
             sf::Color col = marker.color;
             if (marker.pulse)
             {
                 float alpha = (std::sin(m_PulseTimer * 3.0f) + 1.0f) * 0.5f;
-                col.a = static_cast<sf::Uint8>(100 + alpha * 155);
+                col.a = static_cast<std::uint8_t>(100 + alpha * 155);
             }
 
             float size = marker.size * std::sqrt(m_Zoom);
@@ -213,7 +205,7 @@ namespace bunker
             case MapMarker::Shape::Circle:
             {
                 sf::CircleShape shape(size);
-                shape.setOrigin(size, size);
+                shape.setOrigin({size, size});
                 shape.setPosition(pos);
                 shape.setFillColor(col);
                 window.draw(shape);
@@ -222,7 +214,7 @@ namespace bunker
             case MapMarker::Shape::Diamond:
             {
                 sf::CircleShape shape(size, 4);
-                shape.setOrigin(size, size);
+                shape.setOrigin({size, size});
                 shape.setPosition(pos);
                 shape.setFillColor(col);
                 window.draw(shape);
@@ -231,7 +223,7 @@ namespace bunker
             case MapMarker::Shape::Square:
             {
                 sf::RectangleShape shape({size * 2, size * 2});
-                shape.setOrigin(size, size);
+                shape.setOrigin({size, size});
                 shape.setPosition(pos);
                 shape.setFillColor(col);
                 window.draw(shape);
@@ -240,12 +232,14 @@ namespace bunker
             case MapMarker::Shape::Triangle:
             {
                 sf::CircleShape shape(size, 3);
-                shape.setOrigin(size, size);
+                shape.setOrigin({size, size});
                 shape.setPosition(pos);
                 shape.setFillColor(col);
                 window.draw(shape);
                 break;
             }
+            default:
+                break;
             }
 
             if (!marker.label.empty() && m_FontLoaded)
@@ -255,7 +249,7 @@ namespace bunker
         }
     }
 
-    void MapScreen::renderLegend(sf::RenderWindow &window, float W, float H)
+    void MapScreen::renderLegend(sf::RenderWindow& window, float W, float H)
     {
         float lx = W - 200;
         float ly = H - 180;
@@ -269,18 +263,15 @@ namespace bunker
             sf::Color color;
         };
         std::vector<LegendEntry> entries = {
-            {"You", sf::Color(50, 255, 50)},
-            {"BT-7274", sf::Color(230, 115, 25)},
-            {"Relay Tower", sf::Color::White},
-            {"Enemies", sf::Color(255, 50, 50)},
-            {"Loot", sf::Color(180, 140, 60)},
-            {"Ether Erosion", sf::Color(100, 30, 160)},
+            {"You", sf::Color(50, 255, 50)},   {"BT-7274", sf::Color(230, 115, 25)},
+            {"Relay Tower", sf::Color::White}, {"Enemies", sf::Color(255, 50, 50)},
+            {"Loot", sf::Color(180, 140, 60)}, {"Ether Erosion", sf::Color(100, 30, 160)},
         };
 
-        for (const auto &e : entries)
+        for (const auto& e : entries)
         {
             sf::RectangleShape dot({8, 8});
-            dot.setPosition(lx, ly + 2);
+            dot.setPosition({lx, ly + 2});
             dot.setFillColor(e.color);
             window.draw(dot);
             drawText(window, e.label, lx + 14, ly, 10, sf::Color(160, 160, 160));
@@ -288,17 +279,14 @@ namespace bunker
         }
     }
 
-    void MapScreen::drawText(sf::RenderWindow &window, const std::string &str,
-                             float x, float y, int size, sf::Color color)
+    void MapScreen::drawText(sf::RenderWindow& window, const std::string& str, float x, float y, int size,
+                             sf::Color color)
     {
         if (!m_FontLoaded)
             return;
-        sf::Text text;
-        text.setFont(m_Font);
-        text.setString(str);
-        text.setCharacterSize(size);
+        sf::Text text(m_Font, str, static_cast<unsigned int>(size));
         text.setFillColor(color);
-        text.setPosition(x, y);
+        text.setPosition({x, y});
         window.draw(text);
     }
 

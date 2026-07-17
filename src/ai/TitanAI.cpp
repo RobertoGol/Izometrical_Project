@@ -1,10 +1,10 @@
 #include "ai/TitanAI.hpp"
+#include "engine/Log.hpp"
 #include "gameplay/BulletSystem.hpp"
 #include "gameplay/DamageSystem.hpp"
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
-#include <iostream>
 
 namespace bunker
 {
@@ -14,7 +14,7 @@ namespace bunker
         m_CurrentCamProfile = {350.0f, 120.0f, 1.02f};
     }
 
-    bool TitanAI::tryMount(GameState &gs)
+    bool TitanAI::tryMount(GameState& gs)
     {
         if (gs.playerMode == UnitMode::Titan)
             return false;
@@ -25,7 +25,7 @@ namespace bunker
 
         if (distSq > 4.0f)
         {
-            std::cout << "[BT-7274] Слишком далеко для посадки." << std::endl;
+            bunker::logInfo() << "[BT-7274] Слишком далеко для посадки." << std::endl;
             return false;
         }
 
@@ -33,11 +33,11 @@ namespace bunker
         gs.titan.isPiloted = true;
         gs.playerPos = gs.titan.position;
 
-        std::cout << "[BT-7274] Протокол 3: Защитить Пилота. Связь установлена." << std::endl;
+        bunker::logInfo() << "[BT-7274] Протокол 3: Защитить Пилота. Связь установлена." << std::endl;
         return true;
     }
 
-    void TitanAI::dismount(GameState &gs)
+    void TitanAI::dismount(GameState& gs)
     {
         if (gs.playerMode != UnitMode::Titan)
             return;
@@ -67,27 +67,33 @@ namespace bunker
         m_VortexActive = false;
         m_CaughtBulletsCount = 0;
 
-        std::cout << "[BT-7274] Высадка. Переход в автономный режим." << std::endl;
+        bunker::logInfo() << "[BT-7274] Высадка. Переход в автономный режим." << std::endl;
     }
 
-    bool TitanAI::tryMountGunner(GameState &gs)
+    bool TitanAI::tryMountGunner(GameState& gs)
     {
+        (void)gs;
         if (m_IsGunnerMounted)
             return false;
         m_IsGunnerMounted = true;
-        std::cout << "[CO-OP] Второй Пилот залез на броню Танка БТ-7274 и занял турель! Кооп-разделение ролей активировано." << std::endl;
+        bunker::logInfo()
+            << "[CO-OP] Второй Пилот залез на броню Танка БТ-7274 и занял турель! Кооп-разделение ролей активировано."
+            << std::endl;
         return true;
     }
 
-    void TitanAI::dismountGunner(GameState &gs)
+    void TitanAI::dismountGunner(GameState& gs)
     {
+        (void)gs;
         if (!m_IsGunnerMounted)
             return;
         m_IsGunnerMounted = false;
-        std::cout << "[CO-OP] Второй Пилот спрыгнул с Танка. Водитель забирает управление пулемётами (Доступен ДУПЛЕКС)." << std::endl;
+        bunker::logInfo()
+            << "[CO-OP] Второй Пилот спрыгнул с Танка. Водитель забирает управление пулемётами (Доступен ДУПЛЕКС)."
+            << std::endl;
     }
 
-    void TitanAI::update(GameState &gs, const InputSnapshot &input, float dt)
+    void TitanAI::update(GameState& gs, const InputSnapshot& input, float dt)
     {
         updateBoiler(dt);
 
@@ -115,7 +121,7 @@ namespace bunker
             if (m_ReMapTimer <= 0.0f)
             {
                 m_IsReMapping = false;
-                std::cout << "[BT-7274] Калибр сменён. Орудие готово." << std::endl;
+                bunker::logInfo() << "[BT-7274] Калибр сменён. Орудие готово." << std::endl;
             }
             return;
         }
@@ -134,10 +140,10 @@ namespace bunker
                 cycleCockpitFireMode();
             }
 
-            bool holdingQ = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
+            bool holdingQ = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q);
             updateVortexShield(gs, holdingQ, dt);
 
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::F))
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F))
             {
                 if (validateCoreOverdriveTrigger(gs))
                 {
@@ -167,15 +173,17 @@ namespace bunker
         {
         case CockpitFireMode::CannonOnly:
             m_FireMode = CockpitFireMode::TeammateMGOnly;
-            std::cout << "[COCKPIT] Режим огня: Турельные пулемёты (Место тиммейта)" << std::endl;
+            bunker::logInfo() << "[COCKPIT] Режим огня: Турельные пулемёты (Место тиммейта)" << std::endl;
             break;
         case CockpitFireMode::TeammateMGOnly:
             m_FireMode = CockpitFireMode::DuplexTwinSalvo;
-            std::cout << "[COCKPIT] Режим огня: ДУПЛЕКС (Синхронный залп Пушка + Пулемёты!)" << std::endl;
+            bunker::logInfo() << "[COCKPIT] Режим огня: ДУПЛЕКС (Синхронный залп Пушка + Пулемёты!)" << std::endl;
             break;
         case CockpitFireMode::DuplexTwinSalvo:
             m_FireMode = CockpitFireMode::CannonOnly;
-            std::cout << "[COCKPIT] Режим огня: Основная пушка" << std::endl;
+            bunker::logInfo() << "[COCKPIT] Режим огня: Основная пушка" << std::endl;
+            break;
+        default:
             break;
         }
     }
@@ -192,11 +200,13 @@ namespace bunker
             return "TURRET MG ONLY";
         case CockpitFireMode::DuplexTwinSalvo:
             return "DUPLEX [TWIN SALVO]";
+        default:
+            break;
         }
         return "UNKNOWN";
     }
 
-    void TitanAI::fireFromCockpit(GameState &gs)
+    void TitanAI::fireFromCockpit(GameState& gs)
     {
         if (gs.titan.fireCooldown > 0.0f)
             return;
@@ -229,7 +239,8 @@ namespace bunker
 
         // ── Логика стрельбы по местам в кабине (Пакет 2 Target Mechanics) ──
         bool fireCannon = (m_FireMode == CockpitFireMode::CannonOnly || m_FireMode == CockpitFireMode::DuplexTwinSalvo);
-        bool fireHMG = (m_FireMode == CockpitFireMode::TeammateMGOnly || m_FireMode == CockpitFireMode::DuplexTwinSalvo);
+        bool fireHMG =
+            (m_FireMode == CockpitFireMode::TeammateMGOnly || m_FireMode == CockpitFireMode::DuplexTwinSalvo);
 
         if (m_IsGunnerMounted)
         {
@@ -266,6 +277,8 @@ namespace bunker
                 gs.bullets.push_back(b);
                 gs.titan.fireCooldown = 0.14f;
                 break;
+            default:
+                break;
             }
         }
 
@@ -291,7 +304,7 @@ namespace bunker
         }
     }
 
-    void TitanAI::autoFire(GameState &gs)
+    void TitanAI::autoFire(GameState& gs)
     {
         if (gs.titan.isPiloted)
             return;
@@ -302,7 +315,7 @@ namespace bunker
         if (gs.enemies.empty())
             return;
 
-        for (auto &e : gs.enemies)
+        for (auto& e : gs.enemies)
         {
             if (!e.isAlive)
                 continue;
@@ -330,9 +343,8 @@ namespace bunker
         }
     }
 
-    PilotInputControls TitanAI::filterAndStabilizeInputs(
-        const PilotInputControls &rawInput,
-        const TerrainFrictionData &terrain)
+    PilotInputControls TitanAI::filterAndStabilizeInputs(const PilotInputControls& rawInput,
+                                                         const TerrainFrictionData& terrain)
     {
 
         PilotInputControls stabilized = rawInput;
@@ -361,6 +373,8 @@ namespace bunker
             return "[2] SCORCH MORTAR";
         case AncientLoadout::Ion_SplitLaser_Vacuum:
             return "[3] ION LASER";
+        default:
+            break;
         }
         return "UNKNOWN";
     }
@@ -379,7 +393,7 @@ namespace bunker
         }
     }
 
-    void TitanAI::updatePilotStress(const GameState &gs, float dt)
+    void TitanAI::updatePilotStress(const GameState& gs, float dt)
     {
         float hpPercent = gs.titan.health / gs.titan.maxHealth;
         float targetStress = (1.0f - hpPercent) * 60.0f;
@@ -395,8 +409,9 @@ namespace bunker
         m_PilotStress = std::clamp(m_PilotStress, 0.0f, 100.0f);
     }
 
-    void TitanAI::triggerReMap(GameState &gs, AncientLoadout newWeapon)
+    void TitanAI::triggerReMap(GameState& gs, AncientLoadout newWeapon)
     {
+        (void)gs;
         if (m_VortexActive || m_IsReMapping)
             return;
         if (m_ActiveLoadout == newWeapon)
@@ -417,12 +432,14 @@ namespace bunker
         case AncientLoadout::Ion_SplitLaser_Vacuum:
             m_CurrentCamProfile = {100.0f, 10.0f, 1.0f};
             break;
+        default:
+            break;
         }
 
-        std::cout << "[BT-7274] Смена калибра → " << getLoadoutName() << std::endl;
+        bunker::logInfo() << "[BT-7274] Смена калибра → " << getLoadoutName() << std::endl;
     }
 
-    void TitanAI::updateVortexShield(GameState &gs, bool isHoldingQ, float dt)
+    void TitanAI::updateVortexShield(GameState& gs, bool isHoldingQ, float dt)
     {
         if (m_ActiveLoadout == AncientLoadout::Scorch_ThermiteMortar)
         {
@@ -436,7 +453,7 @@ namespace bunker
             m_VortexEnergy = std::max(0.0f, m_VortexEnergy - 30.0f * dt);
 
             float shieldRadiusSq = 4.0f;
-            for (auto &b : gs.bullets)
+            for (auto& b : gs.bullets)
             {
                 if (!b.isAlive)
                     continue;
@@ -474,7 +491,8 @@ namespace bunker
                         gs.bullets.push_back(rb);
                     }
 
-                    std::cout << "[BT-7274] Вортекс выброс: " << m_CaughtBulletsCount << " снарядов!" << std::endl;
+                    bunker::logInfo() << "[BT-7274] Вортекс выброс: " << m_CaughtBulletsCount << " снарядов!"
+                                      << std::endl;
                 }
                 m_CaughtBulletsCount = 0;
             }
@@ -484,7 +502,7 @@ namespace bunker
         }
     }
 
-    bool TitanAI::validateCoreOverdriveTrigger(const GameState &gs)
+    bool TitanAI::validateCoreOverdriveTrigger(const GameState& gs)
     {
         if (m_CoreChargePercent < 100.0f)
             return false;
@@ -492,7 +510,7 @@ namespace bunker
             return false;
 
         int nearbyEnemies = 0;
-        for (const auto &e : gs.enemies)
+        for (const auto& e : gs.enemies)
         {
             if (!e.isAlive)
                 continue;
@@ -512,10 +530,10 @@ namespace bunker
         m_CoreOverdriveActive = true;
         m_BoilerSteamPressure = 1200.0f;
         m_CoolantTemperature = 980.0f;
-        std::cout << "[BT-7274] !! CORE OVERDRIVE АКТИВИРОВАН !! Давление: 1200 Бар!" << std::endl;
+        bunker::logInfo() << "[BT-7274] !! CORE OVERDRIVE АКТИВИРОВАН !! Давление: 1200 Бар!" << std::endl;
     }
 
-    void TitanAI::updateAutonomousMode(GameState &gs, float dt)
+    void TitanAI::updateAutonomousMode(GameState& gs, float dt)
     {
         float tdx = gs.playerPos.x - gs.titan.position.x;
         float tdy = gs.playerPos.y - gs.titan.position.y;
@@ -557,7 +575,7 @@ namespace bunker
         }
     }
 
-    void TitanAI::updatePilotedMode(GameState &gs, const InputSnapshot &input, float dt)
+    void TitanAI::updatePilotedMode(GameState& gs, const InputSnapshot& input, float dt)
     {
         float camDx = gs.mouseWorldPos.x - gs.titan.position.x;
         float camDy = gs.mouseWorldPos.y - gs.titan.position.y;
@@ -607,7 +625,7 @@ namespace bunker
         gs.playerPos = gs.titan.position;
     }
 
-    Vector3D TitanAI::calculateCombatAnchor(const GameState &gs)
+    Vector3D TitanAI::calculateCombatAnchor(const GameState& gs)
     {
         if (gs.enemies.empty())
             return gs.playerPos;
@@ -615,7 +633,7 @@ namespace bunker
         Vector3D center = {0.0f, 0.0f, 0.0f};
         int count = 0;
 
-        for (const auto &e : gs.enemies)
+        for (const auto& e : gs.enemies)
         {
             if (!e.isAlive)
                 continue;
@@ -630,10 +648,8 @@ namespace bunker
         center.x /= count;
         center.y /= count;
 
-        return {
-            gs.playerPos.x + (center.x - gs.playerPos.x) * 0.40f,
-            gs.playerPos.y + (center.y - gs.playerPos.y) * 0.40f,
-            0.0f};
+        return {gs.playerPos.x + (center.x - gs.playerPos.x) * 0.40f,
+                gs.playerPos.y + (center.y - gs.playerPos.y) * 0.40f, 0.0f};
     }
 
 } // namespace bunker
