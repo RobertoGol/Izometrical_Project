@@ -522,3 +522,30 @@ cmake --build build-codex-mapeditor
 ```
 
 Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
+## Дополнительный проход: дробление AdvancedMechanics.hpp
+
+Следующий крупнейший файл, `include/gameplay/AdvancedMechanics.hpp`, разделен на тематические заголовки. Старый путь оставлен как compatibility umbrella, поэтому существующие include не менялись.
+
+Добавлены файлы:
+
+```text
+include/gameplay/advanced/AdvancedMechanicsCommon.hpp
+include/gameplay/advanced/AdvancedMechanicsSurvivalSystems.hpp
+include/gameplay/advanced/AdvancedMechanicsWorldSystems.hpp
+include/gameplay/advanced/AdvancedMechanicsProgressionSystems.hpp
+include/gameplay/advanced/AdvancedMechanicsCampSystems.hpp
+include/gameplay/advanced/AdvancedMechanicsToolGunSystems.hpp
+include/gameplay/advanced/AdvancedMechanicsServices.hpp
+include/gameplay/advanced/AdvancedMechanicsFacade.hpp
+```
+
+После разделения `include/gameplay/AdvancedMechanics.hpp` содержит только подключение facade-заголовка. Самый большой новый заголовок меньше 7 KB.
+
+Проверка:
+
+```text
+cmake --build build-codex-ninja
+cmake --build build-codex-mapeditor
+```
+
+Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
