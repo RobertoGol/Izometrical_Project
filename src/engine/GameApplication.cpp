@@ -7,6 +7,7 @@
 #include <imgui-SFML.h>
 #include "Collisions.hpp"
 #include "content/AssetPaths.hpp"
+#include "core/IsoMath.hpp"
 #include "render/GameRenderer.hpp"
 
 #include <SFML/Graphics.hpp>
@@ -36,6 +37,7 @@ namespace bunker
                         settings);
 
         m_GameState.hostileAI = &m_HostileAI;
+        m_ImGuiInitialized = ImGui::SFML::Init(m_Window);
         
 
         // Инициализация нового 3D пайплайна
@@ -55,7 +57,6 @@ namespace bunker
             
             // --- ДОБАВЬ ЭТОТ ЛОГ ---
             frameCount++;
-            if (frameCount > 1000) break; // Увеличил лимит для теста
         }
 
         bunker::logInfo() << "[SYSTEM] Выход из цикла. Кадров: " << frameCount << std::endl;
@@ -79,6 +80,11 @@ namespace bunker
     void GameApplication::shutdown()
     {
         SaveSystem::writeSave(1, m_GameState, m_Inventory);
+        if (m_ImGuiInitialized)
+        {
+            ImGui::SFML::Shutdown(m_Window);
+            m_ImGuiInitialized = false;
+        }
         bunker::logInfo() << "[SYSTEM] Автосохранение при выходе. До встречи, Пилот." << std::endl;
     }
 
@@ -185,7 +191,11 @@ namespace bunker
         m_GameState.deltaTime = dt;
 
         // InputManager единственный забирает SFML events; дополнительные хоткеи ниже обрабатываются edge-check'ом.
-        InputSnapshot input = m_InputManager.capture(m_Window);
+        InputSnapshot input = m_InputManager.capture(m_Window, m_ImGuiInitialized);
+        if (m_ImGuiInitialized)
+        {
+            ImGui::SFML::Update(m_Window, sf::seconds(dt));
+        }
 
         processEdgeHotkeys(input);
 
@@ -333,8 +343,9 @@ namespace bunker
 
     void GameApplication::updateMouseWorldPosition(const InputSnapshot& input)
     {
-        // ЗАКОММЕНТИРУЙ ЭТУ СТРОКУ:
-        // m_GameState.mouseWorldPos = m_Camera.screenToWorld(m_Window, input.mousePixelPos);
+        const sf::Vector2f screenPos = m_Window.mapPixelToCoords(input.mousePixelPos);
+        m_GameState.mouseWorldPos = IsoMath::screenToWorld3D(screenPos.x, screenPos.y);
+        m_GameState.isAiming = input.isAiming;
     }
 
     void GameApplication::processSaveLoadInput(const InputSnapshot& input)
@@ -400,7 +411,7 @@ namespace bunker
         updateCombat(input, dt);
         updateWorldSystems(input, dt);
 
-        // m_Camera.update(m_GameState.playerPos, m_GameState.mouseWorldPos, m_GameState.isAiming, dt);
+        m_Camera.update(dt, m_Window);
     }
 
     void GameApplication::updateMovementAndInteraction(const InputSnapshot& input, float dt)
@@ -534,9 +545,7 @@ namespace bunker
     void GameApplication::renderGameplayFrame()
     {
         // 1. Очистка экрана перед отрисовкой
-        // Сейчас стоит розовый цвет (1.0, 0.0, 1.0). 
-        // Если окно будет розовым — значит OpenGL работает и мы видим результат.
-        glClearColor(1.0f, 0.0f, 1.0f, 1.0f); 
+        glClearColor(0.06f, 0.07f, 0.08f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // =========================================================
@@ -564,8 +573,6 @@ namespace bunker
         // Устанавливаем стандартную камеру (экранное пространство 1:1)
         m_Window.setView(m_Window.getDefaultView());
         
-        // === ИНТЕРФЕЙС (ВРЕМЕННО ОТКЛЮЧЕН) ===
-        /*
         m_Hud.render(m_Window, m_GameState, m_PlayerController, m_Tactics, m_TitanAI, m_VehicleManager, m_Inventory);
         
         if (m_TimeShift.isInitialized()) {
@@ -581,8 +588,9 @@ namespace bunker
             m_TerminalUI.render(m_Window, m_GameState);
         }
 
-        ImGui::SFML::Render(m_Window);
-        */
+        if (m_ImGuiInitialized) {
+            ImGui::SFML::Render(m_Window);
+        }
 
         // Восстанавливаем аппаратный контекст OpenGL после 2D
         m_Window.popGLStates();

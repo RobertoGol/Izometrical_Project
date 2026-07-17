@@ -107,6 +107,7 @@ namespace bunker
         sf::Clock m_Clock;
         sf::Font m_GlobalFont;
         bool m_FontLoaded = false;
+        bool m_ImGuiInitialized = false;
 
         EdgeKeyState m_EdgeKeys;
 

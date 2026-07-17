@@ -31,7 +31,7 @@ namespace bunker
     {
     public:
         InputManager() = default;
-        InputSnapshot capture(sf::RenderWindow &window);
+        InputSnapshot capture(sf::RenderWindow& window, bool processImGuiEvents = false);
     };
 
 } // namespace bunker

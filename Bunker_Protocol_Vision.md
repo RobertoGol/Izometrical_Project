@@ -184,12 +184,12 @@ What needs checking:
 
 ### P0 - runtime blockers
 
-- [ ] Убрать тестовый лимит `frameCount > 1000` из `GameApplication::run()`, чтобы игра не завершалась сама после demo-run.
-- [ ] Восстановить `updateMouseWorldPosition()`: экранная позиция мыши должна снова превращаться в world position для aim, toolgun, CAMP placement и interaction.
-- [ ] Восстановить `m_Camera.update(...)` или явно связать новую 3D camera с `GameState`, mouse aim и player/titan movement.
-- [ ] Вернуть рабочий UI/HUD слой в `renderGameplayFrame()`: сейчас HUD, PipPad, subtitles, terminal и ImGui временно отключены.
-- [ ] Убрать debug-magenta clear color из normal gameplay path и оставить его только как explicit debug mode.
-- [ ] Исправить `ResourceManager::ConsumeResources()`: параметр `circuits` скрывает поле класса, из-за чего списание circuits может работать неправильно.
+- [x] Убрать тестовый лимит `frameCount > 1000` из `GameApplication::run()`, чтобы игра не завершалась сама после demo-run.
+- [x] Восстановить `updateMouseWorldPosition()`: экранная позиция мыши должна снова превращаться в world position для aim, toolgun, CAMP placement и interaction.
+- [x] Восстановить `m_Camera.update(...)` или явно связать новую 3D camera с `GameState`, mouse aim и player/titan movement.
+- [x] Вернуть рабочий UI/HUD слой в `renderGameplayFrame()`: сейчас HUD, PipPad, subtitles, terminal и ImGui временно отключены.
+- [x] Убрать debug-magenta clear color из normal gameplay path и оставить его только как explicit debug mode.
+- [x] Исправить `ResourceManager::ConsumeResources()`: параметр `circuits` скрывает поле класса, из-за чего списание circuits может работать неправильно.
 
 ### P1 - 3D renderer and ECS integration
 

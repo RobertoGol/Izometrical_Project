@@ -6,27 +6,27 @@ ResourceManager &ResourceManager::Get()
     return instance;
 }
 
-bool ResourceManager::HasResources(int scrap, int circuits, int core) const
+bool ResourceManager::HasResources(int scrap, int circuitCost, int core) const
 {
     return this->scrapMetal >= scrap &&
-           this->circuits >= circuits &&
+           this->circuits >= circuitCost &&
            this->coreEnergy >= core;
 }
 
-bool ResourceManager::ConsumeResources(int scrap, int circuits, int core)
+bool ResourceManager::ConsumeResources(int scrap, int circuitCost, int core)
 {
-    if (!HasResources(scrap, circuits, core))
+    if (!HasResources(scrap, circuitCost, core))
         return false;
 
     scrapMetal -= scrap;
-    circuits -= circuits;
+    this->circuits -= circuitCost;
     coreEnergy -= core;
     return true;
 }
 
-void ResourceManager::AddResources(int scrap, int circuits, int core)
+void ResourceManager::AddResources(int scrap, int circuitAmount, int core)
 {
     scrapMetal += scrap;
-    circuits += circuits;
+    circuits += circuitAmount;
     coreEnergy += core;
 }

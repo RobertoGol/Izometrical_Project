@@ -1,14 +1,20 @@
 #include "engine/InputManager.hpp"
+#include "imgui-SFML.h"
 
 namespace bunker
 {
 
-    InputSnapshot InputManager::capture(sf::RenderWindow& window)
+    InputSnapshot InputManager::capture(sf::RenderWindow& window, bool processImGuiEvents)
     {
         InputSnapshot snap;
 
         while (const auto event = window.pollEvent())
         {
+            if (processImGuiEvents)
+            {
+                ImGui::SFML::ProcessEvent(window, *event);
+            }
+
             if (event->is<sf::Event::Closed>())
             {
                 snap.quit = true;
