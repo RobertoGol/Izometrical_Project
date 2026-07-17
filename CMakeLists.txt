@@ -51,6 +51,9 @@ add_library(game_core STATIC
     src/entities/Collisions.cpp
     src/entities/PlayerController.cpp
     src/gameplay/AdvancedMechanics.cpp
+    src/gameplay/AdvancedMechanicsSurvival.cpp
+    src/gameplay/AdvancedMechanicsWorld.cpp
+    src/gameplay/AdvancedMechanicsServices.cpp
     src/gameplay/AdvancedPilotMovement.cpp
     src/gameplay/BulletSystem.cpp
     src/gameplay/DamageSystem.cpp

@@ -298,3 +298,34 @@ cmake --build build-codex-mapeditor
 ```
 
 Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
+
+## Дополнительный проход: дробление AdvancedMechanics.cpp
+
+Выполнен следующий локальный шаг по крупным файлам: `src/gameplay/AdvancedMechanics.cpp` разделен по уже существующим подсистемным секциям.
+
+Добавлены файлы:
+
+```text
+src/gameplay/AdvancedMechanicsSurvival.cpp
+src/gameplay/AdvancedMechanicsWorld.cpp
+src/gameplay/AdvancedMechanicsServices.cpp
+```
+
+После разделения `src/gameplay/AdvancedMechanics.cpp` содержит только фасад `AdvancedMechanics::initialize`, `AdvancedMechanics::update` и `AdvancedMechanics::onExplosion`. Код подсистем был перенесен без изменения логики:
+
+```text
+AdvancedMechanicsSurvival.cpp: RadioTapeSystem, SurvivalSystem, TankUtilitySystem
+AdvancedMechanicsWorld.cpp: ReactiveWorldSystem, StoryRouteSystem, SkillSystem, LootGenerator, CampSystem, ToolGunSystem
+AdvancedMechanicsServices.cpp: ObjModel, ObjModelLoader, LanlineServices, ProfileSessionSystem
+```
+
+`CMakeLists.txt` обновлен вручную, потому что список исходников для `game_core` явный, а не glob-based.
+
+Проверка:
+
+```text
+cmake --build build-codex-ninja
+cmake --build build-codex-mapeditor
+```
+
+Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
