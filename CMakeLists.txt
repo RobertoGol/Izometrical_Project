@@ -72,6 +72,8 @@ add_library(game_core STATIC
     src/DevMenu.cpp
     src/engine/AudioController.cpp
     src/engine/GameApplication.cpp
+    src/engine/GameApplicationECSBridge.cpp
+    src/engine/GameApplicationRender.cpp
     src/engine/InputManager.cpp
     src/engine/ProceduralSoundEffects.cpp
     src/engine/ProceduralSoundEffectsEnvironment.cpp

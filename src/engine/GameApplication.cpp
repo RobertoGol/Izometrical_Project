@@ -1,32 +1,19 @@
 #include "engine/GameApplication.hpp"
 #include "content/MeshBuilder.hpp"
 #include "world/TerrainGenerator.hpp" // ЭТО ОБЯЗАТЕЛЬНО
-#include <glad/glad.h> // ДОБАВЛЕНО: для инициализации OpenGL функций
 
-#include <imgui.h>
 #include <imgui-SFML.h>
 #include "Collisions.hpp"
-#include "content/MaterialCatalog.hpp"
 #include "content/AssetPaths.hpp"
 #include "core/IsoMath.hpp"
-#include "render/GameRenderer.hpp"
 
 #include <SFML/Graphics.hpp>
-#include <SFML/OpenGL.hpp> // Необходимо для pushGLStates/popGLStates
 #include "engine/Log.hpp"
 #include <cstdlib>
 #include <ctime>
 
 namespace bunker
 {
-    namespace
-    {
-        glm::vec3 gameplayToRenderPosition(const Vector3D& position, float heightOffset = 0.0f)
-        {
-            return {position.x, position.z + heightOffset, position.y};
-        }
-    }
-
     GameApplication::GameApplication()
         : m_Window(sf::VideoMode({Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT}), "Bunker Protocol ISO",
             sf::Style::Close | sf::Style::Titlebar)
@@ -142,40 +129,6 @@ namespace bunker
         m_Registry.meshes.insert(testCube, MeshBuilder::createTestCube());
         createGameplayAnchors();
 
-        // ВАЖНО: убедись, что твои методы renderGameplayFrame, processEdgeHotkeys и т.д. 
-        // на месте. Я просто не стал дублировать их огромный текст для краткости.      
-        // Можно заспавнить еще 1000 кубов циклом, и рендер даже не вспотеет, 
-        // потому что данные лежат в памяти последовательно!
-    }
-
-    void GameApplication::createGameplayAnchors()
-    {
-        m_PlayerAnchorEntity = m_Registry.createEntity();
-        TransformComponent playerTransform;
-        playerTransform.scale = glm::vec3(0.45f, 0.9f, 0.45f);
-        m_Registry.transforms.insert(m_PlayerAnchorEntity, playerTransform);
-        m_Registry.meshes.insert(m_PlayerAnchorEntity, MeshBuilder::createTestCube());
-
-        m_TitanAnchorEntity = m_Registry.createEntity();
-        TransformComponent titanTransform;
-        titanTransform.scale = glm::vec3(1.4f, 1.0f, 1.4f);
-        m_Registry.transforms.insert(m_TitanAnchorEntity, titanTransform);
-        m_Registry.meshes.insert(m_TitanAnchorEntity, MeshBuilder::createTestCube());
-
-        syncGameplayAnchorsToECS();
-    }
-
-    void GameApplication::syncGameplayAnchorsToECS()
-    {
-        if (auto* playerTransform = m_Registry.transforms.get(m_PlayerAnchorEntity))
-        {
-            playerTransform->position = gameplayToRenderPosition(m_GameState.playerPos, 0.35f);
-        }
-
-        if (auto* titanTransform = m_Registry.transforms.get(m_TitanAnchorEntity))
-        {
-            titanTransform->position = gameplayToRenderPosition(m_GameState.titan.position, 0.55f);
-        }
     }
 
     void GameApplication::assignInitialHostileProfiles()
@@ -373,16 +326,6 @@ namespace bunker
 
         // B/toggleCamp остаётся в InputSnapshot и обрабатывается AdvancedMechanics::update.
         (void)input;
-    }
-
-    void GameApplication::renderMapFrame(float dt)
-    {
-        m_MapScreen.updatePan(dt);
-
-        m_Window.clear(sf::Color(20, 20, 22));
-        m_Window.setView(m_Window.getDefaultView());
-        m_MapScreen.render(m_Window, m_GameState);
-        m_Window.display();
     }
 
     void GameApplication::updateGameplayFrame(const InputSnapshot& input, float dt)
@@ -602,90 +545,6 @@ namespace bunker
         {
             m_Advanced.camp.place(m_GameState, m_Inventory, m_Advanced.skills.buildCostMultiplier());
         }
-    }
-
-    // 2. ИЗМЕНЕННЫЙ МЕТОД ОТРИСОВКИ
-    void GameApplication::renderGameplayFrame()
-    {
-        // 1. Очистка экрана перед отрисовкой
-        glClearColor(0.06f, 0.07f, 0.08f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // =========================================================
-        // СЛОЙ 1: 3D МИР (OpenGL / ECS)
-        // =========================================================
-        
-        // Включаем тест глубины для правильного отображения 3D объектов
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-
-        // Рендерим 3D-сцену один раз
-        m_Renderer3D.renderScene(m_Registry, m_Camera);
-        
-        // =========================================================
-        // ПЕРЕХОД К 2D (SFML / ImGui)
-        // =========================================================
-        
-        // Отключаем 3D-фичи, чтобы они не влияли на плоский интерфейс
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_CULL_FACE);
-
-        // Сохраняем стейт 3D контекста OpenGL, чтобы 2D-команды SFML его не сломали
-        m_Window.pushGLStates();
-
-        // Устанавливаем стандартную камеру (экранное пространство 1:1)
-        m_Window.setView(m_Window.getDefaultView());
-        
-        GameRenderer::renderFloor(m_Window, m_GameState, m_TimeShift);
-        GameRenderer::renderEntities(m_Window, m_GameState, m_TimeShift, m_HostileAI);
-        GameRenderer::renderAdvancedWorld(m_Window, m_Advanced);
-
-        m_Hud.render(m_Window, m_GameState, m_PlayerController, m_Tactics, m_TitanAI, m_VehicleManager, m_Inventory);
-        
-        if (m_TimeShift.isInitialized()) {
-            m_TimeShift.renderHUD(m_Window, m_FontLoaded ? &m_GlobalFont : nullptr);
-            m_TimeShift.renderTransitionEffect(m_Window);
-        }
-
-        GameRenderer::renderAdvancedHUD(m_Window, m_Advanced, m_FontLoaded ? &m_GlobalFont : nullptr);
-        m_Audio.renderSubtitlesHUD(m_Window, m_FontLoaded ? &m_GlobalFont : nullptr);
-        m_PipPad.renderTablet(m_Window, m_GameState, m_Inventory, m_Advanced, m_FontLoaded ? &m_GlobalFont : nullptr);
-
-        if (m_TerminalUI.isOpen()) {
-            m_TerminalUI.render(m_Window, m_GameState);
-        }
-
-        if (m_ImGuiInitialized) {
-            renderMaterialDebugWindow();
-            ImGui::SFML::Render(m_Window);
-        }
-
-        // Восстанавливаем аппаратный контекст OpenGL после 2D
-        m_Window.popGLStates();
-
-        // Финальный вывод кадра на экран
-        m_Window.display(); 
-    }// <--- ЭТА СКОБКА ЗАКРЫВАЕТ ФУНКЦИЮ renderGameplayFrame
-
-    void GameApplication::renderMaterialDebugWindow()
-    {
-        if (!m_ShowMaterialDebug)
-        {
-            return;
-        }
-
-        ImGui::Begin("Material Catalog", &m_ShowMaterialDebug);
-        for (const auto& material : getMaterialCatalog())
-        {
-            ImGui::Text("ID %u | %s | %s | #%06X | rough %.2f | metal %.2f",
-                        material.id,
-                        material.name,
-                        materialCategoryName(material.category),
-                        material.hex,
-                        material.roughness,
-                        material.metallic);
-        }
-        ImGui::End();
     }
 
     bool GameApplication::consumeEdge(bool isPressedNow, bool& wasPressedBefore)

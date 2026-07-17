@@ -238,9 +238,9 @@ What needs checking:
 
 ### P2 - architecture and code health
 
-- [ ] Уменьшить `GameApplication.cpp`: сейчас это главный orchestration bottleneck и самый крупный файл runtime.
-- [ ] Разделить старый 2D renderer и новый 3D renderer по clear ownership: кто рисует world, кто UI, кто debug.
-- [ ] Убрать закомментированные рабочие блоки из runtime path: заменить на feature flags/debug config.
+- [x] Уменьшить `GameApplication.cpp`: сейчас это главный orchestration bottleneck и самый крупный файл runtime.
+- [x] Разделить старый 2D renderer и новый 3D renderer по clear ownership: кто рисует world, кто UI, кто debug.
+- [x] Убрать закомментированные рабочие блоки из runtime path: заменить на feature flags/debug config.
 - [ ] Продолжить дробление крупных модулей: `AdvancedMechanicsSurvival`, `AdvancedMechanicsServices`, `VehicleManager`, `DevMenu`.
 - [ ] Очистить mojibake/битую кодировку русских комментариев, чтобы документация и комментарии были читаемыми в IDE.
 
