@@ -16,6 +16,7 @@ namespace bunker {
 
         // --- ДОБАВЬ ЭТУ СТРОКУ ---
         void renderSkyDome();
+        void setWireframeEnabled(bool enabled);
 
     private:
         std::uint32_t m_shaderProgram = 0;
@@ -25,6 +26,7 @@ namespace bunker {
         int m_locProjection = -1;
         int m_locModel = -1;
         bool m_initialized = false;
+        bool m_wireframeEnabled = false;
 
         void loadShaders();
         void bindMaterial(std::uint32_t materialID);
