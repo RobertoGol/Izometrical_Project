@@ -4,10 +4,33 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <map>
 #include <sstream>
 
 namespace bunker
 {
+    namespace
+    {
+        using VehicleConfigSetter = void (*)(VehicleConfig&, const std::string&);
+
+        const std::map<std::string, VehicleConfigSetter>& vehicleConfigSetters()
+        {
+            static const std::map<std::string, VehicleConfigSetter> setters = {
+                {"name", [](VehicleConfig& cfg, const std::string& val) { cfg.displayName = val; }},
+                {"max_speed", [](VehicleConfig& cfg, const std::string& val) { cfg.maxSpeed = std::stof(val); }},
+                {"acceleration", [](VehicleConfig& cfg, const std::string& val) { cfg.acceleration = std::stof(val); }},
+                {"deceleration", [](VehicleConfig& cfg, const std::string& val) { cfg.deceleration = std::stof(val); }},
+                {"turn_speed", [](VehicleConfig& cfg, const std::string& val) { cfg.turnSpeed = std::stof(val); }},
+                {"collision_radius",
+                 [](VehicleConfig& cfg, const std::string& val) { cfg.collisionRadius = std::stof(val); }},
+                {"max_pressure", [](VehicleConfig& cfg, const std::string& val) { cfg.maxPressure = std::stof(val); }},
+                {"drive_type", [](VehicleConfig& cfg, const std::string& val) { cfg.driveType = val; }},
+                {"texture", [](VehicleConfig& cfg, const std::string& val) { cfg.texturePath = val; }},
+                {"sound_engine", [](VehicleConfig& cfg, const std::string& val) { cfg.soundPath = val; }},
+            };
+            return setters;
+        }
+    } // namespace
 
     void VehicleInstance::updatePhysics(GameState& gs, const InputSnapshot& input, float dt)
     {
@@ -328,26 +351,12 @@ namespace bunker
             std::string key = line.substr(0, eq);
             std::string val = line.substr(eq + 1);
 
-            if (key == "name")
-                cfg.displayName = val;
-            else if (key == "max_speed")
-                cfg.maxSpeed = std::stof(val);
-            else if (key == "acceleration")
-                cfg.acceleration = std::stof(val);
-            else if (key == "deceleration")
-                cfg.deceleration = std::stof(val);
-            else if (key == "turn_speed")
-                cfg.turnSpeed = std::stof(val);
-            else if (key == "collision_radius")
-                cfg.collisionRadius = std::stof(val);
-            else if (key == "max_pressure")
-                cfg.maxPressure = std::stof(val);
-            else if (key == "drive_type")
-                cfg.driveType = val;
-            else if (key == "texture")
-                cfg.texturePath = val;
-            else if (key == "sound_engine")
-                cfg.soundPath = val;
+            const auto& setters = vehicleConfigSetters();
+            const auto setter = setters.find(key);
+            if (setter != setters.end())
+            {
+                setter->second(cfg, val);
+            }
         }
 
         file.close();

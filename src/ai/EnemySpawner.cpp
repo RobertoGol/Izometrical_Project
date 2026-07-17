@@ -10,6 +10,41 @@
 
 namespace bunker
 {
+    namespace
+    {
+        using EnemyConfigSetter = void (*)(EnemyConfig&, const std::string&);
+
+        EnemyClassType parseEnemyClassType(const std::string& value)
+        {
+            static const std::map<std::string, EnemyClassType> classTypes = {
+                {"VerminSwarm", EnemyClassType::VerminSwarm},
+                {"TargetDummy", EnemyClassType::TargetDummy},
+                {"PunchingBag", EnemyClassType::PunchingBag},
+                {"StaticBase", EnemyClassType::StaticBase},
+            };
+
+            const auto classType = classTypes.find(value);
+            return (classType != classTypes.end()) ? classType->second : EnemyClassType::VerminSwarm;
+        }
+
+        const std::map<std::string, EnemyConfigSetter>& enemyConfigSetters()
+        {
+            static const std::map<std::string, EnemyConfigSetter> setters = {
+                {"name", [](EnemyConfig& cfg, const std::string& val) { cfg.displayName = val; }},
+                {"health", [](EnemyConfig& cfg, const std::string& val) { cfg.maxHealth = std::stof(val); }},
+                {"speed", [](EnemyConfig& cfg, const std::string& val) { cfg.baseSpeed = std::stof(val); }},
+                {"radius", [](EnemyConfig& cfg, const std::string& val) { cfg.physicalRadius = std::stof(val); }},
+                {"erosion_damage",
+                 [](EnemyConfig& cfg, const std::string& val) { cfg.erosionDamage = std::stof(val); }},
+                {"reward_score", [](EnemyConfig& cfg, const std::string& val) { cfg.rewardScore = std::stoi(val); }},
+                {"faction", [](EnemyConfig& cfg, const std::string& val) { cfg.factionID = val; }},
+                {"texture", [](EnemyConfig& cfg, const std::string& val) { cfg.texturePath = val; }},
+                {"sound_death", [](EnemyConfig& cfg, const std::string& val) { cfg.soundDeathPath = val; }},
+                {"type", [](EnemyConfig& cfg, const std::string& val) { cfg.classType = parseEnemyClassType(val); }},
+            };
+            return setters;
+        }
+    } // namespace
 
     void EnemySpawner::scanAndLoadConfigs(const std::string& enemiesDir)
     {
@@ -169,35 +204,11 @@ namespace bunker
             std::string key = line.substr(0, eq);
             std::string val = line.substr(eq + 1);
 
-            if (key == "name")
-                cfg.displayName = val;
-            else if (key == "health")
-                cfg.maxHealth = std::stof(val);
-            else if (key == "speed")
-                cfg.baseSpeed = std::stof(val);
-            else if (key == "radius")
-                cfg.physicalRadius = std::stof(val);
-            else if (key == "erosion_damage")
-                cfg.erosionDamage = std::stof(val);
-            else if (key == "reward_score")
-                cfg.rewardScore = std::stoi(val);
-            else if (key == "faction")
-                cfg.factionID = val;
-            else if (key == "texture")
-                cfg.texturePath = val;
-            else if (key == "sound_death")
-                cfg.soundDeathPath = val;
-            else if (key == "type")
+            const auto& setters = enemyConfigSetters();
+            const auto setter = setters.find(key);
+            if (setter != setters.end())
             {
-                static const std::map<std::string, EnemyClassType> classTypes = {
-                    {"VerminSwarm", EnemyClassType::VerminSwarm},
-                    {"TargetDummy", EnemyClassType::TargetDummy},
-                    {"PunchingBag", EnemyClassType::PunchingBag},
-                    {"StaticBase", EnemyClassType::StaticBase},
-                };
-                const auto classType = classTypes.find(val);
-                if (classType != classTypes.end())
-                    cfg.classType = classType->second;
+                setter->second(cfg, val);
             }
         }
         file.close();

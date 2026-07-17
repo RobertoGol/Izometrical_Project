@@ -167,25 +167,24 @@ namespace bunker
                 sf::Image variant = baseImg; // Копия базы
                 int seed = static_cast<int>(std::time(nullptr)) + i * 7919;
 
-                if (cfg.method == "recolor")
+                using VariationApplier = std::function<void(sf::Image&, const sf::Image&, bool, int)>;
+                static const std::map<std::string, VariationApplier> variationAppliers = {
+                    {"recolor", [](sf::Image& image, const sf::Image& mask, bool masked, int value)
+                     { applyRecolor(image, mask, masked, value); }},
+                    {"terrain",
+                     [](sf::Image& image, const sf::Image&, bool, int value) { applyTerrainNoise(image, value); }},
+                    {"creature", [](sf::Image& image, const sf::Image& mask, bool masked, int value)
+                     { applyCreatureVariation(image, mask, masked, value); }},
+                    {"robot", [](sf::Image& image, const sf::Image& mask, bool masked, int value)
+                     { applyRobotScheme(image, mask, masked, value); }},
+                    {"item", [](sf::Image& image, const sf::Image& mask, bool masked, int value)
+                     { applyItemVariation(image, mask, masked, value); }},
+                };
+
+                const auto applier = variationAppliers.find(cfg.method);
+                if (applier != variationAppliers.end())
                 {
-                    applyRecolor(variant, maskImg, hasMask, seed);
-                }
-                else if (cfg.method == "terrain")
-                {
-                    applyTerrainNoise(variant, seed);
-                }
-                else if (cfg.method == "creature")
-                {
-                    applyCreatureVariation(variant, maskImg, hasMask, seed);
-                }
-                else if (cfg.method == "robot")
-                {
-                    applyRobotScheme(variant, maskImg, hasMask, seed);
-                }
-                else if (cfg.method == "item")
-                {
-                    applyItemVariation(variant, maskImg, hasMask, seed);
+                    applier->second(variant, maskImg, hasMask, seed);
                 }
 
                 // Сохраняем вариацию

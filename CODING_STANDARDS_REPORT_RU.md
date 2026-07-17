@@ -275,3 +275,26 @@ cmake --build build-codex-mapeditor
 build-codex-ninja: успешно, отфильтрованных MSVC warning/error нет
 build-codex-mapeditor: успешно, отфильтрованных MSVC warning/error нет
 ```
+
+## Дополнительный проход: табличные парсеры конфигов
+
+После локального checkpoint-коммита выполнен следующий шаг по оставшимся string parser chains.
+
+Изменено:
+
+```text
+src/vehicles/VehicleManager.cpp: key/value parser -> таблица VehicleConfigSetter
+src/ai/EnemySpawner.cpp: key/value parser -> таблица EnemyConfigSetter
+include/content/TextureGenerator.hpp: cfg.method dispatch -> таблица VariationApplier
+```
+
+Смысл изменения: убрать длинные цепочки `if/else if (key == "...")` и `cfg.method == "..."` там, где это действительно дискретная dispatch-логика. Поведение неизвестных ключей и неизвестных методов сохранено: они просто игнорируются, как и раньше.
+
+Проверка:
+
+```text
+cmake --build build-codex-ninja
+cmake --build build-codex-mapeditor
+```
+
+Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
