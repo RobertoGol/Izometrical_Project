@@ -110,6 +110,8 @@ namespace bunker
         bool m_FontLoaded = false;
         bool m_ImGuiInitialized = false;
         bool m_RenderWireframe = false;
+        EntityID m_PlayerAnchorEntity = MAX_ENTITIES;
+        EntityID m_TitanAnchorEntity = MAX_ENTITIES;
 
         EdgeKeyState m_EdgeKeys;
 
@@ -118,6 +120,8 @@ namespace bunker
 
         void generateAndLoadContent();
         void generateWorld();
+        void createGameplayAnchors();
+        void syncGameplayAnchorsToECS();
         void assignInitialHostileProfiles();
         void restoreSaveIfAvailable();
         void loadFonts();

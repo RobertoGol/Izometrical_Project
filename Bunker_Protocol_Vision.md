@@ -207,11 +207,13 @@ What needs checking:
 
 ### P1 - gameplay to 3D migration
 
-- [ ] Решить источник истины для мира: старый tile/grid `GameState` или новый ECS/3D world. Сейчас они существуют параллельно.
-- [ ] Связать player/titan/enemies/vehicles с 3D entities или ввести adapter layer между `GameState` и ECS.
-- [ ] Вернуть рендер существующих gameplay-сущностей после 3D pass: enemies, bullets, vehicles, loot, workstations, weather effects.
+- [x] Решить источник истины для текущего прохода: старый `GameState` остается gameplay source of truth, ECS получает render anchors.
+- [x] Связать player/titan с 3D entities через adapter layer между `GameState` и ECS.
+- [x] Вернуть рендер существующих gameplay-сущностей после 3D pass: floor, enemies, loot, tower, player/titan и advanced world markers.
+- [x] Обновить `SpatialGrid` регистрацию для player, titan и alive enemies.
+- [ ] Связать enemies/vehicles/workstations с pooled 3D ECS entities.
 - [ ] Проверить collision/interaction coordinates после перехода с isometric 2D на 3D camera.
-- [ ] Обновить `SpatialGrid`, CAMP validator и world containers так, чтобы они работали с теми же координатами, что и renderer.
+- [ ] Подключить CAMP validator и world containers к единому coordinate adapter.
 
 ### P1 - save/load and persistence
 

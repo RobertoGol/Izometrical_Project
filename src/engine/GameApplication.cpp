@@ -18,6 +18,13 @@
 
 namespace bunker
 {
+    namespace
+    {
+        glm::vec3 gameplayToRenderPosition(const Vector3D& position, float heightOffset = 0.0f)
+        {
+            return {position.x, position.z + heightOffset, position.y};
+        }
+    }
 
     GameApplication::GameApplication()
         : m_Window(sf::VideoMode({Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT}), "Bunker Protocol ISO",
@@ -132,11 +139,42 @@ namespace bunker
 
         m_Registry.transforms.insert(testCube, transform);
         m_Registry.meshes.insert(testCube, MeshBuilder::createTestCube());
+        createGameplayAnchors();
 
         // ВАЖНО: убедись, что твои методы renderGameplayFrame, processEdgeHotkeys и т.д. 
         // на месте. Я просто не стал дублировать их огромный текст для краткости.      
         // Можно заспавнить еще 1000 кубов циклом, и рендер даже не вспотеет, 
         // потому что данные лежат в памяти последовательно!
+    }
+
+    void GameApplication::createGameplayAnchors()
+    {
+        m_PlayerAnchorEntity = m_Registry.createEntity();
+        TransformComponent playerTransform;
+        playerTransform.scale = glm::vec3(0.45f, 0.9f, 0.45f);
+        m_Registry.transforms.insert(m_PlayerAnchorEntity, playerTransform);
+        m_Registry.meshes.insert(m_PlayerAnchorEntity, MeshBuilder::createTestCube());
+
+        m_TitanAnchorEntity = m_Registry.createEntity();
+        TransformComponent titanTransform;
+        titanTransform.scale = glm::vec3(1.4f, 1.0f, 1.4f);
+        m_Registry.transforms.insert(m_TitanAnchorEntity, titanTransform);
+        m_Registry.meshes.insert(m_TitanAnchorEntity, MeshBuilder::createTestCube());
+
+        syncGameplayAnchorsToECS();
+    }
+
+    void GameApplication::syncGameplayAnchorsToECS()
+    {
+        if (auto* playerTransform = m_Registry.transforms.get(m_PlayerAnchorEntity))
+        {
+            playerTransform->position = gameplayToRenderPosition(m_GameState.playerPos, 0.35f);
+        }
+
+        if (auto* titanTransform = m_Registry.transforms.get(m_TitanAnchorEntity))
+        {
+            titanTransform->position = gameplayToRenderPosition(m_GameState.titan.position, 0.55f);
+        }
     }
 
     void GameApplication::assignInitialHostileProfiles()
@@ -419,6 +457,7 @@ namespace bunker
 
         updateCombat(input, dt);
         updateWorldSystems(input, dt);
+        syncGameplayAnchorsToECS();
 
         m_Camera.update(dt, m_Window);
     }
@@ -539,6 +578,14 @@ namespace bunker
         // Broadphase регистрация сетки
         m_SpatialGrid.clearBuckets();
         m_SpatialGrid.registerEntity(0, m_GameState.playerPos);
+        m_SpatialGrid.registerEntity(1, m_GameState.titan.position);
+        for (std::size_t i = 0; i < m_GameState.enemies.size(); ++i)
+        {
+            if (m_GameState.enemies[i].isAlive)
+            {
+                m_SpatialGrid.registerEntity(i + 2, m_GameState.enemies[i].position);
+            }
+        }
 
         // Advanced переносы из двух старых репозиториев.
         m_Advanced.update(m_GameState, m_Inventory, input, dt);
@@ -582,6 +629,10 @@ namespace bunker
         // Устанавливаем стандартную камеру (экранное пространство 1:1)
         m_Window.setView(m_Window.getDefaultView());
         
+        GameRenderer::renderFloor(m_Window, m_GameState, m_TimeShift);
+        GameRenderer::renderEntities(m_Window, m_GameState, m_TimeShift, m_HostileAI);
+        GameRenderer::renderAdvancedWorld(m_Window, m_Advanced);
+
         m_Hud.render(m_Window, m_GameState, m_PlayerController, m_Tactics, m_TitanAI, m_VehicleManager, m_Inventory);
         
         if (m_TimeShift.isInitialized()) {
