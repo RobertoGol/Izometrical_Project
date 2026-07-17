@@ -490,3 +490,35 @@ cmake --build build-codex-mapeditor
 ```
 
 Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
+## Дополнительный проход: два крупнейших файла
+
+Выполнен проход по двум крупнейшим оставшимся файлам:
+
+```text
+include/content/TextureGenerator.hpp
+src/gameplay/AdvancedMechanicsWorld.cpp
+```
+
+Что изменено:
+
+```text
+include/content/TextureGenerator.hpp -> compatibility umbrella
+include/content/TextureGeneratorCore.hpp -> TextureGenConfig и TextureGenerator
+include/content/TextureAtlasBaker.hpp -> AtlasSubRect и MegaTileAtlasBaker
+
+src/gameplay/AdvancedMechanicsWorld.cpp -> ReactiveWorldSystem
+src/gameplay/AdvancedMechanicsProgression.cpp -> StoryRouteSystem, SkillSystem, LootGenerator
+src/gameplay/AdvancedMechanicsCamp.cpp -> CampSystem
+src/gameplay/AdvancedMechanicsToolGun.cpp -> PrefabLibrary, ToolGunSystem
+```
+
+`CMakeLists.txt` обновлен для новых `.cpp` файлов AdvancedMechanics. Для заголовков TextureGenerator изменения CMake не требуются: старый путь `content/TextureGenerator.hpp` сохранен как umbrella include.
+
+Проверка:
+
+```text
+cmake --build build-codex-ninja
+cmake --build build-codex-mapeditor
+```
+
+Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
