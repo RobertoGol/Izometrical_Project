@@ -1,6 +1,6 @@
 #pragma once
 #include "core/ECS.hpp"
-#include "entities/Camera.hpp" 
+#include "entities/Camera.hpp"
 
 namespace bunker {
 
@@ -10,20 +10,21 @@ namespace bunker {
         ~Renderer3D() = default;
 
         void initialize();
-        
+
         // Главная функция отрисовки кадра
         void renderScene(Registry& registry, const Camera& camera);
 
         // --- ДОБАВЬ ЭТУ СТРОКУ ---
-        void renderSkyDome(); 
+        void renderSkyDome();
 
     private:
-        std::uint32_t m_shaderProgram;
-        
+        std::uint32_t m_shaderProgram = 0;
+
         // Кэшированные локации uniform-переменных в шейдере
-        int m_locView;
-        int m_locProjection;
-        int m_locModel;
+        int m_locView = -1;
+        int m_locProjection = -1;
+        int m_locModel = -1;
+        bool m_initialized = false;
 
         void loadShaders();
         void bindMaterial(std::uint32_t materialID);

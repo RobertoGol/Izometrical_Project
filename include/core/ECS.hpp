@@ -20,9 +20,9 @@ namespace bunker {
     };
 
     struct MeshComponent {
-        std::uint32_t vaoID;       // ID геометрии на видеокарте (Vertex Array Object)
-        std::uint32_t indexCount;  // Количество вершин для отрисовки
-        std::uint32_t materialID;  // PBR-материал (Albedo, Normal, Roughness, Metallic)
+        std::uint32_t vaoID = 0;       // ID геометрии на видеокарте (Vertex Array Object)
+        std::uint32_t indexCount = 0;  // Количество вершин для отрисовки
+        std::uint32_t materialID = 0;  // PBR-материал (Albedo, Normal, Roughness, Metallic)
     };
 
     // ПЛОТНЫЕ МАССИВЫ (Data-Oriented Design)
@@ -31,9 +31,16 @@ namespace bunker {
     class ComponentArray {
     public:
         void insert(EntityID entity, const T& component) {
+            auto existing = entityToIndex.find(entity);
+            if (existing != entityToIndex.end()) {
+                components[existing->second] = component;
+                return;
+            }
+
             entityToIndex[entity] = components.size();
             indexToEntity[components.size()] = entity;
             components.push_back(component);
+            denseEntities.push_back(entity);
         }
 
         T* get(EntityID entity) {
@@ -58,11 +65,11 @@ namespace bunker {
     class Registry {
     public:
         EntityID createEntity() { return nextEntity++; }
-        
+
         ComponentArray<TransformComponent> transforms;
         ComponentArray<MeshComponent> meshes;
         // В будущем добавишь сюда: Physics, AIState, Health и т.д.
-        
+
     private:
         EntityID nextEntity = 0;
     };
