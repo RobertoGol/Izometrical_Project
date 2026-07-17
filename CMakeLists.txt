@@ -38,6 +38,9 @@ add_library(game_core STATIC
     src/ai/EnemyArchetypeRegistry.cpp
     src/ai/EnemySpawner.cpp
     src/ai/HostileAISystem.cpp
+    src/ai/HostileAISystemBehavior.cpp
+    src/ai/HostileAISystemMovement.cpp
+    src/ai/HostileAISystemProfiles.cpp
     src/ai/PerceptionSystem.cpp
     src/ai/TitanAI.cpp
     src/ai/TitanAICockpit.cpp
@@ -63,6 +66,9 @@ add_library(game_core STATIC
     src/gameplay/AdvancedMechanicsServices.cpp
     src/gameplay/AdvancedPilotMovement.cpp
     src/gameplay/BulletSystem.cpp
+    src/gameplay/BulletSystemEffects.cpp
+    src/gameplay/BulletSystemFire.cpp
+    src/gameplay/BulletSystemRender.cpp
     src/gameplay/DamageSystem.cpp
     src/gameplay/SpatialGrid.cpp
     src/gameplay/StatefulActionsController.cpp
@@ -88,6 +94,10 @@ add_library(game_core STATIC
     src/vehicles/ThermalLoadSystem.cpp
     src/vehicles/VehicleManager.cpp
     src/vehicles/VehicleSeatController.cpp
+    src/world/WeatherSystemDraw.cpp
+    src/world/WeatherSystemEffects.cpp
+    src/world/WeatherSystemLogic.cpp
+    src/world/WeatherSystemRender.cpp
     src/WorkstationDatabase.cpp
     src/WorkstationManager.cpp
     src/Workstations.cpp

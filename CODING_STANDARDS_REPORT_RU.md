@@ -446,3 +446,47 @@ cmake --build build-codex-mapeditor
 ```
 
 Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
+## Дополнительный проход: последние 4 файла из списка
+
+Выполнен проход по последним четырем файлам из оставшегося списка крупных кандидатов:
+
+```text
+src/gameplay/BulletSystem.cpp
+src/ai/HostileAISystem.cpp
+src/entities/PlayerController.cpp
+src/world/WeatherSystem.cpp
+```
+
+Что изменено:
+
+```text
+BulletSystem.cpp -> update-логика оставлена в основном файле
+BulletSystemFire.cpp -> fireScoutWeapon, fireTitanWeapon, fireTitanMissiles
+BulletSystemEffects.cpp -> splash damage и debug chain lightning
+BulletSystemRender.cpp -> render и small helpers
+
+HostileAISystem.cpp -> spawn/update/damage entry points
+HostileAISystemProfiles.cpp -> profile/health/radius/runtime state helpers
+HostileAISystemBehavior.cpp -> awareness, idle/search/aggro/ranged/melee behavior
+HostileAISystemMovement.cpp -> target choice, movement helpers, random helper
+
+WeatherSystem.cpp -> initialization/update/label entry points
+WeatherSystemLogic.cpp -> weather selection, intensity, thunder, derived values
+WeatherSystemEffects.cpp -> world effects and damage ticks
+WeatherSystemRender.cpp -> public render methods
+WeatherSystemDraw.cpp -> overlay draw helpers, colors, names, formatting/random helper
+
+PlayerController.cpp -> длинный update разделен на приватные helper-методы
+PlayerController.hpp -> добавлены приватные helper-declarations
+```
+
+`CMakeLists.txt` обновлен для новых `.cpp` файлов в явном списке `game_core`.
+
+Проверка:
+
+```text
+cmake --build build-codex-ninja
+cmake --build build-codex-mapeditor
+```
+
+Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.

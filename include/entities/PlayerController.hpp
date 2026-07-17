@@ -37,6 +37,15 @@ namespace bunker
         // ── Угол взгляда ──
         float m_FacingAngle = 0.0f;
 
+        void updateCameraAxes(const GameState& gs);
+        Vector3D buildMovementDirection(const InputSnapshot& input) const;
+        bool updateStamina(const GameState& gs, const InputSnapshot& input, bool isMoving, float dt);
+        bool updateDive(GameState& gs, const InputSnapshot& input, const Vector3D& targetDir, bool isMoving,
+                        float playerRadius, float dt);
+        void applyMovement(GameState& gs, const Vector3D& targetDir, bool isMoving, bool activeSprint,
+                           float playerRadius, float dt);
+        void updateFacingAngle(const GameState& gs);
+
     public:
         PlayerController() = default;
 
