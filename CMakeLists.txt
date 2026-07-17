@@ -69,6 +69,9 @@ add_library(game_core STATIC
     src/persistence/StoryFlagRegistry.cpp
     src/RecipeDatabase.cpp
     src/render/GameRenderer.cpp
+    src/render/GameRendererAdvancedHUD.cpp
+    src/render/GameRendererAdvancedWorld.cpp
+    src/render/GameRendererEntities.cpp
     src/ResourceManager.cpp
     src/TextureGenerator.cpp
     src/ui/HUD.cpp

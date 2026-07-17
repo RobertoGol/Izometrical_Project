@@ -329,3 +329,34 @@ cmake --build build-codex-mapeditor
 ```
 
 Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
+
+## Дополнительный проход: дробление GameRenderer.cpp
+
+Следующий крупный `.cpp` файл также разделен без изменения поведения: `src/render/GameRenderer.cpp`.
+
+Добавлены файлы:
+
+```text
+src/render/GameRendererEntities.cpp
+src/render/GameRendererAdvancedWorld.cpp
+src/render/GameRendererAdvancedHUD.cpp
+```
+
+После разделения `src/render/GameRenderer.cpp` оставлен только для `GameRenderer::renderFloor`. Остальные методы перенесены по зонам ответственности:
+
+```text
+GameRendererEntities.cpp: GameRenderer::renderEntities
+GameRendererAdvancedWorld.cpp: GameRenderer::renderAdvancedWorld
+GameRendererAdvancedHUD.cpp: GameRenderer::renderAdvancedHUD
+```
+
+`CMakeLists.txt` обновлен, потому что `game_core` использует явный список исходников.
+
+Проверка:
+
+```text
+cmake --build build-codex-ninja
+cmake --build build-codex-mapeditor
+```
+
+Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
