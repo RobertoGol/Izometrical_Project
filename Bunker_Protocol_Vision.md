@@ -197,11 +197,13 @@ What needs checking:
 - [x] `Renderer3D::renderScene()` применяет `TransformComponent` через model matrix.
 - [x] `Renderer3D::renderScene()` использует camera view/projection uniforms.
 - [x] Shader files `assets/shaders/base.vert` и `assets/shaders/base.frag` загружаются из assets.
-- [ ] Добавить ownership/lifetime для GPU buffers: сейчас VBO/EBO создаются, но не хранятся и не освобождаются.
-- [ ] Перестать связывать `transforms` и `meshes` только по индексу массива; использовать entity IDs из ECS, чтобы transform и mesh не расходились.
-- [ ] Добавить normal/tangent support для будущего normal mapping.
-- [ ] Сделать sky/weather/lighting реальной частью 3D renderer вместо пустого `renderSkyDome()`.
-- [ ] Добавить debug toggle для wireframe, normals, material IDs и camera frustum.
+- [x] Добавить ownership/lifetime для GPU buffers: сейчас VBO/EBO создаются, но не хранятся и не освобождаются.
+- [x] Перестать связывать `transforms` и `meshes` только по индексу массива; использовать entity IDs из ECS, чтобы transform и mesh не расходились.
+- [x] Добавить normal/tangent support для будущего normal mapping.
+- [x] Перенести sky clear color, lighting и fog в управляемые параметры `Renderer3D`/shader uniforms вместо пустого `renderSkyDome()`.
+- [x] Добавить debug toggle для wireframe.
+- [ ] Связать sky/weather параметры с `WeatherSystem`.
+- [ ] Добавить debug overlays для normals, material IDs и camera frustum.
 
 ### P1 - gameplay to 3D migration
 

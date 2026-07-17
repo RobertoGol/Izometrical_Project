@@ -1,6 +1,7 @@
 #pragma once
 #include "core/ECS.hpp"
 #include "entities/Camera.hpp"
+#include <glm/glm.hpp>
 
 namespace bunker {
 
@@ -26,8 +27,17 @@ namespace bunker {
         int m_locProjection = -1;
         int m_locModel = -1;
         int m_locMaterialColor = -1;
+        int m_locLightDirection = -1;
+        int m_locAmbientColor = -1;
+        int m_locLightColor = -1;
+        int m_locFogColor = -1;
         bool m_initialized = false;
         bool m_wireframeEnabled = false;
+        glm::vec3 m_skyColor{0.10f, 0.11f, 0.14f};
+        glm::vec3 m_lightDirection{-0.35f, 0.85f, 0.28f};
+        glm::vec3 m_ambientColor{0.055f, 0.065f, 0.075f};
+        glm::vec3 m_lightColor{0.76f, 0.68f, 0.52f};
+        glm::vec3 m_fogColor{0.11f, 0.12f, 0.105f};
 
         void loadShaders();
         void bindMaterial(std::uint32_t materialID);

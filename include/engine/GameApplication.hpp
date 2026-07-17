@@ -72,6 +72,7 @@ namespace bunker
             bool pipTabInv = false;
             bool pipTabMap = false;
             bool pipTabTapes = false;
+            bool wireframe = false;
         };
 
         sf::RenderWindow m_Window;
@@ -108,6 +109,7 @@ namespace bunker
         sf::Font m_GlobalFont;
         bool m_FontLoaded = false;
         bool m_ImGuiInitialized = false;
+        bool m_RenderWireframe = false;
 
         EdgeKeyState m_EdgeKeys;
 

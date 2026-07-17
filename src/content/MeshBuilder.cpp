@@ -6,6 +6,43 @@
 #include <cstddef>
 
 namespace bunker {
+    namespace {
+        void computeTangents(std::vector<Vertex>& vertices, const std::vector<std::uint32_t>& indices) {
+            for (auto& vertex : vertices) {
+                vertex.tangent = {0.0f, 0.0f, 0.0f};
+            }
+
+            for (std::size_t i = 0; i + 2 < indices.size(); i += 3) {
+                Vertex& v0 = vertices[indices[i]];
+                Vertex& v1 = vertices[indices[i + 1]];
+                Vertex& v2 = vertices[indices[i + 2]];
+
+                const glm::vec3 edge1 = v1.position - v0.position;
+                const glm::vec3 edge2 = v2.position - v0.position;
+                const glm::vec2 deltaUV1 = v1.texCoords - v0.texCoords;
+                const glm::vec2 deltaUV2 = v2.texCoords - v0.texCoords;
+                const float determinant = deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y;
+
+                if (std::abs(determinant) < 0.000001f) {
+                    continue;
+                }
+
+                const float invDeterminant = 1.0f / determinant;
+                const glm::vec3 tangent = (edge1 * deltaUV2.y - edge2 * deltaUV1.y) * invDeterminant;
+                v0.tangent += tangent;
+                v1.tangent += tangent;
+                v2.tangent += tangent;
+            }
+
+            for (auto& vertex : vertices) {
+                if (glm::dot(vertex.tangent, vertex.tangent) < 0.000001f) {
+                    vertex.tangent = {1.0f, 0.0f, 0.0f};
+                } else {
+                    vertex.tangent = glm::normalize(vertex.tangent);
+                }
+            }
+        }
+    }
 
     MeshComponent MeshBuilder::loadToGPU(const std::vector<Vertex>& vertices,
                                         const std::vector<std::uint32_t>& indices,
@@ -23,6 +60,9 @@ namespace bunker {
             return mesh;
         }
 
+        std::vector<Vertex> gpuVertices = vertices;
+        computeTangents(gpuVertices, indices);
+
         GLuint vao = 0;
         GLuint vbo = 0;
         GLuint ebo = 0;
@@ -36,8 +76,8 @@ namespace bunker {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(
             GL_ARRAY_BUFFER,
-            static_cast<GLsizeiptr>(vertices.size() * sizeof(Vertex)),
-            vertices.data(),
+            static_cast<GLsizeiptr>(gpuVertices.size() * sizeof(Vertex)),
+            gpuVertices.data(),
             GL_STATIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -74,11 +114,39 @@ namespace bunker {
             sizeof(Vertex),
             reinterpret_cast<void*>(offsetof(Vertex, texCoords)));
 
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(
+            3,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(Vertex),
+            reinterpret_cast<void*>(offsetof(Vertex, tangent)));
+
         glBindVertexArray(0);
 
         mesh.vaoID = vao;
+        mesh.vboID = vbo;
+        mesh.eboID = ebo;
 
         return mesh;
+    }
+
+    void MeshBuilder::releaseFromGPU(MeshComponent& mesh)
+    {
+        if (mesh.eboID != 0) {
+            glDeleteBuffers(1, &mesh.eboID);
+            mesh.eboID = 0;
+        }
+        if (mesh.vboID != 0) {
+            glDeleteBuffers(1, &mesh.vboID);
+            mesh.vboID = 0;
+        }
+        if (mesh.vaoID != 0) {
+            glDeleteVertexArrays(1, &mesh.vaoID);
+            mesh.vaoID = 0;
+        }
+        mesh.indexCount = 0;
     }
 
     MeshComponent MeshBuilder::createGround(float size) {

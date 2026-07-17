@@ -98,7 +98,7 @@ namespace bunker {
         }
 
         // 1. Очистка буферов
-        glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
+        glClearColor(m_skyColor.r, m_skyColor.g, m_skyColor.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // 2. Небо
@@ -121,22 +121,38 @@ namespace bunker {
             if (m_locProjection >= 0) {
                 glUniformMatrix4fv(m_locProjection, 1, GL_FALSE, glm::value_ptr(projection));
             }
+            if (m_locLightDirection >= 0) {
+                const glm::vec3 lightDirection = glm::normalize(m_lightDirection);
+                glUniform3fv(m_locLightDirection, 1, glm::value_ptr(lightDirection));
+            }
+            if (m_locAmbientColor >= 0) {
+                glUniform3fv(m_locAmbientColor, 1, glm::value_ptr(m_ambientColor));
+            }
+            if (m_locLightColor >= 0) {
+                glUniform3fv(m_locLightColor, 1, glm::value_ptr(m_lightColor));
+            }
+            if (m_locFogColor >= 0) {
+                glUniform3fv(m_locFogColor, 1, glm::value_ptr(m_fogColor));
+            }
         }
 
         // 4. Отрисовка ECS объектов
-        auto& transforms = registry.transforms.getRawData();
-        auto& meshes = registry.meshes.getRawData();
-        const auto drawCount = std::min(meshes.size(), transforms.size());
+        const auto& meshes = registry.meshes.getRawData();
+        const auto& meshEntities = registry.meshes.getDenseEntities();
+        const auto drawCount = std::min(meshes.size(), meshEntities.size());
 
         for (size_t i = 0; i < drawCount; ++i) {
             const auto& mesh = meshes[i];
-            const auto& transform = transforms[i];
+            const TransformComponent* transform = registry.transforms.get(meshEntities[i]);
+            if (transform == nullptr || mesh.vaoID == 0 || mesh.indexCount == 0) {
+                continue;
+            }
 
             if (m_shaderProgram != 0 && m_locModel >= 0) {
                 glm::mat4 model{1.0f};
-                model = glm::translate(model, transform.position);
-                model *= glm::mat4_cast(transform.rotation);
-                model = glm::scale(model, transform.scale);
+                model = glm::translate(model, transform->position);
+                model *= glm::mat4_cast(transform->rotation);
+                model = glm::scale(model, transform->scale);
                 glUniformMatrix4fv(m_locModel, 1, GL_FALSE, glm::value_ptr(model));
             }
 
@@ -156,15 +172,9 @@ namespace bunker {
     }
 
     void Renderer3D::renderSkyDome() {
-        // Отключаем запись в буфер глубины, чтобы небо не перекрывало объекты
+        // Sky is currently represented by the renderer clear color. Keep depth writes enabled
+        // so the following world pass owns the depth buffer completely.
         glDepthMask(GL_FALSE);
-
-        // glUseProgram(m_SkyShader);
-        // glBindTexture(GL_TEXTURE_2D, m_SkyTextureID);
-
-        // m_SkyMesh.draw();
-
-        // Возвращаем запись глубины
         glDepthMask(GL_TRUE);
     }
 
@@ -206,6 +216,10 @@ namespace bunker {
         m_locProjection = glGetUniformLocation(m_shaderProgram, "u_projection");
         m_locModel = glGetUniformLocation(m_shaderProgram, "u_model");
         m_locMaterialColor = glGetUniformLocation(m_shaderProgram, "u_materialColor");
+        m_locLightDirection = glGetUniformLocation(m_shaderProgram, "u_lightDirection");
+        m_locAmbientColor = glGetUniformLocation(m_shaderProgram, "u_ambientColor");
+        m_locLightColor = glGetUniformLocation(m_shaderProgram, "u_lightColor");
+        m_locFogColor = glGetUniformLocation(m_shaderProgram, "u_fogColor");
     }
 
     void Renderer3D::bindMaterial(std::uint32_t materialID) {

@@ -79,6 +79,10 @@ namespace bunker
 
     void GameApplication::shutdown()
     {
+        for (auto& mesh : m_Registry.meshes.getRawData())
+        {
+            MeshBuilder::releaseFromGPU(mesh);
+        }
         SaveSystem::writeSave(1, m_GameState, m_Inventory);
         if (m_ImGuiInitialized)
         {
@@ -316,6 +320,11 @@ namespace bunker
         if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F6), m_EdgeKeys.delivery))
         {
             m_Advanced.lanline.requestDelivery("ammo", m_GameState.playerPos);
+        }
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F4), m_EdgeKeys.wireframe))
+        {
+            m_RenderWireframe = !m_RenderWireframe;
+            m_Renderer3D.setWireframeEnabled(m_RenderWireframe);
         }
 
         // B/toggleCamp остаётся в InputSnapshot и обрабатывается AdvancedMechanics::update.

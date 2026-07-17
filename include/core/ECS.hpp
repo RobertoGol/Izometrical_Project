@@ -21,6 +21,8 @@ namespace bunker {
 
     struct MeshComponent {
         std::uint32_t vaoID = 0;       // ID геометрии на видеокарте (Vertex Array Object)
+        std::uint32_t vboID = 0;       // Vertex Buffer Object
+        std::uint32_t eboID = 0;       // Element Buffer Object
         std::uint32_t indexCount = 0;  // Количество вершин для отрисовки
         std::uint32_t materialID = 0;  // PBR-материал (Albedo, Normal, Roughness, Metallic)
     };
@@ -49,8 +51,15 @@ namespace bunker {
             return &components[it->second];
         }
 
+        const T* get(EntityID entity) const {
+            auto it = entityToIndex.find(entity);
+            if (it == entityToIndex.end()) return nullptr;
+            return &components[it->second];
+        }
+
         // Ключевой метод для рендера: отдаем сырой массив для линейного прохода
         std::vector<T>& getRawData() { return components; }
+        const std::vector<T>& getRawData() const { return components; }
         const std::vector<EntityID>& getDenseEntities() const { return denseEntities; }
 
     private:
