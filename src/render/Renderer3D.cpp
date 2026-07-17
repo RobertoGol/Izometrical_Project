@@ -207,6 +207,8 @@ namespace bunker {
     }
 
     void Renderer3D::bindMaterial(std::uint32_t materialID) {
+        (void)materialID;
+
         // Тут будет glBindTexture для текстур (Diffuse, Normal, etc.)
         // Material binding
     }

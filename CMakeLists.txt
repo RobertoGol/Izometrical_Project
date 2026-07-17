@@ -13,19 +13,23 @@ find_package(SFML 3.1 CONFIG REQUIRED COMPONENTS Audio Graphics Window System)
 find_package(OpenGL REQUIRED)
 
 # --- Загрузка GLM ---
-include(FetchContent)
-FetchContent_Declare(
-    glm
-    GIT_REPOSITORY https://github.com/g-truc/glm.git
-    GIT_TAG 0.9.9.8
-)
-FetchContent_GetProperties(glm)
-if(NOT glm_POPULATED)
-    FetchContent_Populate(glm)
-endif()
-
 add_library(glm INTERFACE)
-target_include_directories(glm INTERFACE "${glm_SOURCE_DIR}")
+set(LOCAL_GLM_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.deps/glm-0.9.9.8")
+if(EXISTS "${LOCAL_GLM_SOURCE_DIR}/glm/glm.hpp")
+    target_include_directories(glm INTERFACE "${LOCAL_GLM_SOURCE_DIR}")
+else()
+    include(FetchContent)
+    FetchContent_Declare(
+        glm
+        GIT_REPOSITORY https://github.com/g-truc/glm.git
+        GIT_TAG 0.9.9.8
+    )
+    FetchContent_GetProperties(glm)
+    if(NOT glm_POPULATED)
+        FetchContent_Populate(glm)
+    endif()
+    target_include_directories(glm INTERFACE "${glm_SOURCE_DIR}")
+endif()
 # --------------------
 
 set(IMGUI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source/ImGui")

@@ -20,5 +20,6 @@ compile_flags.txt
 build/
 build-*/
 out/
+.deps/
 
 manuals/
