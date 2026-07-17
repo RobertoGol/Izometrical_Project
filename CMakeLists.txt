@@ -112,7 +112,6 @@ add_library(game_core STATIC
     src/render/GameRendererEntities.cpp
     src/render/Renderer3D.cpp
     src/ResourceManager.cpp
-    src/TextureGenerator.cpp
     src/ui/HUD.cpp
     src/ui/PipPadUI.cpp
     src/ui/TerminalUI.cpp

@@ -228,12 +228,12 @@ What needs checking:
 - [x] Цвет материала хранится как hex (`grass -> 0x...`), а не как ручные RGB float values.
 - [x] `Renderer3D::bindMaterial()` отправляет material color в `base.frag` через `u_materialColor`.
 - [x] Ground/cube/terrain получают первые material IDs.
-- [ ] Убрать путаницу двух `TextureGenerator`: старый `include/TextureGenerator.hpp`/`src/TextureGenerator.cpp` и новый `include/content/TextureGeneratorCore.hpp`.
-- [ ] Добавить material categories: terrain, metal, concrete, organic, debug.
-- [ ] Добавить material properties: roughness, metallic, emissive/fallback values.
-- [ ] Добавить texture slots: albedo, normal, roughness, metallic; связать их с generated textures.
-- [ ] Добавить validation material catalog: duplicate IDs, unknown ID fallback logging.
-- [ ] Добавить editor/debug UI для выбора и просмотра material ID/name/hex.
+- [x] Убрать путаницу двух `TextureGenerator`: старый `include/TextureGenerator.hpp`/`src/TextureGenerator.cpp` и новый `include/content/TextureGeneratorCore.hpp`.
+- [x] Добавить material categories: terrain, metal, concrete, organic, debug.
+- [x] Добавить material properties: roughness, metallic, emissive/fallback values.
+- [x] Добавить texture slots: albedo, normal, roughness, metallic; связать их с generated textures.
+- [x] Добавить validation material catalog: duplicate IDs, unknown ID fallback logging.
+- [x] Добавить editor/debug UI для выбора и просмотра material ID/name/hex.
 - [ ] Когда появятся texture bindings, вынести material binding из `Renderer3D` в dedicated material system.
 
 ### P2 - architecture and code health

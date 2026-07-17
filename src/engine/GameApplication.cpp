@@ -6,6 +6,7 @@
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include "Collisions.hpp"
+#include "content/MaterialCatalog.hpp"
 #include "content/AssetPaths.hpp"
 #include "core/IsoMath.hpp"
 #include "render/GameRenderer.hpp"
@@ -365,6 +366,10 @@ namespace bunker
             m_RenderWireframe = !m_RenderWireframe;
             m_Renderer3D.setWireframeEnabled(m_RenderWireframe);
         }
+        if (consumeEdge(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F11), m_EdgeKeys.materialDebug))
+        {
+            m_ShowMaterialDebug = !m_ShowMaterialDebug;
+        }
 
         // B/toggleCamp остаётся в InputSnapshot и обрабатывается AdvancedMechanics::update.
         (void)input;
@@ -651,6 +656,7 @@ namespace bunker
         }
 
         if (m_ImGuiInitialized) {
+            renderMaterialDebugWindow();
             ImGui::SFML::Render(m_Window);
         }
 
@@ -660,6 +666,27 @@ namespace bunker
         // Финальный вывод кадра на экран
         m_Window.display(); 
     }// <--- ЭТА СКОБКА ЗАКРЫВАЕТ ФУНКЦИЮ renderGameplayFrame
+
+    void GameApplication::renderMaterialDebugWindow()
+    {
+        if (!m_ShowMaterialDebug)
+        {
+            return;
+        }
+
+        ImGui::Begin("Material Catalog", &m_ShowMaterialDebug);
+        for (const auto& material : getMaterialCatalog())
+        {
+            ImGui::Text("ID %u | %s | %s | #%06X | rough %.2f | metal %.2f",
+                        material.id,
+                        material.name,
+                        materialCategoryName(material.category),
+                        material.hex,
+                        material.roughness,
+                        material.metallic);
+        }
+        ImGui::End();
+    }
 
     bool GameApplication::consumeEdge(bool isPressedNow, bool& wasPressedBefore)
     {

@@ -81,6 +81,10 @@ namespace bunker {
         }
 
         loadShaders();
+        std::string materialError;
+        if (!validateMaterialCatalog(&materialError)) {
+            logError() << "[Renderer3D] Material catalog invalid: " << materialError << std::endl;
+        }
 
         // Глобальные настройки стейта OpenGL
         glEnable(GL_DEPTH_TEST);
@@ -216,6 +220,9 @@ namespace bunker {
         m_locProjection = glGetUniformLocation(m_shaderProgram, "u_projection");
         m_locModel = glGetUniformLocation(m_shaderProgram, "u_model");
         m_locMaterialColor = glGetUniformLocation(m_shaderProgram, "u_materialColor");
+        m_locMaterialEmissive = glGetUniformLocation(m_shaderProgram, "u_materialEmissive");
+        m_locMaterialRoughness = glGetUniformLocation(m_shaderProgram, "u_materialRoughness");
+        m_locMaterialMetallic = glGetUniformLocation(m_shaderProgram, "u_materialMetallic");
         m_locLightDirection = glGetUniformLocation(m_shaderProgram, "u_lightDirection");
         m_locAmbientColor = glGetUniformLocation(m_shaderProgram, "u_ambientColor");
         m_locLightColor = glGetUniformLocation(m_shaderProgram, "u_lightColor");
@@ -230,6 +237,16 @@ namespace bunker {
         const auto& material = getMaterial(materialID);
         const glm::vec3 color = hexToLinearRgb(material.hex);
         glUniform3fv(m_locMaterialColor, 1, glm::value_ptr(color));
+        if (m_locMaterialEmissive >= 0) {
+            const glm::vec3 emissive = hexToLinearRgb(material.emissiveHex);
+            glUniform3fv(m_locMaterialEmissive, 1, glm::value_ptr(emissive));
+        }
+        if (m_locMaterialRoughness >= 0) {
+            glUniform1f(m_locMaterialRoughness, material.roughness);
+        }
+        if (m_locMaterialMetallic >= 0) {
+            glUniform1f(m_locMaterialMetallic, material.metallic);
+        }
     }
 
 } // namespace bunker

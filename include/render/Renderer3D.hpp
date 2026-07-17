@@ -27,6 +27,9 @@ namespace bunker {
         int m_locProjection = -1;
         int m_locModel = -1;
         int m_locMaterialColor = -1;
+        int m_locMaterialEmissive = -1;
+        int m_locMaterialRoughness = -1;
+        int m_locMaterialMetallic = -1;
         int m_locLightDirection = -1;
         int m_locAmbientColor = -1;
         int m_locLightColor = -1;

@@ -73,6 +73,7 @@ namespace bunker
             bool pipTabMap = false;
             bool pipTabTapes = false;
             bool wireframe = false;
+            bool materialDebug = false;
         };
 
         sf::RenderWindow m_Window;
@@ -110,6 +111,7 @@ namespace bunker
         bool m_FontLoaded = false;
         bool m_ImGuiInitialized = false;
         bool m_RenderWireframe = false;
+        bool m_ShowMaterialDebug = false;
         EntityID m_PlayerAnchorEntity = MAX_ENTITIES;
         EntityID m_TitanAnchorEntity = MAX_ENTITIES;
 
@@ -132,6 +134,7 @@ namespace bunker
         void renderMapFrame(float dt);
         void updateGameplayFrame(const InputSnapshot& input, float dt);
         void renderGameplayFrame();
+        void renderMaterialDebugWindow();
 
         void updateMouseWorldPosition(const InputSnapshot& input);
         void processSaveLoadInput(const InputSnapshot& input);
