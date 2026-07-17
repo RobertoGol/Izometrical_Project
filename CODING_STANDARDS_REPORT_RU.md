@@ -549,3 +549,24 @@ cmake --build build-codex-mapeditor
 ```
 
 Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
+## Дополнительный проход: дробление TextureGeneratorCore.hpp
+
+Следующий крупнейший файл, `include/content/TextureGeneratorCore.hpp`, преобразован из header-only монолита в декларационный заголовок с companion inline-файлом.
+
+Изменено:
+
+```text
+include/content/TextureGeneratorCore.hpp -> TextureGenConfig и декларация TextureGenerator
+include/content/TextureGeneratorCore.inl -> inline-реализации методов TextureGenerator
+```
+
+Поведение осталось header-only: `TextureGeneratorCore.hpp` подключает `.inl` в конце, поэтому отдельный `.cpp` и изменения CMake не требуются. Размер основного `.hpp` уменьшен примерно с 28 KB до 1.8 KB.
+
+Проверка:
+
+```text
+cmake --build build-codex-ninja
+cmake --build build-codex-mapeditor
+```
+
+Результат: обе сборки успешны, отфильтрованных MSVC warning/error нет.
