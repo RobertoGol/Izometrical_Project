@@ -1,6 +1,6 @@
 #pragma once
 #include "core/ECS.hpp"
-#include "entities/Camera.hpp" // Твоя будущая 3D-камера
+#include "entities/Camera.hpp" 
 
 namespace bunker {
 
@@ -13,6 +13,9 @@ namespace bunker {
         
         // Главная функция отрисовки кадра
         void renderScene(Registry& registry, const Camera& camera);
+
+        // --- ДОБАВЬ ЭТУ СТРОКУ ---
+        void renderSkyDome(); 
 
     private:
         std::uint32_t m_shaderProgram;

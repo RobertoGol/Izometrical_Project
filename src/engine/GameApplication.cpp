@@ -1,5 +1,7 @@
 #include "engine/GameApplication.hpp"
 #include "content/MeshBuilder.hpp"
+#include "world/TerrainGenerator.hpp" // ЭТО ОБЯЗАТЕЛЬНО
+#include <glad/glad.h> // ДОБАВЛЕНО: для инициализации OpenGL функций
 
 #include <imgui.h>
 #include <imgui-SFML.h>
@@ -18,22 +20,23 @@ namespace bunker
 
     GameApplication::GameApplication()
         : m_Window(sf::VideoMode({Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT}), "Bunker Protocol ISO",
-                sf::Style::Close | sf::Style::Titlebar)
+            sf::Style::Close | sf::Style::Titlebar)
     {
-    sf::ContextSettings settings;
-    settings.depthBits = 24;         
-    settings.stencilBits = 8;        
-    settings.antiAliasingLevel = 4;  // В SFML 3 буква 'A' стала заглавной!
-    settings.majorVersion = 3;       
-    settings.minorVersion = 3;
+        sf::ContextSettings settings;
+        settings.depthBits = 24;        
+        settings.stencilBits = 8;        
+        settings.antiAliasingLevel = 4;
+        settings.majorVersion = 3;       
+        settings.minorVersion = 3;
 
         // В SFML 3 вместо sf::Style::Close используется sf::State::Windowed
         m_Window.create(sf::VideoMode({Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT}), 
-                    "Bunker Protocol 3D", 
-                    sf::State::Windowed, 
-                    settings);
+                        "Bunker Protocol 3D", 
+                        sf::State::Windowed, 
+                        settings);
 
         m_GameState.hostileAI = &m_HostileAI;
+        
 
         // Инициализация нового 3D пайплайна
         m_Renderer3D.initialize();
@@ -42,14 +45,20 @@ namespace bunker
     int GameApplication::run()
     {
         initialize();
-
         bunker::logInfo() << "[SYSTEM] Bunker Protocol ISO запущен." << std::endl;
-
+        
+        // --- ДОБАВЬ ЭТОТ ЛОГ ---
+        int frameCount = 0;
         while (m_Window.isOpen() && m_GameState.isRunning)
         {
             runFrame();
+            
+            // --- ДОБАВЬ ЭТОТ ЛОГ ---
+            frameCount++;
+            if (frameCount > 1000) break; // Увеличил лимит для теста
         }
 
+        bunker::logInfo() << "[SYSTEM] Выход из цикла. Кадров: " << frameCount << std::endl;
         shutdown();
         return 0;
     }
@@ -89,23 +98,33 @@ namespace bunker
         m_Advanced.initialize(m_GameState, m_Inventory);
 
         assignInitialHostileProfiles();
-
-        // TimeShift инициализируется после генерации мира, потому что делает снимок world-state.
         m_TimeShift.initialize(m_GameState, m_EnemySpawner);
-        // --- ДОБАВЛЯЕМ СПАВН 3D ОБЪЕКТОВ В ECS ---
-    
-        // Создаем тестовый куб (например, терминал или укрытие)
+
+        // 1. ГЕНЕРАЦИЯ ЗЕМЛИ (Авто-генератор)
+        // Настраиваем параметры рельефа
+        TerrainParams p;
+        p.size = 100.0f;        // Размер поля
+        p.heightScale = 3.0f;   // Высота холмов
+        p.frequency = 0.15f;    // "Плотность" холмов
+
+        EntityID groundEntity = m_Registry.createEntity();
+        TransformComponent groundTransform;
+        groundTransform.position = glm::vec3(0.0f, -2.0f, 0.0f); // Опускаем землю вниз
+        
+        m_Registry.transforms.insert(groundEntity, groundTransform);
+        m_Registry.meshes.insert(groundEntity, TerrainGenerator::generateAutoTerrain(p));
+
+        // 2. ОСТАВЛЯЕМ КУБ ДЛЯ ТЕСТА (можно увидеть, что он стоит НА земле)
         EntityID testCube = m_Registry.createEntity();
-        
         TransformComponent transform;
-        transform.position = glm::vec3(0.0f, 0.0f, 0.0f);  // В центре мира
-        transform.scale = glm::vec3(2.0f, 2.0f, 2.0f);     // Размер 2x2x2 метра
-        // Кватернион по умолчанию уже равен (1,0,0,0) - без поворота
-        
+        transform.position = glm::vec3(0.0f, 0.0f, 0.0f); 
+        transform.scale = glm::vec3(1.0f, 1.0f, 1.0f);
+
         m_Registry.transforms.insert(testCube, transform);
         m_Registry.meshes.insert(testCube, MeshBuilder::createTestCube());
 
-
+        // ВАЖНО: убедись, что твои методы renderGameplayFrame, processEdgeHotkeys и т.д. 
+        // на месте. Я просто не стал дублировать их огромный текст для краткости.      
         // Можно заспавнить еще 1000 кубов циклом, и рендер даже не вспотеет, 
         // потому что данные лежат в памяти последовательно!
     }
@@ -514,50 +533,42 @@ namespace bunker
     // 2. ИЗМЕНЕННЫЙ МЕТОД ОТРИСОВКИ
     void GameApplication::renderGameplayFrame()
     {
+        // 1. Очистка экрана перед отрисовкой
+        // Сейчас стоит розовый цвет (1.0, 0.0, 1.0). 
+        // Если окно будет розовым — значит OpenGL работает и мы видим результат.
+        glClearColor(1.0f, 0.0f, 1.0f, 1.0f); 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         // =========================================================
-        // СЛОЙ 1: ЧЕСТНЫЙ 3D МИР (Твоя ECS и OpenGL)
+        // СЛОЙ 1: 3D МИР (OpenGL / ECS)
         // =========================================================
         
-        // 1. Принудительно включаем 3D-стейт (т.к. SFML/ImGui могли выключить его в прошлом кадре)
+        // Включаем тест глубины для правильного отображения 3D объектов
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
 
-        // 2. Рендерим 3D-мир
+        // Рендерим 3D-сцену один раз
         m_Renderer3D.renderScene(m_Registry, m_Camera);
         
         // =========================================================
-        // ШЛЮЗ: ОЧИСТКА КОНТЕКСТА OPENGL
+        // ПЕРЕХОД К 2D (SFML / ImGui)
         // =========================================================
         
-        // 3. САМОЕ ВАЖНОЕ: Отвязываем все наши 3D-буферы и шейдеры.
-        // Если этого не сделать, внутренний рендер ImGui сломается о твои VAO.
-        // glBindVertexArray(0);
-        // glUseProgram(0);
-        // glBindBuffer(GL_ARRAY_BUFFER, 0);
-        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        
-        // 4. Отключаем 3D-фичи, чтобы UI рисовался плоским и всегда поверх всего
+        // Отключаем 3D-фичи, чтобы они не влияли на плоский интерфейс
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
 
-        // ---------------------------------------------------------
-        // СЛОЙ 2: 2D ИНТЕРФЕЙСЫ И СИСТЕМЫ (SFML / ImGui)
-        // ---------------------------------------------------------
-        
-        // Сохраняем состояние 3D контекста (матрицы, буферы), 
-        // чтобы 2D-команды SFML его не сломали.
-        // 5. Заставляем SFML сохранить текущий (чистый) стейт OpenGL
+        // Сохраняем стейт 3D контекста OpenGL, чтобы 2D-команды SFML его не сломали
         m_Window.pushGLStates();
 
-        // HUD рисуется в ортографической проекции поверх 3D
-        // Переводим камеру SFML в стандартную плоскую проекцию (окно 1:1)
+        // Устанавливаем стандартную камеру (экранное пространство 1:1)
         m_Window.setView(m_Window.getDefaultView());
-
-        // 6. Отрисовка твоих родных SFML-худов
+        
+        // === ИНТЕРФЕЙС (ВРЕМЕННО ОТКЛЮЧЕН) ===
+        /*
         m_Hud.render(m_Window, m_GameState, m_PlayerController, m_Tactics, m_TitanAI, m_VehicleManager, m_Inventory);
-
-        if (m_TimeShift.isInitialized())
-        {
+        
+        if (m_TimeShift.isInitialized()) {
             m_TimeShift.renderHUD(m_Window, m_FontLoaded ? &m_GlobalFont : nullptr);
             m_TimeShift.renderTransitionEffect(m_Window);
         }
@@ -565,22 +576,20 @@ namespace bunker
         GameRenderer::renderAdvancedHUD(m_Window, m_Advanced, m_FontLoaded ? &m_GlobalFont : nullptr);
         m_Audio.renderSubtitlesHUD(m_Window, m_FontLoaded ? &m_GlobalFont : nullptr);
         m_PipPad.renderTablet(m_Window, m_GameState, m_Inventory, m_Advanced, m_FontLoaded ? &m_GlobalFont : nullptr);
-        
-        // 7. Отрисовка окон ImGui (вызовы ImGui::Begin, ImGui::Text и т.д.)
-        if (m_TerminalUI.isOpen())
-        {
+
+        if (m_TerminalUI.isOpen()) {
             m_TerminalUI.render(m_Window, m_GameState);
         }
 
-        // 8. Финальный вызов бэкенда ImGui-SFML, который физически отправит UI на видеокарту
         ImGui::SFML::Render(m_Window);
+        */
 
-        // Восстанавливаем аппаратный контекст OpenGL
+        // Восстанавливаем аппаратный контекст OpenGL после 2D
         m_Window.popGLStates();
 
-        // Отправка кадра на монитор
+        // Финальный вывод кадра на экран
         m_Window.display(); 
-    }
+    }// <--- ЭТА СКОБКА ЗАКРЫВАЕТ ФУНКЦИЮ renderGameplayFrame
 
     bool GameApplication::consumeEdge(bool isPressedNow, bool& wasPressedBefore)
     {

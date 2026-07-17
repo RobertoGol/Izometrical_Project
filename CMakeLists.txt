@@ -11,24 +11,22 @@ set(SFML_DIR "${SFML_ROOT}/lib/cmake/SFML" CACHE PATH "SFML CMake package direct
 
 find_package(SFML 3.1 CONFIG REQUIRED COMPONENTS Audio Graphics Window System)
 find_package(OpenGL REQUIRED)
-# --- Загрузка GLM (OpenGL Mathematics) ---
+
+# --- Загрузка GLM ---
 include(FetchContent)
 FetchContent_Declare(
     glm
     GIT_REPOSITORY https://github.com/g-truc/glm.git
     GIT_TAG 0.9.9.8
 )
-# Просто скачиваем файлы, игнорируя внутренний CMakeLists.txt библиотеки
 FetchContent_GetProperties(glm)
 if(NOT glm_POPULATED)
     FetchContent_Populate(glm)
 endif()
 
-# Вручную создаем header-only библиотеку для нашего проекта
 add_library(glm INTERFACE)
 target_include_directories(glm INTERFACE "${glm_SOURCE_DIR}")
-# -----------------------------------------
-
+# --------------------
 
 set(IMGUI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source/ImGui")
 
@@ -52,6 +50,7 @@ target_link_libraries(imgui_sfml_vendor PUBLIC
 )
 
 add_library(game_core STATIC
+    src/glad.c
     src/ai/BossAISystem.cpp
     src/ai/EnemyArchetypeRegistry.cpp
     src/ai/EnemySpawner.cpp
@@ -65,7 +64,7 @@ add_library(game_core STATIC
     src/ai/TitanAIMovement.cpp
     src/ai/TitanAISystems.cpp
     src/content/Workstations.cpp
-    src/content/MeshBuilder.cpp # <--- ДОБАВЛЕНО
+    src/content/MeshBuilder.cpp
     src/DevMenu.cpp
     src/engine/AudioController.cpp
     src/engine/GameApplication.cpp
@@ -107,7 +106,7 @@ add_library(game_core STATIC
     src/render/GameRendererAdvancedHUD.cpp
     src/render/GameRendererAdvancedWorld.cpp
     src/render/GameRendererEntities.cpp
-    src/render/Renderer3D.cpp # <--- ДОБАВЛЕНО
+    src/render/Renderer3D.cpp
     src/ResourceManager.cpp
     src/TextureGenerator.cpp
     src/ui/HUD.cpp
@@ -130,6 +129,7 @@ add_library(game_core STATIC
     src/world/StoryEventManager.cpp
     src/world/WeatherSystem.cpp
     src/world/WorldSession.cpp
+    src/world/TerrainGenerator.cpp
     src/WorldWorkstation.cpp
 )
 
@@ -148,15 +148,14 @@ target_include_directories(game_core PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/include/world"
 )
 
-# --- ЛИНКОВКА GLM И OPENGL К ЯДРУ ИГРЫ ---
 target_link_libraries(game_core PUBLIC
     SFML::Audio
     SFML::Graphics
     SFML::Window
     SFML::System
-    glm 
+    glm
     OpenGL::GL
-    imgui_sfml_vendor # <--- ДОБАВЬ ЭТУ СТРОКУ СЮДА
+    imgui_sfml_vendor
 )
 
 add_executable(${PROJECT_NAME}
@@ -176,12 +175,12 @@ else()
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
+# Копирование ассетов и DLL
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/assets"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>/assets"
-        COMMENT "Copying assets to build directory..."
     )
 endif()
 
@@ -190,6 +189,5 @@ if(EXISTS "${SFML_ROOT}/bin")
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${SFML_ROOT}/bin"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-        COMMENT "Copying SFML runtime DLLs to build directory..."
     )
 endif()
