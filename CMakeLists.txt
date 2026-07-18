@@ -88,6 +88,7 @@ add_library(game_core STATIC
     src/gameplay/AdvancedMechanics.cpp
     src/gameplay/AdvancedMechanicsCamp.cpp
     src/gameplay/AdvancedMechanicsProgression.cpp
+    src/gameplay/AdvancedMechanicsRadio.cpp
     src/gameplay/AdvancedMechanicsSurvival.cpp
     src/gameplay/AdvancedMechanicsServices.cpp
     src/gameplay/AdvancedMechanicsToolGun.cpp

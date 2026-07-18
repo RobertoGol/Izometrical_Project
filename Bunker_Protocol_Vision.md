@@ -242,6 +242,7 @@ What needs checking:
 - [x] Разделить старый 2D renderer и новый 3D renderer по clear ownership: кто рисует world, кто UI, кто debug.
 - [x] Убрать закомментированные рабочие блоки из runtime path: заменить на feature flags/debug config.
 - [ ] Продолжить дробление крупных модулей: `AdvancedMechanicsSurvival`, `AdvancedMechanicsServices`, `VehicleManager`, `DevMenu`.
+- [x] Вынести `RadioTapeSystem` из `AdvancedMechanicsSurvival.cpp` в отдельный модуль `AdvancedMechanicsRadio.cpp`.
 - [ ] Очистить mojibake/битую кодировку русских комментариев, чтобы документация и комментарии были читаемыми в IDE.
 
 ### P2 - build, dependencies, and verification
