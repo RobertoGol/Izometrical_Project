@@ -433,6 +433,7 @@ namespace bunker
         m_PlayerController.update(m_GameState, input, dt);
 
         // Посадка в транспорт, подключение к терминалу или подбор лута (E).
+        m_InteractionManager.refreshHighlightedTarget(m_GameState, m_TerminalUI, m_VehicleManager, m_DoorTransition);
         if (input.interact)
         {
             m_InteractionManager.tryInteract(

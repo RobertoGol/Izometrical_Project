@@ -51,6 +51,11 @@ namespace bunker
                          WorldSession& worldSession,
                          PlayerInventory& inventory);
 
+        void refreshHighlightedTarget(const GameState& gameState,
+                                      const TerminalManager& terminals,
+                                      const VehicleManager& vehicles,
+                                      const DoorTransition& doors);
+
         const std::optional<InteractionTarget>& highlightedTarget() const { return m_HighlightedTarget; }
 
       private:

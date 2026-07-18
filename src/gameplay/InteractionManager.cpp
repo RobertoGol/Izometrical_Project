@@ -138,6 +138,14 @@ namespace bunker
         }
     }
 
+    void InteractionManager::refreshHighlightedTarget(const GameState& gameState,
+                                                      const TerminalManager& terminals,
+                                                      const VehicleManager& vehicles,
+                                                      const DoorTransition& doors)
+    {
+        m_HighlightedTarget = queryBestTarget(gameState, terminals, vehicles, doors);
+    }
+
     bool InteractionManager::hasLineOfSight(const PhysicsWorld& world, const Vector3D& from, const Vector3D& to) const
     {
         const float dx = to.x - from.x;

@@ -22,8 +22,6 @@
 * UI логика инвентаря и контейнеров
 * Основа языка `Lang_for_my_decisions`
 
----
-
 # P0 — КРИТИЧЕСКИЙ МИНИМУМ
 
 ## 1. CollisionSystem
@@ -85,7 +83,7 @@
 * [x] Added line-of-sight checks through `PhysicsWorld`.
 * [x] Routed `E` interaction through `InteractionManager`.
 * [x] Connected current working interaction types: `Terminal`, `Container`, `Vehicle`.
-* [ ] Highlight rendering hook is API-ready through `highlightedTarget()`, but visual overlay still needs renderer/UI integration.
+* [x] Highlight rendering hook is connected to a visible `[E]` world overlay.
 * [ ] Door, Pickup, CraftingStation and NPC execution need their own systems before they can be enabled.
 
 ### Файлы
@@ -3350,6 +3348,26 @@ State of Decay 2.
 - третье лицо;
 - FPS;
 - переключение режимов.
+
+---
+
+# CODEX ACTIVE CHECKLIST
+
+This is the current implementation checklist for unfinished in-development work. Keep this section near the end and check items off as they are completed.
+
+- [x] Interaction highlight renders a visible `[E]` world overlay.
+- [ ] Door/Pickup/CraftingStation/NPC interaction execution.
+- [ ] Region-based external loot table loading.
+- [ ] Loot respawn rules with world/session timer policy.
+- [ ] Real `.bwld` async world load/unload for DoorTransition.
+- [ ] Fullscreen DoorTransition fade overlay.
+- [ ] Equipment save/load verification against `ModularEquipmentSystem`.
+- [ ] Persist opened doors and current `.bwld` world id.
+- [ ] Manual QA: player slide, wall blocking, and 3D camera movement.
+- [ ] Manual QA: mouse aim/toolgun/CAMP placement world position.
+- [ ] Manual QA: HUD/PipPad/Terminal visible over 3D.
+- [ ] Manual QA: ground, terrain and cube material colors.
+- [ ] Manual QA: save/load preserves new 3D/ECS data.
 
 ---
 

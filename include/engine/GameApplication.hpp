@@ -143,6 +143,7 @@ namespace bunker
         void renderMapFrame(float dt);
         void updateGameplayFrame(const InputSnapshot& input, float dt);
         void renderGameplayFrame();
+        void renderInteractionHighlight();
         void renderMaterialDebugWindow();
 
         void updateMouseWorldPosition(const InputSnapshot& input);

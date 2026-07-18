@@ -1,11 +1,13 @@
 #include "engine/GameApplication.hpp"
 #include "content/MaterialCatalog.hpp"
 #include "core/Constants.hpp"
+#include "core/IsoMath.hpp"
 #include "render/GameRenderer.hpp"
 
 #include <glad/glad.h>
 #include <imgui.h>
 #include <imgui-SFML.h>
+#include <string>
 
 namespace bunker
 {
@@ -38,6 +40,7 @@ namespace bunker
         GameRenderer::renderFloor(m_Window, m_GameState, m_TimeShift);
         GameRenderer::renderEntities(m_Window, m_GameState, m_TimeShift, m_HostileAI);
         GameRenderer::renderAdvancedWorld(m_Window, m_Advanced);
+        renderInteractionHighlight();
 
         m_Hud.render(m_Window, m_GameState, m_PlayerController, m_Tactics, m_TitanAI, m_VehicleManager, m_Inventory);
 
@@ -64,6 +67,53 @@ namespace bunker
 
         m_Window.popGLStates();
         m_Window.display();
+    }
+
+    void GameApplication::renderInteractionHighlight()
+    {
+        const auto& target = m_InteractionManager.highlightedTarget();
+        if (!target || !target->hasLineOfSight)
+        {
+            return;
+        }
+
+        sf::Vector2f screenPos = IsoMath::worldToScreen(target->position);
+        screenPos.y -= 18.0f;
+
+        sf::CircleShape ring(13.0f, 32);
+        ring.setOrigin({13.0f, 13.0f});
+        ring.setPosition(screenPos);
+        ring.setFillColor(sf::Color(0, 0, 0, 0));
+        ring.setOutlineThickness(2.0f);
+        ring.setOutlineColor(sf::Color(120, 255, 170, 220));
+        m_Window.draw(ring);
+
+        sf::CircleShape pointer(4.0f, 3);
+        pointer.setOrigin({4.0f, 4.0f});
+        pointer.setPosition({screenPos.x, screenPos.y + 19.0f});
+        pointer.setFillColor(sf::Color(120, 255, 170, 230));
+        m_Window.draw(pointer);
+
+        if (!m_FontLoaded)
+        {
+            return;
+        }
+
+        std::string label = target->label.empty() ? "Interact" : target->label;
+        if (label.size() > 28)
+        {
+            label = label.substr(0, 25) + "...";
+        }
+
+        sf::Text text(m_GlobalFont, "[E] " + label, 13);
+        text.setFillColor(sf::Color(220, 255, 225));
+        text.setOutlineThickness(1.0f);
+        text.setOutlineColor(sf::Color(10, 25, 15, 220));
+
+        const sf::FloatRect bounds = text.getLocalBounds();
+        text.setOrigin({bounds.position.x + bounds.size.x * 0.5f, bounds.position.y + bounds.size.y});
+        text.setPosition({screenPos.x, screenPos.y - 16.0f});
+        m_Window.draw(text);
     }
 
     void GameApplication::renderMaterialDebugWindow()
