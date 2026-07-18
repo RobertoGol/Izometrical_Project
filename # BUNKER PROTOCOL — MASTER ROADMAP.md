@@ -26,7 +26,7 @@
 
 This is the single active checklist for unfinished implementation and verification work. Older roadmap sections below keep project context and completion history, but active open items should be added here.
 
-## Runtime blockers and foundations
+## Completed Foundation Checkpoint
 
 - [x] Door/Pickup/CraftingStation/NPC interaction execution.
 - [x] Region-based external loot table loading.
@@ -36,19 +36,105 @@ This is the single active checklist for unfinished implementation and verificati
 - [x] Equipment save/load verification against `ModularEquipmentSystem`.
 - [x] Persist opened doors and current `.bwld` world id.
 - [x] Add real `.bwld` parser/assets and wire the DoorTransition loader callback to world unload/load when map files exist.
-
-## Code health
-
 - [x] Finish MapEditor ownership/size review after earlier `main.cpp` split.
 - [x] Review remaining string parser chains for dispatch-table extraction where it improves readability.
-
-## Final QA
-
 - [x] Player slide, wall blocking, and 3D camera movement.
 - [x] Mouse aim/toolgun/CAMP placement world position.
 - [x] HUD/PipPad/Terminal visible over 3D.
 - [x] Ground, terrain and cube material colors.
 - [x] Save/load preserves new 3D/ECS data.
+
+## P1 - Vertical Slice
+
+- [ ] Build full Inventory UI: slots, stack display, item actions, drag/drop, stack split, transfer flow, and tooltip rendering.
+- [ ] Build Container UI connected to loot containers, loose pickups, inventory transfer, weight limits, and save/load state.
+- [ ] Build Equipment UI/panels for weapons, armor, ammo, BT-72 parts, durability, weight, and quick comparison.
+- [ ] Finish Equipment System gameplay rules: equip/unequip, durability damage, repair hooks, ammo compatibility, armor effects, and weight penalties.
+- [ ] Finish ECS foundations: add/verify render, physics, inventory, interaction, health, and script components where they are still represented only by legacy `GameState`.
+- [ ] Add explicit GameState/GameLoop modes for Loading, Playing, Paused, Inventory, Terminal, Dialogue, and Menu so UI screens do not fight gameplay input.
+- [ ] Integrate `Lang_for_my_decisions` VM core: parser/AST, bytecode interpreter, variables, script context, native bindings, and terminal command bridge.
+- [ ] Connect terminal/workstation actions to real UI flows instead of placeholder/autocraft-only execution.
+
+## P1.5 - First Playable Combat And Health
+
+- [ ] Complete weapon combat: hitscan, projectiles, recoil, spread, reload timing, ammo consumption, critical hits, armor penetration, explosions, and limb damage.
+- [ ] Finish enemy damage feedback: hit reactions, death states, loot drops, score/XP rewards, and readable combat logs/HUD events.
+- [ ] Add player health consequences: bleeding, healing item flow, armor mitigation, death/fail state, and respawn/load recovery.
+- [ ] Verify Titan/BT-72 cockpit combat: cannon/autocannon, missiles, heat, utility seat behavior, and cockpit HUD feedback.
+
+## P2 - Core Game Systems
+
+- [ ] Expand Crafting System: recipe database, ingredient validation, station UI, repair recipes, upgrade recipes, and crafting result feedback.
+- [ ] Expand Survival System: hunger, thirst, fatigue, sleep, temperature, radiation, diseases, bleeding, and medical items.
+- [ ] Expand Weather and World Events: scheduler, radiation/ether storms, visibility modifiers, temperature effects, random events, and world event persistence.
+- [ ] Finish Pip-Pad as the main in-game tablet: status, inventory, equipment, map, radio, quests, tapes/logs, and readable Fallout-style layout.
+- [ ] Finish Game HUD: health, energy, armor, radiation/erosion, weapon, ammo, active effects, crosshair, interaction prompts, subtitles, and state-specific HUD variants.
+- [ ] Finish in-game pause/menu flow: resume, save, load, settings, quit to menu, and modal input blocking.
+- [ ] Finish save/load UI: save slots, overwrite confirmation, load preview, autosave/manual save labels, and corrupted/missing save handling.
+- [ ] Finish loading screens for new game, continue, `.bwld` transitions, and save/load restore.
+
+## P3 - Unique Bunker Protocol Systems
+
+- [ ] Build BT-72/AIMP deep systems: energy blocks, power modes, internal storage, terrain scanner, radar, heat/overheat, module damage, upgrade tree, and autopilot.
+- [ ] Build AIMP personal base system: storage, production, repair, upgrades, equipment setup, medical/research/defense/energy modules, and expedition management.
+- [ ] Build Quest System: quest database, objectives, triggers, rewards, branching choices, fail conditions, journal UI, and save/load persistence.
+- [ ] Build Fog of Information: unexplored map, discovery by towers/scanners, overwatch points, radar reveal zones, and Pip-Pad map integration.
+- [ ] Build Expedition Planning UI: team/loadout selection, risk/reward preview, region choice, supply costs, launch flow, and return results.
+
+## P4 - NPC, AI, Factions, Dialogue
+
+- [ ] Expand AI System: navmesh/pathing, patrol, alert/search/combat/flee states, cover system, squad behavior, perception tuning, and debug visualization.
+- [ ] Build Factions and Economy: reputation, trading, dynamic prices, resource scarcity, repair services, contracts, expedition rewards, and faction save data.
+- [ ] Build Dialogue System: dialogue trees, conditions, reputation checks, quest hooks, voice/log integration, companion dialogue, and terminal/Pip-Pad history.
+- [ ] Expand neutral NPCs beyond placeholders: schedules/locations, greetings, quest roles, vendor roles, and persistence.
+
+## P5 - Co-op Model
+
+- [ ] Implement host session flow with host-owned world state.
+- [ ] Implement client join/rejoin for 2-4 players over the selected LAN/P2P/Steam path.
+- [ ] Sync player transforms, inventory, containers, doors, enemies, quests, AIMP state, chat, and pings.
+- [ ] Define co-op save rules: host world save, per-player character/AIMP progress, disconnect handling, and version compatibility.
+- [ ] Build multiplayer UI: host, join, session browser/direct join, player list, invite/status, and connection failure states.
+
+## P6 - Optimization And AA Polish
+
+- [ ] Add chunk streaming for worlds and large maps.
+- [ ] Add frustum culling, occlusion culling, LOD, and instanced rendering.
+- [ ] Add async asset loading, texture streaming, mesh streaming, shader cache, and resource lifetime tracking.
+- [ ] Add profiler, performance overlay, frame-time budget checks, memory budget checks, and crash reporter.
+- [ ] Add graphics settings: resolution, fullscreen/windowed, VSync, quality presets, AA, shadows, effects, FOV, brightness/gamma.
+- [ ] Add audio settings: master/music/SFX/voice volume, language, subtitles, subtitle size, and speaker mode.
+- [ ] Add controls settings: key rebinding, mouse sensitivity, controller support, invert axis, and accessibility toggles.
+
+## Player Flow And Presentation
+
+- [ ] Build Main Menu: Continue, New Game, Load Game, Settings, Credits, Exit.
+- [ ] Build Continue preview: character name, level, play time, last region, AIMP state, and BT-72 state.
+- [ ] Build New Game flow: character creation, background selection, personal AIMP creation, and first world loading.
+- [ ] Build Load Game screen: save slots, metadata previews, delete/rename where useful, and safe fallback for missing/corrupt saves.
+- [ ] Build Character Creation: appearance, face, hair, body, identity/name, background, attributes, and confirmation flow.
+- [ ] Build Character Profile persistence for name, appearance choices, background, level, skills, equipment, and play time.
+- [ ] Build Character Menu and status screens: stats, health, conditions, active effects, equipment, and readable progression summary.
+- [ ] Build Skills/Perks UI and unlock flow for Engineering, Combat, Survival, Science, and Leadership.
+- [ ] Implement progression rules: XP gain, level-up, skill points, unlock requirements, specialization/respec policy, and save/load.
+- [ ] Build BT-72/AIMP control interface: modules, energy, armor, scanner, upgrades, storage, repair, and autopilot status.
+
+## Content, Tools, And Data Pipeline
+
+- [ ] Finish MapEditor export/import path for runtime `.bwld` format and verify round-trip with `WorldFileLoader`.
+- [ ] Expand `.bwld` schema for objects, materials, spawn sets, triggers, region metadata, nav data, lighting, and scripted events.
+- [ ] Add asset validation for materials, textures, audio references, loot tables, enemies, vehicles, workstations, and `.bwld` files.
+- [ ] Finish code transfer/integration still useful from `Video_Game_Izom`: inventory UI, container UI, equipment slots, tooltip system, and quest journal UI.
+- [ ] Finish code transfer/integration still useful from `Lang_for_my_decisions`: parser, AST, VM core, native binding layer, and terminal command system.
+- [ ] Review what remains useful from `GMyGameDoNotTouch`: weather scheduler, world metadata, event timers, file registry, and any non-duplicated save helpers.
+
+## Final Verification Before Release Builds
+
+- [ ] Add smoke tests or test harnesses for save/load, `.bwld` load, inventory transfer, crafting, equipment, combat, UI modes, and material catalog validation.
+- [ ] Add manual QA checklist for movement/collision, doors, loot, pickups, NPCs, combat, crafting, CAMP, Pip-Pad, terminal, map, save/load, and settings.
+- [ ] Verify keyboard/mouse input conflicts across gameplay, inventory, terminal, map, pause menu, and dialogue.
+- [ ] Verify UI readability at target resolutions and no overlapping HUD/Pip-Pad/terminal/menu text.
+- [ ] Verify branch builds cleanly on the expected Windows/MSVC setup and document any required installed tools.
 
 # P0 — КРИТИЧЕСКИЙ МИНИМУМ
 
