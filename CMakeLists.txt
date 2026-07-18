@@ -120,6 +120,7 @@ add_library(game_core STATIC
     src/render/GameRendererAdvancedWorld.cpp
     src/render/GameRendererEntities.cpp
     src/render/Renderer3D.cpp
+    src/render/ShaderManager.cpp
     src/ResourceManager.cpp
     src/ui/HUD.cpp
     src/ui/PipPadUI.cpp

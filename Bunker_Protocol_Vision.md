@@ -104,7 +104,7 @@
 
 ## 6. Приоритет реализации
 
-- [ ] **Shader Manager:** не хардкодить шейдеры, а загружать их из `assets/`.
+- [x] **Shader Manager:** не хардкодить шейдеры, а загружать их из `assets/`.
 - [ ] **Post-Processing Chain:** FBO / RenderTexture, чтобы сначала рисовать сцену в текстуру.
 - [ ] **Terminal Shader:** CRT-эффект для `TerminalUI`.
 - [ ] **Lighting:** базовое PBR-освещение.
