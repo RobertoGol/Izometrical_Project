@@ -241,14 +241,14 @@ What needs checking:
 - [x] Уменьшить `GameApplication.cpp`: сейчас это главный orchestration bottleneck и самый крупный файл runtime.
 - [x] Разделить старый 2D renderer и новый 3D renderer по clear ownership: кто рисует world, кто UI, кто debug.
 - [x] Убрать закомментированные рабочие блоки из runtime path: заменить на feature flags/debug config.
-- [ ] Продолжить дробление крупных модулей: `AdvancedMechanicsSurvival`, `AdvancedMechanicsServices`, `VehicleManager`, `DevMenu`.
+- [x] Продолжить дробление крупных модулей: `AdvancedMechanicsSurvival`, `AdvancedMechanicsServices`, `VehicleManager`, `DevMenu`.
 - [x] Вынести `RadioTapeSystem` из `AdvancedMechanicsSurvival.cpp` в отдельный модуль `AdvancedMechanicsRadio.cpp`.
 - [x] Вынести `TankUtilitySystem` из `AdvancedMechanicsSurvival.cpp` в отдельный модуль `AdvancedMechanicsTankUtility.cpp`.
 - [x] Вынести OBJ model loader из `AdvancedMechanicsServices.cpp` в отдельный модуль `AdvancedMechanicsObjModel.cpp`.
 - [x] Вынести `LanlineServices` из `AdvancedMechanicsServices.cpp` в отдельный модуль `AdvancedMechanicsLanline.cpp`.
 - [x] Вынести `VehicleInstance` physics/drive methods из `VehicleManager.cpp` в отдельный модуль `VehicleInstance.cpp`.
 - [x] Вынести Lua/console часть `DevMenu` в отдельный модуль `DevMenuConsole.cpp` и объявить скрытые DEV_BUILD методы/state в header.
-- [ ] Очистить mojibake/битую кодировку русских комментариев, чтобы документация и комментарии были читаемыми в IDE.
+- [x] Очистить mojibake/битую кодировку русских комментариев, чтобы документация и комментарии были читаемыми в IDE.
 
 ### P2 - build, dependencies, and verification
 

@@ -231,7 +231,7 @@ void DevMenu::RenderDebugTab()
 
     ImGui::Checkbox("Show FPS", &showFPS);
     ImGui::Text("Frame Time: %.2f ms", 1000.0f / ImGui::GetIO().Framerate);
-    ImGui::Text("RAM / VRAM: N/A (Р·Р°РіР»СѓС€РєР°)");
+    ImGui::Text("RAM / VRAM: N/A (stub)");
 
     ImGui::Separator();
     if (ImGui::Checkbox("Show Collision / Hitboxes", &showCollision))
@@ -244,7 +244,7 @@ void DevMenu::RenderDebugTab()
     }
 }
 
-// ==================== РЎР›РћР ====================
+// ==================== LAYERS ====================
 void DevMenu::SetLayerVisibility(int layer, bool isVisible)
 {
     m_LayerVisibility[layer] = isVisible;

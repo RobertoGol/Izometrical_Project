@@ -31,14 +31,14 @@ namespace bunker
         std::string path = getAssetPath(ev);
         if (!m_VoiceStream.openFromFile(path))
         {
-            bunker::logError() << "[AUDIO] Ошибка загрузки аудиофайла: " << path << std::endl;
+            bunker::logError() << "[AUDIO] Failed to load audio file: " << path << std::endl;
             return false;
         }
 
         m_VoiceStream.play();
         m_CurrentSubtitle = getSubtitleText(ev);
         m_SubtitleTimer = 7.5f;
-        bunker::logInfo() << "[VOICEOVER] Воспроизведение (" << static_cast<int>(m_VoiceLang) << "): " << path
+        bunker::logInfo() << "[VOICEOVER] Playback (" << static_cast<int>(m_VoiceLang) << "): " << path
                           << std::endl;
         return true;
     }
@@ -118,20 +118,17 @@ namespace bunker
              "BT-7274 (AU): Righto mate. System online. Isolation confirmed. Pressure at 350 Bar. Welcome aboard "
              "mate!"},
             {{VoiceEvent::TitanActivation, VoiceLanguage::Russian},
-             "Р‘Рў-7274: РЎРёСЃС‚РµРјР° Р°РєС‚РёРІРёСЂРѕРІР°РЅР°. РџСЂРѕС‚РѕРєРѕР» РёР·РѕР»СЏС†РёРё РЈР±РµР¶РёС‰Р° 17 "
-             "РїРѕРґС‚РІРµСЂР¶РґРµРЅ. Р”Р°РІР»РµРЅРёРµ 350 Р‘Р°СЂ. РџСЂРёРІРµС‚СЃС‚РІСѓСЋ!"},
+             "BT-7274: Sistema aktivirovana. Protokol izolyatsii Ubezhishcha 17 podtverzhden. Davlenie 350 Bar. Privetstvuyu!"},
             {{VoiceEvent::TitanActivation, VoiceLanguage::German},
-             "BT-7274: System online. Bunker 17 Isolationsprotokoll bestГ¤tigt. Hydraulikdruck 350 Bar. Willkommen!"},
+             "BT-7274: System online. Bunker 17 isolation confirmed. Hydraulics at 350 Bar. Willkommen!"},
             {{VoiceEvent::RaySwarmAlert, VoiceLanguage::Russian},
-             "RAY Р”СЂРѕРЅ: Р—Р°С„РёРєСЃРёСЂРѕРІР°РЅР° С†РµР»СЊ. Р‘РѕРµРІРѕР№ СЂРµР¶РёРј!"},
+             "RAY Dron: Zafiksirovana tsel. Boevoy rezhim!"},
             {{VoiceEvent::RaySwarmDestroy, VoiceLanguage::Russian},
-             "RAY Р”СЂРѕРЅ: РљСЂРёС‚РёС‡РµСЃРєРёР№ РѕС‚РєР°Р· СЏРґСЂР°. Р”РµР°РєС‚РёРІР°С†РёСЏ."},
+             "RAY Dron: Kriticheskiy otkaz yadra. Deaktivatsiya."},
             {{VoiceEvent::PipBoyBoot, VoiceLanguage::Russian},
-             "РџРёРї-Р‘РѕР№ II: РџСЂРёР±РѕСЂ Р·Р°РїСѓС‰РµРЅ. РЎРµС‚СЊ Р РѕР±РљРѕ РїРѕРґРєР»СЋС‡РµРЅР°. Р›РёРЅРёРё "
-             "Р Р°Р·СѓРјР° Рё Р”СѓС€Рё СЃС‚Р°Р±РёР»СЊРЅС‹. РџСЂРѕС‚РѕРєРѕР» #325-7-2."},
+             "Pip-Boy II: Pribor zapushchen. Set RobCo podklyuchena. Linii Razuma i Dushi stabilny. Protokol #325-7-2."},
             {{VoiceEvent::PipPadBoot, VoiceLanguage::Russian},
-             "РџРёРї-Р‘РѕР№ II: РџСЂРёР±РѕСЂ Р·Р°РїСѓС‰РµРЅ. РЎРµС‚СЊ Р РѕР±РљРѕ РїРѕРґРєР»СЋС‡РµРЅР°. Р›РёРЅРёРё "
-             "Р Р°Р·СѓРјР° Рё Р”СѓС€Рё СЃС‚Р°Р±РёР»СЊРЅС‹. РџСЂРѕС‚РѕРєРѕР» #325-7-2."},
+             "Pip-Pad II: Pribor zapushchen. Set RobCo podklyuchena. Linii Razuma i Dushi stabilny. Protokol #325-7-2."},
         };
 
         const auto subtitle = subtitles.find({ev, m_SubLang});
