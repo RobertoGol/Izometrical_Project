@@ -2,6 +2,7 @@
 
 #include "gameplay/SpatialGrid.hpp"
 #include <SFML/Graphics.hpp>
+#include <vector>
 
 #include "core/ECS.hpp"
 #include "render/Renderer3D.hpp"
@@ -114,6 +115,9 @@ namespace bunker
         bool m_ShowMaterialDebug = false;
         EntityID m_PlayerAnchorEntity = MAX_ENTITIES;
         EntityID m_TitanAnchorEntity = MAX_ENTITIES;
+        std::vector<EntityID> m_EnemyAnchorEntities;
+        std::vector<EntityID> m_VehicleAnchorEntities;
+        std::vector<EntityID> m_WorkstationAnchorEntities;
 
         EdgeKeyState m_EdgeKeys;
 

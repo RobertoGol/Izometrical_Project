@@ -43,6 +43,42 @@ WorkstationUIState Workstations::OpenWorkstationUI(WorkstationType stationType)
     return state;
 }
 
+WorkstationUIState Workstations::OpenWorkstationUI(WorldWorkstation* station)
+{
+    if (!station)
+    {
+        WorkstationUIState state;
+        state.isAvailable = false;
+        state.statusMessage = "Station not found.";
+        return state;
+    }
+
+    WorkstationUIState state = OpenWorkstationUI(station->type);
+    switch (station->GetAvailability())
+    {
+    case StationAvailability::Available:
+        return state;
+    case StationAvailability::Destroyed:
+        state.isAvailable = false;
+        state.statusMessage = "Station destroyed.";
+        break;
+    case StationAvailability::Inactive:
+        state.isAvailable = false;
+        state.statusMessage = "Station inactive.";
+        break;
+    case StationAvailability::NoPower:
+        state.isAvailable = false;
+        state.statusMessage = "Station has no power.";
+        break;
+    default:
+        state.isAvailable = false;
+        state.statusMessage = "Station unavailable.";
+        break;
+    }
+
+    return state;
+}
+
 void Workstations::DispatchStationAction(WorkstationUIState& state, StationActionType action, int recipeIndex)
 {
     switch (action)

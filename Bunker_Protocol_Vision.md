@@ -211,7 +211,7 @@ What needs checking:
 - [x] Связать player/titan с 3D entities через adapter layer между `GameState` и ECS.
 - [x] Вернуть рендер существующих gameplay-сущностей после 3D pass: floor, enemies, loot, tower, player/titan и advanced world markers.
 - [x] Обновить `SpatialGrid` регистрацию для player, titan и alive enemies.
-- [ ] Связать enemies/vehicles/workstations с pooled 3D ECS entities.
+- [x] Связать enemies/vehicles/workstations с pooled 3D ECS entities.
 - [ ] Проверить collision/interaction coordinates после перехода с isometric 2D на 3D camera.
 - [ ] Подключить CAMP validator и world containers к единому coordinate adapter.
 
