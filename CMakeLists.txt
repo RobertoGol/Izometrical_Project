@@ -124,6 +124,7 @@ add_library(game_core STATIC
     src/ui/TerminalUI.cpp
     src/ui/WorkstationUI.cpp
     src/vehicles/ThermalLoadSystem.cpp
+    src/vehicles/VehicleInstance.cpp
     src/vehicles/VehicleManager.cpp
     src/vehicles/VehicleSeatController.cpp
     src/world/WeatherSystemDraw.cpp

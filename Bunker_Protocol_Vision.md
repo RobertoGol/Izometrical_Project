@@ -246,6 +246,7 @@ What needs checking:
 - [x] Вынести `TankUtilitySystem` из `AdvancedMechanicsSurvival.cpp` в отдельный модуль `AdvancedMechanicsTankUtility.cpp`.
 - [x] Вынести OBJ model loader из `AdvancedMechanicsServices.cpp` в отдельный модуль `AdvancedMechanicsObjModel.cpp`.
 - [x] Вынести `LanlineServices` из `AdvancedMechanicsServices.cpp` в отдельный модуль `AdvancedMechanicsLanline.cpp`.
+- [x] Вынести `VehicleInstance` physics/drive methods из `VehicleManager.cpp` в отдельный модуль `VehicleInstance.cpp`.
 - [ ] Очистить mojibake/битую кодировку русских комментариев, чтобы документация и комментарии были читаемыми в IDE.
 
 ### P2 - build, dependencies, and verification
