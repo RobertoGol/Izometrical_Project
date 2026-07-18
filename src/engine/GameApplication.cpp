@@ -5,7 +5,7 @@
 #include <imgui-SFML.h>
 #include "Collisions.hpp"
 #include "content/AssetPaths.hpp"
-#include "core/IsoMath.hpp"
+#include "core/WorldCoordinateAdapter.hpp"
 
 #include <SFML/Graphics.hpp>
 #include "engine/Log.hpp"
@@ -339,8 +339,10 @@ namespace bunker
 
     void GameApplication::updateMouseWorldPosition(const InputSnapshot& input)
     {
-        const sf::Vector2f screenPos = m_Window.mapPixelToCoords(input.mousePixelPos);
-        m_GameState.mouseWorldPos = IsoMath::screenToWorld3D(screenPos.x, screenPos.y);
+        m_GameState.mouseWorldPos = WorldCoordinateAdapter::screenToGameplayGround(input.mousePixelPos,
+                                                                                   m_Window.getSize(),
+                                                                                   m_Camera,
+                                                                                   m_GameState.mouseWorldPos);
         m_GameState.isAiming = input.isAiming;
     }
 
