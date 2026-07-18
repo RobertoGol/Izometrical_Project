@@ -243,6 +243,7 @@ What needs checking:
 - [x] Убрать закомментированные рабочие блоки из runtime path: заменить на feature flags/debug config.
 - [ ] Продолжить дробление крупных модулей: `AdvancedMechanicsSurvival`, `AdvancedMechanicsServices`, `VehicleManager`, `DevMenu`.
 - [x] Вынести `RadioTapeSystem` из `AdvancedMechanicsSurvival.cpp` в отдельный модуль `AdvancedMechanicsRadio.cpp`.
+- [x] Вынести `TankUtilitySystem` из `AdvancedMechanicsSurvival.cpp` в отдельный модуль `AdvancedMechanicsTankUtility.cpp`.
 - [ ] Очистить mojibake/битую кодировку русских комментариев, чтобы документация и комментарии были читаемыми в IDE.
 
 ### P2 - build, dependencies, and verification
