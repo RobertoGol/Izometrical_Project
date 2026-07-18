@@ -1,5 +1,6 @@
 #include "engine/GameApplication.hpp"
 #include "content/MaterialCatalog.hpp"
+#include "core/Constants.hpp"
 #include "render/GameRenderer.hpp"
 
 #include <glad/glad.h>
@@ -73,6 +74,40 @@ namespace bunker
         }
 
         ImGui::Begin("Material Catalog", &m_ShowMaterialDebug);
+        int overlay = static_cast<int>(m_Renderer3D.debugOverlay());
+        ImGui::Text("3D Debug Overlay");
+        if (ImGui::RadioButton("None", overlay == static_cast<int>(RendererDebugOverlay::None)))
+        {
+            m_Renderer3D.setDebugOverlay(RendererDebugOverlay::None);
+        }
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Normals", overlay == static_cast<int>(RendererDebugOverlay::Normals)))
+        {
+            m_Renderer3D.setDebugOverlay(RendererDebugOverlay::Normals);
+        }
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Material IDs", overlay == static_cast<int>(RendererDebugOverlay::MaterialIds)))
+        {
+            m_Renderer3D.setDebugOverlay(RendererDebugOverlay::MaterialIds);
+        }
+
+        const glm::vec3 cameraPos = m_Camera.getPosition();
+        const glm::vec3 cameraFront = m_Camera.getFront();
+        constexpr float nearPlane = 0.1f;
+        constexpr float farPlane = 2000.0f;
+        const float aspectRatio = static_cast<float>(Config::SCREEN_WIDTH) / static_cast<float>(Config::SCREEN_HEIGHT);
+        ImGui::Separator();
+        ImGui::Text("Camera Frustum");
+        ImGui::Text("pos %.2f %.2f %.2f | front %.2f %.2f %.2f",
+                    cameraPos.x,
+                    cameraPos.y,
+                    cameraPos.z,
+                    cameraFront.x,
+                    cameraFront.y,
+                    cameraFront.z);
+        ImGui::Text("fov 45.00 | aspect %.3f | near %.2f | far %.1f", aspectRatio, nearPlane, farPlane);
+        ImGui::Separator();
+
         for (const auto& material : getMaterialCatalog())
         {
             ImGui::Text("ID %u | %s | %s | #%06X | rough %.2f | metal %.2f",

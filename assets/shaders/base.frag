@@ -13,6 +13,8 @@ uniform vec3 u_lightDirection;
 uniform vec3 u_ambientColor;
 uniform vec3 u_lightColor;
 uniform vec3 u_fogColor;
+uniform int u_debugOverlay;
+uniform vec3 u_materialDebugColor;
 
 out vec4 fragColor;
 
@@ -21,6 +23,17 @@ void main()
     vec3 normal = normalize(v_normal);
     vec3 tangent = normalize(v_tangent);
     normal = normalize(normal + tangent * 0.015);
+    if (u_debugOverlay == 1)
+    {
+        fragColor = vec4(normal * 0.5 + 0.5, 1.0);
+        return;
+    }
+    if (u_debugOverlay == 2)
+    {
+        fragColor = vec4(u_materialDebugColor, 1.0);
+        return;
+    }
+
     vec3 lightDirection = normalize(u_lightDirection);
 
     float diffuse = max(dot(normal, lightDirection), 0.0);
