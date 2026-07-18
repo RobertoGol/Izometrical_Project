@@ -87,6 +87,7 @@ add_library(game_core STATIC
     src/entities/PlayerController.cpp
     src/gameplay/AdvancedMechanics.cpp
     src/gameplay/AdvancedMechanicsCamp.cpp
+    src/gameplay/AdvancedMechanicsLanline.cpp
     src/gameplay/AdvancedMechanicsObjModel.cpp
     src/gameplay/AdvancedMechanicsProgression.cpp
     src/gameplay/AdvancedMechanicsRadio.cpp
