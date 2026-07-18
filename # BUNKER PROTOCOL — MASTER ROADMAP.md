@@ -22,6 +22,33 @@
 * UI логика инвентаря и контейнеров
 * Основа языка `Lang_for_my_decisions`
 
+# ACTIVE CHECKLIST
+
+This is the single active checklist for unfinished implementation and verification work. Older roadmap sections below keep project context and completion history, but active open items should be added here.
+
+## Runtime blockers and foundations
+
+- [ ] Door/Pickup/CraftingStation/NPC interaction execution.
+- [ ] Region-based external loot table loading.
+- [ ] Loot respawn rules with world/session timer policy.
+- [ ] Real `.bwld` async world load/unload for DoorTransition.
+- [ ] Fullscreen DoorTransition fade overlay.
+- [ ] Equipment save/load verification against `ModularEquipmentSystem`.
+- [ ] Persist opened doors and current `.bwld` world id.
+
+## Code health
+
+- [ ] Finish MapEditor ownership/size review after earlier `main.cpp` split.
+- [ ] Review remaining string parser chains for dispatch-table extraction where it improves readability.
+
+## Final QA
+
+- [ ] Player slide, wall blocking, and 3D camera movement.
+- [ ] Mouse aim/toolgun/CAMP placement world position.
+- [ ] HUD/PipPad/Terminal visible over 3D.
+- [ ] Ground, terrain and cube material colors.
+- [ ] Save/load preserves new 3D/ECS data.
+
 # P0 — КРИТИЧЕСКИЙ МИНИМУМ
 
 ## 1. CollisionSystem
@@ -50,7 +77,7 @@
 * [x] Added ground and ceiling contact flags for the 3D movement pipeline.
 * [x] Routed player walk/dive movement through `CollisionSystem::sweepAndSlide`.
 * [x] Routed dynamic collision resolve through `CollisionSystem::resolveDynamicCollisions`.
-* [ ] Manual QA: feel-test player slide, wall blocking, and 3D camera movement in the running game.
+* Active QA item moved to `ACTIVE CHECKLIST`.
 
 ---
 
@@ -84,7 +111,7 @@
 * [x] Routed `E` interaction through `InteractionManager`.
 * [x] Connected current working interaction types: `Terminal`, `Container`, `Vehicle`.
 * [x] Highlight rendering hook is connected to a visible `[E]` world overlay.
-* [ ] Door, Pickup, CraftingStation and NPC execution need their own systems before they can be enabled.
+* Remaining interaction execution work moved to `ACTIVE CHECKLIST`.
 
 ### Файлы
 
@@ -121,8 +148,7 @@
 * [x] Added container-tier mapping for wooden crates, iron safes and dev vaults.
 * [x] One-time generation respects existing container contents and opened state.
 * [x] Container state persistence remains covered by existing `SaveSystem` container serialization.
-* [ ] Region-based external loot table files still need data-driven loading.
-* [ ] Respawn rules need world/session timer policy before enabling.
+* Remaining loot loading and respawn policy work moved to `ACTIVE CHECKLIST`.
 
 ### Файлы
 
@@ -151,8 +177,7 @@
 * [x] Added transition phases: fade out, loading, fade in.
 * [x] Connected door targets to `InteractionManager` and `E` interaction.
 * [x] Connected transition update to the game loop.
-* [ ] Async file/world loading is simulated for now; real `.bwld` load/unload still needs loader integration.
-* [ ] Fade alpha is tracked, but rendering a fullscreen fade overlay still needs UI/render integration.
+* Remaining world-loader and fade overlay work moved to `ACTIVE CHECKLIST`.
 
 ### Файлы
 
@@ -188,8 +213,7 @@
 * [x] Routed app autosave, restore, manual save and manual load through `SaveGame`.
 * [x] Player position, inventory, containers, world grid, progression/story and ECS runtime data remain covered by current serialization.
 * [x] Save versioning remains handled by `SaveSystem`.
-* [ ] Equipment-specific state needs a dedicated verification pass against `ModularEquipmentSystem`.
-* [ ] Opened doors/current `.bwld` world id need real DoorTransition/world-loader persistence once those systems stop being simulated.
+* Remaining equipment and world-door persistence work moved to `ACTIVE CHECKLIST`.
 
 ### Файлы
 
@@ -613,59 +637,6 @@
 * До MVP: ~55%
 * До V1: ~35–40%
 * До полной версии: ~20–25%
-
----
-
-# СЛЕДУЮЩИЙ ШАГ
-
-Начинать с:
-
-1. `CollisionSystem.cpp`
-2. `InteractionManager.cpp`
-3. `LootManager.cpp`
-4. `DoorTransition.cpp`
-5. `SaveGame.cpp`
-
-После этих пяти задач проект перейдёт из стадии «3D-реконструкция движка» в стадию «реально играбельный Bunker Protocol».
-
----
-
-# CODEX — РАБОЧЕЕ ПРОДОЛЖЕНИЕ
-
-Этот блок добавлен как рабочее продолжение roadmap. Существующие разделы выше не удалять:
-они остаются главным планом проекта.
-
-## Правило продолжения
-
-1. P0, P1 и P2 из этого файла остаются базовым roadmap.
-2. Новые задачи добавлять ниже, не переписывая уже существующие разделы.
-3. Старые runtime-проверки из `Bunker_Protocol_Vision.md` оставить в конце как финальный QA-чеклист.
-4. Если задача из старого рабочего списка пересекается с новым roadmap, считать новый roadmap главным источником, а старую задачу переносить в финальный QA или в соответствующий P-раздел.
-
-## Следующий рабочий фокус
-
-После закрытия P0 из нового roadmap переходить к P1 и P2 как к вертикальному срезу.
-После этого рабочее развитие продолжается с P3:
-
-1. P3 — уникальные механики Bunker Protocol.
-2. P4 — NPC, фракции и экономика.
-3. P5 — кооператив.
-4. P6 — оптимизация и AA-уровень.
-
----
-
-# ФИНАЛЬНЫЙ QA-ЧЕКЛИСТ
-
-Эти пункты не удалять. Они остаются в конце файла и проверяются после крупных изменений 3D/render/ECS/save-load.
-
-- [ ] Камера двигается/следит за игроком в 3D.
-- [ ] Mouse aim/toolgun/CAMP placement используют правильную world position.
-- [ ] HUD/PipPad/Terminal снова видны поверх 3D.
-- [ ] Ground, terrain и cube имеют разные material colors.
-- [ ] Save/load сохраняет не только старый 2D state, но и новые 3D/ECS данные.
-
-
----
 
 # ДОПОЛНЕНИЕ ПОСЛЕ ПРОВЕРКИ РЕКОМЕНДАЦИЙ
 
@@ -3348,30 +3319,6 @@ State of Decay 2.
 - третье лицо;
 - FPS;
 - переключение режимов.
-
----
-
-# CODEX ACTIVE CHECKLIST
-
-This is the current implementation checklist for unfinished in-development work. Keep this section near the end and check items off as they are completed.
-
-- [x] Interaction highlight renders a visible `[E]` world overlay.
-- [ ] Door/Pickup/CraftingStation/NPC interaction execution.
-- [ ] Region-based external loot table loading.
-- [ ] Loot respawn rules with world/session timer policy.
-- [ ] Real `.bwld` async world load/unload for DoorTransition.
-- [ ] Fullscreen DoorTransition fade overlay.
-- [ ] Equipment save/load verification against `ModularEquipmentSystem`.
-- [ ] Persist opened doors and current `.bwld` world id.
-- [ ] Code health: finish MapEditor ownership/size review after earlier `main.cpp` split.
-- [ ] Code health: review remaining string parser chains for dispatch-table extraction where it improves readability.
-- [ ] Manual QA: player slide, wall blocking, and 3D camera movement.
-- [ ] Manual QA: mouse aim/toolgun/CAMP placement world position.
-- [ ] Manual QA: HUD/PipPad/Terminal visible over 3D.
-- [ ] Manual QA: ground, terrain and cube material colors.
-- [ ] Manual QA: save/load preserves new 3D/ECS data.
-
----
 
 # Final Vision
 
