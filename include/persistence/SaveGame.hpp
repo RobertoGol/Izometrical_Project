@@ -7,6 +7,8 @@
 namespace bunker
 {
     class AdvancedMechanics;
+    class DoorTransition;
+    class ModularEquipmentSystem;
 
     struct SaveGameContext
     {
@@ -15,6 +17,8 @@ namespace bunker
         PlayerInventory* inventory = nullptr;
         Registry* registry = nullptr;
         AdvancedMechanics* advanced = nullptr;
+        DoorTransition* doorTransition = nullptr;
+        ModularEquipmentSystem* modularEquipment = nullptr;
     };
 
     class SaveGame

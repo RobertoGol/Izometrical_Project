@@ -1,4 +1,5 @@
 #include "world/WorldSession.hpp"
+#include "WorkstationManager.hpp"
 #include "core/Constants.hpp"
 #include "engine/Log.hpp"
 #include "gameplay/DamageSystem.hpp"
@@ -10,6 +11,10 @@ namespace bunker
 
     void WorldSession::generateDefaultWorld(GameState& gs, EnemySpawner& spawner)
     {
+        gs.lootContainers.clear();
+        gs.loosePickups.clear();
+        gs.neutralNpcs.clear();
+
         for (int x = 0; x < Config::MAP_WIDTH; ++x)
         {
             for (int y = 0; y < Config::MAP_HEIGHT; ++y)
@@ -51,6 +56,17 @@ namespace bunker
 
         gs.playerPos = {5.0f, 5.0f, 0.0f};
         gs.titan.position = {7.0f, 7.0f, 0.0f};
+
+        gs.loosePickups.push_back({{6.0f, 5.0f, 0.0f}, {202, ItemType::Resource, 3, 0.05f, "CIRCUITS"}, false, 1.0f});
+        gs.loosePickups.push_back(
+            {{6.5f, 5.5f, 0.0f}, {203, ItemType::Resource, 1, 0.25f, "CORE ENERGY CELL"}, false, 1.0f});
+        gs.neutralNpcs.push_back({1, {7.0f, 5.0f, 0.0f}, "Vault Technician", false, 1.4f});
+
+        if (::WorkstationManager::Get().GetAllStations().empty())
+        {
+            ::WorkstationManager::Get().SpawnWorkstation(::WorkstationType::ArmorWorkbench, 8.0f, 6.0f);
+            ::WorkstationManager::Get().SpawnWorkstation(::WorkstationType::TankMaintenanceBay, 10.0f, 6.0f);
+        }
 
         bunker::logInfo() << "[WORLD] Убежище 17 сгенерировано." << std::endl;
     }

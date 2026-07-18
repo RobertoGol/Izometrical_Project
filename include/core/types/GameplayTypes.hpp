@@ -142,8 +142,27 @@ namespace bunker
         Vector3D position;
         LootContainerType type = LootContainerType::WoodenCrate;
         bool isOpened = false;
+        float respawnDelaySeconds = 0.0f;
+        float respawnTimerSeconds = 0.0f;
         float physicsRadius = 0.35f;
         std::vector<InventoryItem> containsItems;
+    };
+
+    struct LoosePickup
+    {
+        Vector3D position;
+        InventoryItem item;
+        bool collected = false;
+        float interactionRadius = 1.0f;
+    };
+
+    struct NeutralNpc
+    {
+        int id = 0;
+        Vector3D position;
+        std::string displayName = "Vault Resident";
+        bool hasTalked = false;
+        float interactionRadius = 1.4f;
     };
 
     // ══════════════════════════════════════════════════════════════════════

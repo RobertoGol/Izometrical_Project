@@ -80,7 +80,8 @@ namespace bunker
             MeshBuilder::releaseFromGPU(mesh);
         }
         m_Renderer3D.shutdown();
-        SaveGame::save({1, &m_GameState, &m_Inventory, &m_Registry, &m_Advanced});
+        SaveGame::save(
+            {1, &m_GameState, &m_Inventory, &m_Registry, &m_Advanced, &m_DoorTransition, &m_ModularEquipment});
         if (m_ImGuiInitialized)
         {
             ImGui::SFML::Shutdown(m_Window);
@@ -97,6 +98,7 @@ namespace bunker
         // Загрузка модульных конфигов. Пути централизованы и совпадают с lowercase-asset layout.
         m_VehicleManager.scanAndLoadConfigs(AssetPaths::VehiclesDir);
         m_EnemySpawner.scanAndLoadConfigs(AssetPaths::EnemiesDir);
+        m_Advanced.loot.loadExternalTables("assets/loot_tables");
     }
 
     void GameApplication::generateWorld()
@@ -159,7 +161,8 @@ namespace bunker
     {
         if (SaveGame::exists(1))
         {
-            SaveGame::load({1, &m_GameState, &m_Inventory, &m_Registry, &m_Advanced});
+            SaveGame::load(
+                {1, &m_GameState, &m_Inventory, &m_Registry, &m_Advanced, &m_DoorTransition, &m_ModularEquipment});
             syncGameplayAnchorsToECS();
             bunker::logInfo() << "[SYSTEM] Сохранение восстановлено." << std::endl;
         }
@@ -352,11 +355,13 @@ namespace bunker
     {
         if (input.saveGame)
         {
-            SaveGame::save({1, &m_GameState, &m_Inventory, &m_Registry, &m_Advanced});
+            SaveGame::save(
+                {1, &m_GameState, &m_Inventory, &m_Registry, &m_Advanced, &m_DoorTransition, &m_ModularEquipment});
         }
         if (input.loadGame)
         {
-            SaveGame::load({1, &m_GameState, &m_Inventory, &m_Registry, &m_Advanced});
+            SaveGame::load(
+                {1, &m_GameState, &m_Inventory, &m_Registry, &m_Advanced, &m_DoorTransition, &m_ModularEquipment});
             syncGameplayAnchorsToECS();
         }
     }
@@ -436,8 +441,13 @@ namespace bunker
         m_InteractionManager.refreshHighlightedTarget(m_GameState, m_TerminalUI, m_VehicleManager, m_DoorTransition);
         if (input.interact)
         {
-            m_InteractionManager.tryInteract(
-                m_GameState, m_TerminalUI, m_VehicleManager, m_DoorTransition, m_WorldSession, m_Inventory);
+            m_InteractionManager.tryInteract(m_GameState,
+                                             m_TerminalUI,
+                                             m_VehicleManager,
+                                             m_DoorTransition,
+                                             m_WorldSession,
+                                             m_Inventory,
+                                             m_ModularEquipment);
         }
     }
 

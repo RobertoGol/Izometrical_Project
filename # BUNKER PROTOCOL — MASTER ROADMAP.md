@@ -28,13 +28,14 @@ This is the single active checklist for unfinished implementation and verificati
 
 ## Runtime blockers and foundations
 
-- [ ] Door/Pickup/CraftingStation/NPC interaction execution.
-- [ ] Region-based external loot table loading.
-- [ ] Loot respawn rules with world/session timer policy.
-- [ ] Real `.bwld` async world load/unload for DoorTransition.
-- [ ] Fullscreen DoorTransition fade overlay.
-- [ ] Equipment save/load verification against `ModularEquipmentSystem`.
-- [ ] Persist opened doors and current `.bwld` world id.
+- [x] Door/Pickup/CraftingStation/NPC interaction execution.
+- [x] Region-based external loot table loading.
+- [x] Loot respawn rules with world/session timer policy.
+- [x] DoorTransition loading foundation: fade phases, loader callback boundary, `.bwld` existence fallback, and destination world handoff.
+- [x] Fullscreen DoorTransition fade overlay.
+- [x] Equipment save/load verification against `ModularEquipmentSystem`.
+- [x] Persist opened doors and current `.bwld` world id.
+- [ ] Add real `.bwld` parser/assets and wire the DoorTransition loader callback to world unload/load when map files exist.
 
 ## Code health
 

@@ -1,6 +1,8 @@
 #include "world/DoorTransition.hpp"
 
 #include <algorithm>
+#include <filesystem>
+#include <utility>
 
 namespace bunker
 {
@@ -48,6 +50,11 @@ namespace bunker
         registerDoor({2, {12.0f, 14.0f, 0.0f}, "Vault17_Hangar", {11.0f, 13.0f, 0.0f}, 1.35f});
     }
 
+    void DoorTransition::setWorldLoader(WorldLoader loader)
+    {
+        m_WorldLoader = std::move(loader);
+    }
+
     std::optional<DoorLink> DoorTransition::findNearestDoor(const Vector3D& playerPosition) const
     {
         const DoorLink* bestDoor = nullptr;
@@ -82,6 +89,15 @@ namespace bunker
         m_PendingDoorId = doorId;
         m_Phase = DoorTransitionPhase::FadingOut;
         return true;
+    }
+
+    void DoorTransition::restorePersistence(std::string activeWorldId, std::vector<int> openedDoorIds)
+    {
+        if (!activeWorldId.empty())
+        {
+            m_ActiveWorldId = std::move(activeWorldId);
+        }
+        m_OpenedDoorIds = std::move(openedDoorIds);
     }
 
     void DoorTransition::update(GameState& gameState, float dt)
@@ -139,9 +155,32 @@ namespace bunker
             return;
         }
 
+        bool loaded = false;
+        if (m_WorldLoader)
+        {
+            loaded = m_WorldLoader(*door, gameState);
+        }
+
+        if (!loaded)
+        {
+            const std::filesystem::path mapPath = std::filesystem::path("assets/worlds") / (door->linkTarget + ".bwld");
+            loaded = std::filesystem::exists(mapPath);
+        }
+
         m_ActiveWorldId = door->linkTarget;
+        gameState.mapMeta.currentMapName = door->linkTarget;
         gameState.playerPos = door->destinationSpawnPoint;
         gameState.cameraTarget = door->destinationSpawnPoint;
         gameState.mouseWorldPos = door->destinationSpawnPoint;
+        markDoorOpened(door->id);
+        (void)loaded;
+    }
+
+    void DoorTransition::markDoorOpened(int doorId)
+    {
+        if (std::find(m_OpenedDoorIds.begin(), m_OpenedDoorIds.end(), doorId) == m_OpenedDoorIds.end())
+        {
+            m_OpenedDoorIds.push_back(doorId);
+        }
     }
 } // namespace bunker

@@ -33,16 +33,31 @@ namespace bunker
         LootManager();
 
         InventoryItem roll(LootTier tier);
+        InventoryItem rollForRegion(const std::string& regionId, LootTier tier);
         void fillContainer(LootContainer& container, LootTier tier, int rolls);
+        void fillContainerForRegion(LootContainer& container, const std::string& regionId, LootTier tier, int rolls);
         void normalizeWorldLoot(GameState& gameState);
+        void updateRespawns(GameState& gameState, float dt);
         LootTier tierForContainer(const LootContainer& container) const;
+        void loadExternalTables(const std::string& directory);
 
       private:
         std::mt19937 m_Rng;
         std::map<LootTier, std::vector<LootRollEntry>> m_Tables;
+        std::map<std::string, std::map<LootTier, std::vector<LootRollEntry>>> m_RegionTables;
 
+        InventoryItem rollFromTable(std::vector<LootRollEntry>& table);
         void add(LootTier tier, unsigned int id, ItemType type, std::string name, int minQ, int maxQ, float weight,
                  float unitWeight);
+        void addRegional(const std::string& regionId,
+                         LootTier tier,
+                         unsigned int id,
+                         ItemType type,
+                         std::string name,
+                         int minQ,
+                         int maxQ,
+                         float weight,
+                         float unitWeight);
         void addDefaults();
     };
 

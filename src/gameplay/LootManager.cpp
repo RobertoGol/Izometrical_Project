@@ -1,7 +1,12 @@
 #include "gameplay/LootManager.hpp"
 
+#include "engine/Log.hpp"
 #include "gameplay/advanced/AdvancedMechanicsSurvivalSystems.hpp"
 
+#include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
 #include <utility>
 
 namespace bunker
@@ -12,9 +17,87 @@ namespace bunker
         addDefaults();
     }
 
-    InventoryItem LootManager::roll(LootTier tier)
+    namespace
     {
-        auto& table = m_Tables[tier];
+        std::string trim(std::string value)
+        {
+            const auto first = value.find_first_not_of(" \t\r\n");
+            if (first == std::string::npos)
+            {
+                return {};
+            }
+            const auto last = value.find_last_not_of(" \t\r\n");
+            return value.substr(first, last - first + 1);
+        }
+
+        std::vector<std::string> splitCsv(const std::string& line)
+        {
+            std::vector<std::string> parts;
+            std::stringstream stream(line);
+            std::string part;
+            while (std::getline(stream, part, ','))
+            {
+                parts.push_back(trim(part));
+            }
+            return parts;
+        }
+
+        LootTier parseTier(const std::string& value)
+        {
+            if (value == "Uncommon")
+                return LootTier::Uncommon;
+            if (value == "Rare")
+                return LootTier::Rare;
+            if (value == "Epic")
+                return LootTier::Epic;
+            if (value == "Legendary")
+                return LootTier::Legendary;
+            return LootTier::Common;
+        }
+
+        ItemType parseItemType(const std::string& value)
+        {
+            if (value == "Weapon")
+                return ItemType::Weapon;
+            if (value == "Armor")
+                return ItemType::Armor;
+            if (value == "Medicine")
+                return ItemType::Medicine;
+            if (value == "Ammo")
+                return ItemType::Ammo;
+            if (value == "Quest")
+                return ItemType::Quest;
+            if (value == "Things")
+                return ItemType::Things;
+            return ItemType::Resource;
+        }
+
+        bool parseLootRow(const std::vector<std::string>& parts,
+                          unsigned int& id,
+                          int& minQty,
+                          int& maxQty,
+                          float& weight,
+                          float& unitWeight)
+        {
+            try
+            {
+                id = static_cast<unsigned int>(std::stoul(parts[2]));
+                minQty = std::stoi(parts[5]);
+                maxQty = std::stoi(parts[6]);
+                weight = std::stof(parts[7]);
+                unitWeight = std::stof(parts[8]);
+            }
+            catch (...)
+            {
+                return false;
+            }
+
+            return minQty > 0 && maxQty >= minQty && weight > 0.0f && unitWeight >= 0.0f;
+        }
+    } // namespace
+
+    InventoryItem LootManager::rollFromTable(std::vector<LootRollEntry>& table)
+    {
         if (table.empty())
         {
             return {1, ItemType::Resource, 1, 0.1f, "SCRAP"};
@@ -43,12 +126,51 @@ namespace bunker
         return table.back().item;
     }
 
+    InventoryItem LootManager::roll(LootTier tier)
+    {
+        return rollFromTable(m_Tables[tier]);
+    }
+
+    InventoryItem LootManager::rollForRegion(const std::string& regionId, LootTier tier)
+    {
+        auto region = m_RegionTables.find(regionId);
+        if (region == m_RegionTables.end())
+        {
+            return roll(tier);
+        }
+
+        auto table = region->second.find(tier);
+        if (table == region->second.end() || table->second.empty())
+        {
+            return roll(tier);
+        }
+
+        return rollFromTable(table->second);
+    }
+
     void LootManager::fillContainer(LootContainer& container, LootTier tier, int rolls)
     {
         container.containsItems.clear();
         for (int i = 0; i < rolls; ++i)
         {
             container.containsItems.push_back(roll(tier));
+        }
+
+        if (container.type == LootContainerType::DevVault)
+        {
+            container.containsItems.push_back({1001, ItemType::Quest, 1, 15.0f, "TANK CORE BT (ANALOG TITAN CORE)"});
+        }
+    }
+
+    void LootManager::fillContainerForRegion(LootContainer& container,
+                                             const std::string& regionId,
+                                             LootTier tier,
+                                             int rolls)
+    {
+        container.containsItems.clear();
+        for (int i = 0; i < rolls; ++i)
+        {
+            container.containsItems.push_back(rollForRegion(regionId, tier));
         }
 
         if (container.type == LootContainerType::DevVault)
@@ -67,7 +189,33 @@ namespace bunker
                 continue;
             }
 
-            fillContainer(container, tierForContainer(container), 1 + (containerIndex++ % 3));
+            fillContainerForRegion(
+                container, gameState.mapMeta.currentMapName, tierForContainer(container), 1 + (containerIndex++ % 3));
+            if (container.respawnDelaySeconds <= 0.0f)
+            {
+                container.respawnDelaySeconds = 300.0f;
+            }
+        }
+    }
+
+    void LootManager::updateRespawns(GameState& gameState, float dt)
+    {
+        for (auto& container : gameState.lootContainers)
+        {
+            if (!container.isOpened || container.respawnDelaySeconds <= 0.0f)
+            {
+                continue;
+            }
+
+            container.respawnTimerSeconds += dt;
+            if (container.respawnTimerSeconds < container.respawnDelaySeconds)
+            {
+                continue;
+            }
+
+            container.isOpened = false;
+            container.respawnTimerSeconds = 0.0f;
+            fillContainerForRegion(container, gameState.mapMeta.currentMapName, tierForContainer(container), 1);
         }
     }
 
@@ -96,6 +244,76 @@ namespace bunker
                           float unitWeight)
     {
         m_Tables[tier].push_back({{id, type, 1, unitWeight, std::move(name)}, minQ, maxQ, weight});
+    }
+
+    void LootManager::addRegional(const std::string& regionId,
+                                  LootTier tier,
+                                  unsigned int id,
+                                  ItemType type,
+                                  std::string name,
+                                  int minQ,
+                                  int maxQ,
+                                  float weight,
+                                  float unitWeight)
+    {
+        m_RegionTables[regionId][tier].push_back({{id, type, 1, unitWeight, std::move(name)}, minQ, maxQ, weight});
+    }
+
+    void LootManager::loadExternalTables(const std::string& directory)
+    {
+        namespace fs = std::filesystem;
+        m_RegionTables.clear();
+
+        const fs::path root(directory);
+        if (!fs::exists(root))
+        {
+            bunker::logInfo() << "[LOOT] External loot directory not found: " << directory << std::endl;
+            return;
+        }
+
+        for (const fs::directory_entry& entry : fs::directory_iterator(root))
+        {
+            if (!entry.is_regular_file() || entry.path().extension() != ".loot")
+            {
+                continue;
+            }
+
+            std::ifstream file(entry.path());
+            std::string line;
+            while (std::getline(file, line))
+            {
+                line = trim(line);
+                if (line.empty() || line[0] == '#')
+                {
+                    continue;
+                }
+
+                const std::vector<std::string> parts = splitCsv(line);
+                if (parts.size() < 9)
+                {
+                    bunker::logInfo() << "[LOOT] Skipping malformed loot row in " << entry.path().string() << "."
+                                      << std::endl;
+                    continue;
+                }
+
+                unsigned int id = 0;
+                int minQty = 0;
+                int maxQty = 0;
+                float weight = 0.0f;
+                float unitWeight = 0.0f;
+                if (!parseLootRow(parts, id, minQty, maxQty, weight, unitWeight))
+                {
+                    bunker::logInfo() << "[LOOT] Skipping invalid loot row in " << entry.path().string() << "."
+                                      << std::endl;
+                    continue;
+                }
+
+                addRegional(parts[0], parseTier(parts[1]), id, parseItemType(parts[3]), parts[4], minQty, maxQty,
+                            weight, unitWeight);
+            }
+        }
+
+        bunker::logInfo() << "[LOOT] External region loot tables loaded: " << m_RegionTables.size() << std::endl;
     }
 
     void LootManager::addDefaults()

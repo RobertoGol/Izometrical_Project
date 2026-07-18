@@ -43,6 +43,8 @@ namespace bunker
     struct SessionPersistenceData
     {
         std::vector<LootContainer> lootContainers;
+        std::vector<LoosePickup> loosePickups;
+        std::vector<NeutralNpc> neutralNpcs;
         SessionMapMetaData mapMeta;
         Vault17Progression bunkerProgression;
         CharacterProgression characterProg;

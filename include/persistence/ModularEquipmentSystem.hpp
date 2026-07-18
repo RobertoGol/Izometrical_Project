@@ -147,6 +147,10 @@ namespace bunker
         {
             return m_ActiveTank;
         }
+        const ModularTankChassis& titanRuntimeChassis() const
+        {
+            return m_ActiveTank;
+        }
 
       private:
         std::vector<ArmorItemDef> m_ArmorRegistry;

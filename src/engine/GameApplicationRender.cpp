@@ -7,6 +7,8 @@
 #include <glad/glad.h>
 #include <imgui.h>
 #include <imgui-SFML.h>
+#include <algorithm>
+#include <cstdint>
 #include <string>
 
 namespace bunker
@@ -63,6 +65,14 @@ namespace bunker
         {
             renderMaterialDebugWindow();
             ImGui::SFML::Render(m_Window);
+        }
+
+        const float fadeAlpha = m_DoorTransition.fadeAlpha();
+        if (fadeAlpha > 0.001f)
+        {
+            sf::RectangleShape fade({static_cast<float>(m_Window.getSize().x), static_cast<float>(m_Window.getSize().y)});
+            fade.setFillColor(sf::Color(0, 0, 0, static_cast<std::uint8_t>(std::min(255.0f, fadeAlpha * 255.0f))));
+            m_Window.draw(fade);
         }
 
         m_Window.popGLStates();

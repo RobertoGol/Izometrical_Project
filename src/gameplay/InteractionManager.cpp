@@ -1,10 +1,14 @@
 #include "gameplay/InteractionManager.hpp"
 
+#include "WorkstationManager.hpp"
+#include "engine/Log.hpp"
+#include "persistence/ModularEquipmentSystem.hpp"
 #include "ui/TerminalUI.hpp"
 #include "vehicles/VehicleManager.hpp"
 #include "world/DoorTransition.hpp"
 #include "world/WorldSession.hpp"
 
+#include <algorithm>
 #include <cmath>
 
 namespace bunker
@@ -15,6 +19,9 @@ namespace bunker
         constexpr float VehicleRangeSq = 2.0f * 2.0f;
         constexpr float ContainerPlayerRangeSq = 1.5f * 1.5f;
         constexpr float ContainerAimRangeSq = 1.25f * 1.25f;
+        constexpr float PickupRangeSq = 1.25f * 1.25f;
+        constexpr float WorkstationRange = 1.8f;
+        constexpr float NpcRangeSq = 1.6f * 1.6f;
         constexpr float LineOfSightStep = 0.25f;
 
         float distanceSq2D(const Vector3D& a, const Vector3D& b)
@@ -22,6 +29,49 @@ namespace bunker
             const float dx = a.x - b.x;
             const float dy = a.y - b.y;
             return dx * dx + dy * dy;
+        }
+
+        WorkstationType toEquipmentStationType(::WorkstationType stationType)
+        {
+            switch (stationType)
+            {
+            case ::WorkstationType::ArmorWorkbench:
+                return WorkstationType::ArmorWorkbench;
+            case ::WorkstationType::WeaponsWorkbench:
+                return WorkstationType::WeaponsWorkbench;
+            case ::WorkstationType::TinkerWorkbench:
+                return WorkstationType::TinkerWorkbench;
+            case ::WorkstationType::ChemStation:
+                return WorkstationType::ChemStation;
+            case ::WorkstationType::TankMaintenanceBay:
+                return WorkstationType::TankMaintenanceBay;
+            case ::WorkstationType::Terminal:
+                return WorkstationType::Terminal;
+            case ::WorkstationType::Storage:
+                return WorkstationType::Storage;
+            case ::WorkstationType::None:
+            default:
+                return WorkstationType::None;
+            }
+        }
+
+        const char* craftResultName(CraftResult result)
+        {
+            switch (result)
+            {
+            case CraftResult::Success:
+                return "crafted";
+            case CraftResult::InvalidRecipeIndex:
+                return "no valid recipe";
+            case CraftResult::InsufficientScrap:
+                return "missing scrap";
+            case CraftResult::InsufficientCircuits:
+                return "missing circuits";
+            case CraftResult::InsufficientCoreEnergy:
+                return "missing core energy";
+            default:
+                return "unknown result";
+            }
         }
     } // namespace
 
@@ -103,6 +153,60 @@ namespace bunker
             }
         }
 
+        for (int i = 0; i < static_cast<int>(gameState.loosePickups.size()); ++i)
+        {
+            const LoosePickup& pickup = gameState.loosePickups[i];
+            if (pickup.collected)
+            {
+                continue;
+            }
+
+            const float distSq = distanceSq2D(gameState.playerPos, pickup.position);
+            const float radiusSq = pickup.interactionRadius * pickup.interactionRadius;
+            if (distSq <= std::max(PickupRangeSq, radiusSq))
+            {
+                InteractionTarget target{};
+                target.type = InteractionType::Pickup;
+                target.position = pickup.position;
+                target.index = i;
+                target.distanceSq = distSq;
+                target.label = pickup.item.displayName;
+                considerTarget(world, gameState.playerPos, target, bestTarget);
+            }
+        }
+
+        if (const ::WorldWorkstation* station =
+                ::WorkstationManager::Get().FindNearest(gameState.playerPos.x, gameState.playerPos.y, WorkstationRange))
+        {
+            if (station->CanUse())
+            {
+                InteractionTarget target{};
+                target.type = InteractionType::CraftingStation;
+                target.position = {station->x, station->y, 0.0f};
+                target.index = station->objectID;
+                target.distanceSq = distanceSq2D(gameState.playerPos, target.position);
+                target.label = "Workbench";
+                considerTarget(world, gameState.playerPos, target, bestTarget);
+            }
+        }
+
+        for (int i = 0; i < static_cast<int>(gameState.neutralNpcs.size()); ++i)
+        {
+            const NeutralNpc& npc = gameState.neutralNpcs[i];
+            const float distSq = distanceSq2D(gameState.playerPos, npc.position);
+            const float radiusSq = npc.interactionRadius * npc.interactionRadius;
+            if (distSq <= std::max(NpcRangeSq, radiusSq))
+            {
+                InteractionTarget target{};
+                target.type = InteractionType::NPC;
+                target.position = npc.position;
+                target.index = i;
+                target.distanceSq = distSq;
+                target.label = npc.displayName;
+                considerTarget(world, gameState.playerPos, target, bestTarget);
+            }
+        }
+
         return bestTarget;
     }
 
@@ -111,7 +215,8 @@ namespace bunker
                                          VehicleManager& vehicles,
                                          DoorTransition& doors,
                                          WorldSession& worldSession,
-                                         PlayerInventory& inventory)
+                                         PlayerInventory& inventory,
+                                         ModularEquipmentSystem& equipmentSystem)
     {
         m_HighlightedTarget = queryBestTarget(gameState, terminals, vehicles, doors);
         if (!m_HighlightedTarget)
@@ -131,7 +236,79 @@ namespace bunker
         case InteractionType::Door:
             return doors.requestTransition(m_HighlightedTarget->index);
         case InteractionType::Pickup:
+        {
+            const int index = m_HighlightedTarget->index;
+            if (index < 0 || index >= static_cast<int>(gameState.loosePickups.size()))
+            {
+                return false;
+            }
+
+            LoosePickup& pickup = gameState.loosePickups[index];
+            if (pickup.collected)
+            {
+                return false;
+            }
+
+            if (!inventory.addItem(pickup.item.itemID,
+                                   pickup.item.type,
+                                   pickup.item.quantity,
+                                   pickup.item.weightPerUnit,
+                                   pickup.item.displayName))
+            {
+                bunker::logInfo() << "[PICKUP] Inventory full, could not pick up " << pickup.item.displayName
+                                  << "." << std::endl;
+                return false;
+            }
+
+            pickup.collected = true;
+            bunker::logInfo() << "[PICKUP] Picked up " << pickup.item.displayName << "." << std::endl;
+            return true;
+        }
         case InteractionType::CraftingStation:
+        {
+            const ::WorldWorkstation* station = ::WorkstationManager::Get().FindByObjectID(m_HighlightedTarget->index);
+            if (station == nullptr || !station->CanUse())
+            {
+                return false;
+            }
+
+            const WorkstationType equipmentStationType = toEquipmentStationType(station->type);
+            const auto recipes = equipmentSystem.getRecipesForStation(equipmentStationType);
+            if (recipes.empty())
+            {
+                bunker::logInfo() << "[WORKSTATION] Opened station " << station->objectID
+                                  << "; no direct craft recipe is registered yet." << std::endl;
+                return true;
+            }
+
+            const auto& allRecipes = equipmentSystem.recipes();
+            const auto found = std::find_if(allRecipes.begin(), allRecipes.end(), [&](const CraftingRecipe& recipe) {
+                return recipe.resultItemID == recipes.front().resultItemID;
+            });
+            if (found == allRecipes.end())
+            {
+                return false;
+            }
+
+            const int recipeIndex = static_cast<int>(std::distance(allRecipes.begin(), found));
+            const CraftResult result = equipmentSystem.craftItem(inventory, recipeIndex);
+            bunker::logInfo() << "[WORKSTATION] " << craftResultName(result) << " at station " << station->objectID
+                              << "." << std::endl;
+            return result == CraftResult::Success;
+        }
+        case InteractionType::NPC:
+        {
+            const int index = m_HighlightedTarget->index;
+            if (index < 0 || index >= static_cast<int>(gameState.neutralNpcs.size()))
+            {
+                return false;
+            }
+
+            NeutralNpc& npc = gameState.neutralNpcs[index];
+            npc.hasTalked = true;
+            bunker::logInfo() << "[NPC] " << npc.displayName << ": Stay sharp, pilot." << std::endl;
+            return true;
+        }
         case InteractionType::None:
         default:
             return false;

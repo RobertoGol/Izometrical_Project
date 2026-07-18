@@ -38,6 +38,7 @@ namespace bunker
         radio.update(dt);
         story.update(gs, &radio);
         survival.update(gs, inv, dt);
+        loot.updateRespawns(gs, dt);
         tankUtility.update(gs, dt);
         reactive.update(gs, dt);
         camp.updatePreview(gs, gs.mouseWorldPos, campValidator);

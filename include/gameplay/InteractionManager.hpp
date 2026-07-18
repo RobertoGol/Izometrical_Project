@@ -10,6 +10,7 @@
 
 namespace bunker
 {
+    class ModularEquipmentSystem;
     class TerminalManager;
     class VehicleManager;
     class WorldSession;
@@ -23,7 +24,8 @@ namespace bunker
         Terminal,
         Pickup,
         CraftingStation,
-        Vehicle
+        Vehicle,
+        NPC
     };
 
     struct InteractionTarget
@@ -49,7 +51,8 @@ namespace bunker
                          VehicleManager& vehicles,
                          DoorTransition& doors,
                          WorldSession& worldSession,
-                         PlayerInventory& inventory);
+                         PlayerInventory& inventory,
+                         ModularEquipmentSystem& equipmentSystem);
 
         void refreshHighlightedTarget(const GameState& gameState,
                                       const TerminalManager& terminals,

@@ -64,6 +64,44 @@ namespace bunker
                                    }});
         }
 
+        for (const auto& pickup : gs.loosePickups)
+        {
+            if (pickup.collected)
+            {
+                continue;
+            }
+
+            float px = pickup.position.x;
+            float py = pickup.position.y;
+            renderQueue.push_back({px + py, [&, px, py]()
+                                   {
+                                       sf::CircleShape marker(5.0f, 4);
+                                       marker.setOrigin({5.0f, 5.0f});
+                                       marker.setPosition(IsoMath::worldToScreen(px, py));
+                                       marker.setFillColor(sf::Color(90, 220, 255, 230));
+                                       marker.setOutlineThickness(1.0f);
+                                       marker.setOutlineColor(sf::Color(30, 90, 120));
+                                       window.draw(marker);
+                                   }});
+        }
+
+        for (const auto& npc : gs.neutralNpcs)
+        {
+            float nx = npc.position.x;
+            float ny = npc.position.y;
+            bool talked = npc.hasTalked;
+            renderQueue.push_back({nx + ny, [&, nx, ny, talked]()
+                                   {
+                                       sf::CircleShape shape(8.0f, 8);
+                                       shape.setOrigin({8.0f, 8.0f});
+                                       shape.setPosition(IsoMath::worldToScreen(nx, ny));
+                                       shape.setFillColor(talked ? sf::Color(110, 160, 190) : sf::Color(120, 220, 170));
+                                       shape.setOutlineThickness(1.5f);
+                                       shape.setOutlineColor(sf::Color(20, 70, 45));
+                                       window.draw(shape);
+                                   }});
+        }
+
         // Враги: цвета и форма зависят от HostileAISystem
         bool isPast = timeShift.isPast();
         const auto& hostileStates = hostileAI.debugStates();
