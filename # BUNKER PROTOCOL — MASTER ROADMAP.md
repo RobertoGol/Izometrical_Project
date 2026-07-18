@@ -115,6 +115,17 @@
 * Roll logic
 * Serialization helpers
 
+### Status
+
+* [x] Added `LootManager.hpp/.cpp`.
+* [x] Centralized weighted tier rolls and container filling.
+* [x] Preserved old `LootGenerator` name as a compatibility wrapper.
+* [x] Added container-tier mapping for wooden crates, iron safes and dev vaults.
+* [x] One-time generation respects existing container contents and opened state.
+* [x] Container state persistence remains covered by existing `SaveSystem` container serialization.
+* [ ] Region-based external loot table files still need data-driven loading.
+* [ ] Respawn rules need world/session timer policy before enabling.
+
 ### Файлы
 
 * `LootManager.hpp`

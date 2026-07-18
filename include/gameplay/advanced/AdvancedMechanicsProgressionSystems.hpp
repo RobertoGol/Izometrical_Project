@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gameplay/advanced/AdvancedMechanicsSurvivalSystems.hpp"
+#include "gameplay/LootManager.hpp"
 namespace bunker
 {
 
@@ -120,40 +121,5 @@ namespace bunker
     // ═══════════════════════════════════════════════════════════════════════════════
     // 8) LOOT GENERATOR BY TIERS
     // ═══════════════════════════════════════════════════════════════════════════════
-
-    enum class LootTier
-    {
-        Common,
-        Uncommon,
-        Rare,
-        Epic,
-        Legendary
-    };
-
-    struct LootRollEntry
-    {
-        InventoryItem item;
-        int minQty = 1;
-        int maxQty = 1;
-        float weight = 1.0f;
-    };
-
-    class LootGenerator
-    {
-      public:
-        LootGenerator();
-        InventoryItem roll(LootTier tier);
-        void fillContainer(LootContainer& c, LootTier tier, int rolls);
-        void normalizeWorldLoot(GameState& gs);
-
-      private:
-        std::mt19937 m_Rng;
-        std::map<LootTier, std::vector<LootRollEntry>> m_Tables;
-
-        void add(LootTier tier, unsigned int id, ItemType type, std::string name, int minQ, int maxQ, float w,
-                 float unitWeight);
-        void addDefaults();
-    };
-
 
 } // namespace bunker

@@ -119,6 +119,7 @@ add_library(game_core STATIC
     src/gameplay/BulletSystemRender.cpp
     src/gameplay/DamageSystem.cpp
     src/gameplay/InteractionManager.cpp
+    src/gameplay/LootManager.cpp
     src/gameplay/SpatialGrid.cpp
     src/gameplay/StatefulActionsController.cpp
     src/gameplay/Tactics.cpp
