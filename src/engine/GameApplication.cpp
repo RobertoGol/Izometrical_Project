@@ -78,6 +78,7 @@ namespace bunker
         {
             MeshBuilder::releaseFromGPU(mesh);
         }
+        m_Renderer3D.shutdown();
         SaveSystem::writeSave(1, m_GameState, m_Inventory, &m_Registry, &m_Advanced);
         if (m_ImGuiInitialized)
         {

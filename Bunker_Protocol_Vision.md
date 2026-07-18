@@ -105,7 +105,7 @@
 ## 6. Приоритет реализации
 
 - [x] **Shader Manager:** не хардкодить шейдеры, а загружать их из `assets/`.
-- [ ] **Post-Processing Chain:** FBO / RenderTexture, чтобы сначала рисовать сцену в текстуру.
+- [x] **Post-Processing Chain:** FBO / RenderTexture, чтобы сначала рисовать сцену в текстуру.
 - [x] **Terminal Shader:** CRT-эффект для `TerminalUI`.
 - [x] **Lighting:** базовое PBR-освещение.
 - [x] **Atmospheric Fog:** туман в `base.frag` или отдельном post-process pass.

@@ -2,6 +2,7 @@
 #include "core/ECS.hpp"
 #include "entities/Camera.hpp"
 #include "world/WeatherSystem.hpp"
+#include <cstdint>
 #include <glm/glm.hpp>
 
 namespace bunker {
@@ -19,6 +20,7 @@ namespace bunker {
         ~Renderer3D() = default;
 
         void initialize();
+        void shutdown();
 
         // Главная функция отрисовки кадра
         void renderScene(Registry& registry, const Camera& camera);
@@ -32,6 +34,16 @@ namespace bunker {
 
     private:
         std::uint32_t m_shaderProgram = 0;
+        std::uint32_t m_postShaderProgram = 0;
+        std::uint32_t m_sceneFramebuffer = 0;
+        std::uint32_t m_sceneColorTexture = 0;
+        std::uint32_t m_sceneDepthRenderbuffer = 0;
+        std::uint32_t m_fullscreenQuadVao = 0;
+        std::uint32_t m_fullscreenQuadVbo = 0;
+        unsigned int m_sceneTargetWidth = 0;
+        unsigned int m_sceneTargetHeight = 0;
+        int m_locPostSceneTexture = -1;
+        int m_locPostResolution = -1;
 
         // Кэшированные локации uniform-переменных в шейдере
         int m_locView = -1;
@@ -57,6 +69,11 @@ namespace bunker {
         glm::vec3 m_fogColor{0.11f, 0.12f, 0.105f};
 
         void loadShaders();
+        void loadPostProcessShader();
+        void createFullscreenQuad();
+        bool ensurePostProcessTarget(unsigned int width, unsigned int height);
+        void renderPostProcess(unsigned int width, unsigned int height);
+        void releasePostProcessTarget();
         void bindMaterial(std::uint32_t materialID);
         static glm::vec3 materialDebugColor(std::uint32_t materialID);
     };

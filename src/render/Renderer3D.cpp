@@ -13,6 +13,27 @@
 
 namespace bunker {
 
+    void Renderer3D::shutdown() {
+        releasePostProcessTarget();
+        if (m_fullscreenQuadVbo != 0) {
+            glDeleteBuffers(1, &m_fullscreenQuadVbo);
+            m_fullscreenQuadVbo = 0;
+        }
+        if (m_fullscreenQuadVao != 0) {
+            glDeleteVertexArrays(1, &m_fullscreenQuadVao);
+            m_fullscreenQuadVao = 0;
+        }
+        if (m_postShaderProgram != 0) {
+            glDeleteProgram(m_postShaderProgram);
+            m_postShaderProgram = 0;
+        }
+        if (m_shaderProgram != 0) {
+            glDeleteProgram(m_shaderProgram);
+            m_shaderProgram = 0;
+        }
+        m_initialized = false;
+    }
+
     void Renderer3D::initialize() {
         static bool gladLoaded = false;
         if (!gladLoaded) {
@@ -24,6 +45,8 @@ namespace bunker {
         }
 
         loadShaders();
+        loadPostProcessShader();
+        createFullscreenQuad();
         std::string materialError;
         if (!validateMaterialCatalog(&materialError)) {
             logError() << "[Renderer3D] Material catalog invalid: " << materialError << std::endl;
@@ -42,6 +65,17 @@ namespace bunker {
     void Renderer3D::renderScene(Registry& registry, const Camera& camera) {
         if (!m_initialized) {
             return;
+        }
+
+        const unsigned int targetWidth = static_cast<unsigned int>(Config::SCREEN_WIDTH);
+        const unsigned int targetHeight = static_cast<unsigned int>(Config::SCREEN_HEIGHT);
+        const bool usePostProcess =
+            m_postShaderProgram != 0 && ensurePostProcessTarget(targetWidth, targetHeight);
+        if (usePostProcess) {
+            glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFramebuffer);
+            glViewport(0, 0, static_cast<GLsizei>(targetWidth), static_cast<GLsizei>(targetHeight));
+        } else {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
         // 1. Очистка буферов
@@ -115,6 +149,10 @@ namespace bunker {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glBindVertexArray(0);
         glUseProgram(0);
+
+        if (usePostProcess) {
+            renderPostProcess(targetWidth, targetHeight);
+        }
     }
 
     void Renderer3D::setWireframeEnabled(bool enabled) {
@@ -216,6 +254,137 @@ namespace bunker {
         m_locFogColor = glGetUniformLocation(m_shaderProgram, "u_fogColor");
         m_locDebugOverlay = glGetUniformLocation(m_shaderProgram, "u_debugOverlay");
         m_locMaterialDebugColor = glGetUniformLocation(m_shaderProgram, "u_materialDebugColor");
+    }
+
+    void Renderer3D::loadPostProcessShader() {
+        const std::uint32_t program =
+            ShaderManager::loadProgram("assets/shaders/post.vert", "assets/shaders/post.frag");
+        if (program == 0) {
+            return;
+        }
+
+        if (m_postShaderProgram != 0) {
+            glDeleteProgram(m_postShaderProgram);
+        }
+
+        m_postShaderProgram = program;
+        m_locPostSceneTexture = glGetUniformLocation(m_postShaderProgram, "u_sceneTexture");
+        m_locPostResolution = glGetUniformLocation(m_postShaderProgram, "u_resolution");
+    }
+
+    void Renderer3D::createFullscreenQuad() {
+        if (m_fullscreenQuadVao != 0) {
+            return;
+        }
+
+        constexpr float quadVertices[] = {
+            -1.0f, -1.0f, 0.0f, 0.0f,
+             1.0f, -1.0f, 1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f, 1.0f,
+             1.0f,  1.0f, 1.0f, 1.0f,
+        };
+
+        glGenVertexArrays(1, &m_fullscreenQuadVao);
+        glGenBuffers(1, &m_fullscreenQuadVbo);
+        glBindVertexArray(m_fullscreenQuadVao);
+        glBindBuffer(GL_ARRAY_BUFFER, m_fullscreenQuadVbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
+                              reinterpret_cast<void*>(2 * sizeof(float)));
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
+    bool Renderer3D::ensurePostProcessTarget(unsigned int width, unsigned int height) {
+        if (width == 0 || height == 0) {
+            return false;
+        }
+
+        if (m_sceneFramebuffer != 0 && m_sceneTargetWidth == width && m_sceneTargetHeight == height) {
+            return true;
+        }
+
+        releasePostProcessTarget();
+        m_sceneTargetWidth = width;
+        m_sceneTargetHeight = height;
+
+        glGenFramebuffers(1, &m_sceneFramebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFramebuffer);
+
+        glGenTextures(1, &m_sceneColorTexture);
+        glBindTexture(GL_TEXTURE_2D, m_sceneColorTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(width), static_cast<GLsizei>(height), 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_sceneColorTexture, 0);
+
+        glGenRenderbuffers(1, &m_sceneDepthRenderbuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, m_sceneDepthRenderbuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(width),
+                              static_cast<GLsizei>(height));
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
+                                  m_sceneDepthRenderbuffer);
+
+        const bool complete = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        if (!complete) {
+            logError() << "[Renderer3D] Post-process framebuffer is incomplete." << std::endl;
+            releasePostProcessTarget();
+            return false;
+        }
+
+        return true;
+    }
+
+    void Renderer3D::renderPostProcess(unsigned int width, unsigned int height) {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        glUseProgram(m_postShaderProgram);
+        if (m_locPostSceneTexture >= 0) {
+            glUniform1i(m_locPostSceneTexture, 0);
+        }
+        if (m_locPostResolution >= 0) {
+            glUniform2f(m_locPostResolution, static_cast<float>(width), static_cast<float>(height));
+        }
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_sceneColorTexture);
+        glBindVertexArray(m_fullscreenQuadVao);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray(0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glUseProgram(0);
+    }
+
+    void Renderer3D::releasePostProcessTarget() {
+        if (m_sceneDepthRenderbuffer != 0) {
+            glDeleteRenderbuffers(1, &m_sceneDepthRenderbuffer);
+            m_sceneDepthRenderbuffer = 0;
+        }
+        if (m_sceneColorTexture != 0) {
+            glDeleteTextures(1, &m_sceneColorTexture);
+            m_sceneColorTexture = 0;
+        }
+        if (m_sceneFramebuffer != 0) {
+            glDeleteFramebuffers(1, &m_sceneFramebuffer);
+            m_sceneFramebuffer = 0;
+        }
+        m_sceneTargetWidth = 0;
+        m_sceneTargetHeight = 0;
     }
 
     void Renderer3D::bindMaterial(std::uint32_t materialID) {
