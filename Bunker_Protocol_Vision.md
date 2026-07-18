@@ -244,6 +244,7 @@ What needs checking:
 - [ ] Продолжить дробление крупных модулей: `AdvancedMechanicsSurvival`, `AdvancedMechanicsServices`, `VehicleManager`, `DevMenu`.
 - [x] Вынести `RadioTapeSystem` из `AdvancedMechanicsSurvival.cpp` в отдельный модуль `AdvancedMechanicsRadio.cpp`.
 - [x] Вынести `TankUtilitySystem` из `AdvancedMechanicsSurvival.cpp` в отдельный модуль `AdvancedMechanicsTankUtility.cpp`.
+- [x] Вынести OBJ model loader из `AdvancedMechanicsServices.cpp` в отдельный модуль `AdvancedMechanicsObjModel.cpp`.
 - [ ] Очистить mojibake/битую кодировку русских комментариев, чтобы документация и комментарии были читаемыми в IDE.
 
 ### P2 - build, dependencies, and verification
