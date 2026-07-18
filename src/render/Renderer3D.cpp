@@ -8,6 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/common.hpp>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -173,6 +174,66 @@ namespace bunker {
 
     void Renderer3D::setWireframeEnabled(bool enabled) {
         m_wireframeEnabled = enabled;
+    }
+
+    void Renderer3D::applyWeather(const WeatherRuntimeState& weather) {
+        const float intensity = std::clamp(weather.intensity, 0.0f, 1.0f);
+
+        glm::vec3 sky{0.10f, 0.11f, 0.14f};
+        glm::vec3 fog{0.11f, 0.12f, 0.105f};
+        glm::vec3 ambient{0.055f, 0.065f, 0.075f};
+        glm::vec3 light{0.76f, 0.68f, 0.52f};
+        glm::vec3 lightDirection{-0.35f, 0.85f, 0.28f};
+
+        switch (weather.current)
+        {
+        case WeatherType::Clear:
+            break;
+        case WeatherType::EtherFog:
+            sky = glm::mix(sky, glm::vec3{0.16f, 0.11f, 0.24f}, intensity);
+            fog = glm::mix(fog, glm::vec3{0.34f, 0.20f, 0.52f}, intensity);
+            ambient = glm::mix(ambient, glm::vec3{0.075f, 0.055f, 0.11f}, intensity);
+            light = glm::mix(light, glm::vec3{0.54f, 0.48f, 0.68f}, intensity);
+            break;
+        case WeatherType::AcidRain:
+            sky = glm::mix(sky, glm::vec3{0.08f, 0.12f, 0.08f}, intensity);
+            fog = glm::mix(fog, glm::vec3{0.24f, 0.36f, 0.16f}, intensity);
+            ambient = glm::mix(ambient, glm::vec3{0.045f, 0.075f, 0.045f}, intensity);
+            light = glm::mix(light, glm::vec3{0.55f, 0.72f, 0.38f}, intensity);
+            break;
+        case WeatherType::AshStorm:
+            sky = glm::mix(sky, glm::vec3{0.15f, 0.12f, 0.09f}, intensity);
+            fog = glm::mix(fog, glm::vec3{0.38f, 0.30f, 0.20f}, intensity);
+            ambient = glm::mix(ambient, glm::vec3{0.08f, 0.065f, 0.045f}, intensity);
+            light = glm::mix(light, glm::vec3{0.68f, 0.48f, 0.30f}, intensity);
+            lightDirection = glm::normalize(glm::mix(lightDirection, glm::vec3{-0.55f, 0.65f, 0.18f}, intensity));
+            break;
+        case WeatherType::EtherStorm:
+            sky = glm::mix(sky, glm::vec3{0.07f, 0.055f, 0.12f}, intensity);
+            fog = glm::mix(fog, glm::vec3{0.25f, 0.14f, 0.42f}, intensity);
+            ambient = glm::mix(ambient, glm::vec3{0.045f, 0.035f, 0.085f}, intensity);
+            light = glm::mix(light, glm::vec3{0.44f, 0.36f, 0.76f}, intensity);
+            break;
+        case WeatherType::AutumnBreeze:
+            sky = glm::mix(sky, glm::vec3{0.18f, 0.13f, 0.08f}, intensity);
+            fog = glm::mix(fog, glm::vec3{0.30f, 0.21f, 0.12f}, intensity);
+            light = glm::mix(light, glm::vec3{0.86f, 0.56f, 0.32f}, intensity);
+            break;
+        case WeatherType::WinterBlizzard:
+            sky = glm::mix(sky, glm::vec3{0.12f, 0.16f, 0.20f}, intensity);
+            fog = glm::mix(fog, glm::vec3{0.58f, 0.68f, 0.74f}, intensity);
+            ambient = glm::mix(ambient, glm::vec3{0.075f, 0.095f, 0.115f}, intensity);
+            light = glm::mix(light, glm::vec3{0.72f, 0.82f, 0.92f}, intensity);
+            break;
+        default:
+            break;
+        }
+
+        m_skyColor = glm::clamp(sky, glm::vec3{0.0f}, glm::vec3{1.0f});
+        m_fogColor = glm::clamp(fog, glm::vec3{0.0f}, glm::vec3{1.0f});
+        m_ambientColor = glm::clamp(ambient, glm::vec3{0.0f}, glm::vec3{1.0f});
+        m_lightColor = glm::clamp(light, glm::vec3{0.0f}, glm::vec3{1.0f});
+        m_lightDirection = lightDirection;
     }
 
     void Renderer3D::renderSkyDome() {

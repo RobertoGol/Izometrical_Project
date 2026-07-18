@@ -1,6 +1,7 @@
 #pragma once
 #include "core/ECS.hpp"
 #include "entities/Camera.hpp"
+#include "world/WeatherSystem.hpp"
 #include <glm/glm.hpp>
 
 namespace bunker {
@@ -18,6 +19,7 @@ namespace bunker {
         // --- ДОБАВЬ ЭТУ СТРОКУ ---
         void renderSkyDome();
         void setWireframeEnabled(bool enabled);
+        void applyWeather(const WeatherRuntimeState& weather);
 
     private:
         std::uint32_t m_shaderProgram = 0;

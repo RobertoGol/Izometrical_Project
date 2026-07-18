@@ -25,6 +25,7 @@ namespace bunker
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
+        m_Renderer3D.applyWeather(m_Advanced.weather.state());
         m_Renderer3D.renderScene(m_Registry, m_Camera);
 
         glDisable(GL_DEPTH_TEST);

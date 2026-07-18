@@ -202,7 +202,7 @@ What needs checking:
 - [x] Добавить normal/tangent support для будущего normal mapping.
 - [x] Перенести sky clear color, lighting и fog в управляемые параметры `Renderer3D`/shader uniforms вместо пустого `renderSkyDome()`.
 - [x] Добавить debug toggle для wireframe.
-- [ ] Связать sky/weather параметры с `WeatherSystem`.
+- [x] Связать sky/weather параметры с `WeatherSystem`.
 - [ ] Добавить debug overlays для normals, material IDs и camera frustum.
 
 ### P1 - gameplay to 3D migration
