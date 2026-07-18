@@ -59,6 +59,17 @@ namespace bunker
         add(BreakableKind::Vegetation, {15.0f, 15.0f, 0.0f});
     }
 
+    void ReactiveWorldSystem::restoreBreakables(const std::vector<BreakableObject>& breakables)
+    {
+        m_Breakables = breakables;
+        m_Waves.clear();
+        m_NextId = 0;
+        for (const auto& breakable : m_Breakables)
+        {
+            m_NextId = std::max(m_NextId, breakable.id);
+        }
+    }
+
     void ReactiveWorldSystem::update(GameState& gs, float dt)
     {
         for (auto& wave : m_Waves)

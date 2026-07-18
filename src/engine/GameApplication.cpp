@@ -78,7 +78,7 @@ namespace bunker
         {
             MeshBuilder::releaseFromGPU(mesh);
         }
-        SaveSystem::writeSave(1, m_GameState, m_Inventory, &m_Registry);
+        SaveSystem::writeSave(1, m_GameState, m_Inventory, &m_Registry, &m_Advanced);
         if (m_ImGuiInitialized)
         {
             ImGui::SFML::Shutdown(m_Window);
@@ -157,7 +157,7 @@ namespace bunker
     {
         if (SaveSystem::saveExists(1))
         {
-            SaveSystem::readSave(1, m_GameState, m_Inventory, &m_Registry);
+            SaveSystem::readSave(1, m_GameState, m_Inventory, &m_Registry, &m_Advanced);
             syncGameplayAnchorsToECS();
             bunker::logInfo() << "[SYSTEM] Сохранение восстановлено." << std::endl;
         }
@@ -350,11 +350,11 @@ namespace bunker
     {
         if (input.saveGame)
         {
-            SaveSystem::writeSave(1, m_GameState, m_Inventory, &m_Registry);
+            SaveSystem::writeSave(1, m_GameState, m_Inventory, &m_Registry, &m_Advanced);
         }
         if (input.loadGame)
         {
-            SaveSystem::readSave(1, m_GameState, m_Inventory, &m_Registry);
+            SaveSystem::readSave(1, m_GameState, m_Inventory, &m_Registry, &m_Advanced);
             syncGameplayAnchorsToECS();
         }
     }

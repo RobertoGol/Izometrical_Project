@@ -53,6 +53,7 @@ namespace bunker
         {
             return m_Waves;
         }
+        void restoreBreakables(const std::vector<BreakableObject>& breakables);
 
       private:
         int m_NextId = 0;

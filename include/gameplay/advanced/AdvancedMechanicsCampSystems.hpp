@@ -45,6 +45,7 @@ namespace bunker
         {
             return m_Objects;
         }
+        void restoreObjects(const std::vector<CampObject>& objects);
 
       private:
         bool m_Enabled = false;

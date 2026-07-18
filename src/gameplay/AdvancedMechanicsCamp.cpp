@@ -164,5 +164,14 @@ namespace bunker
         return true;
     }
 
+    void CampSystem::restoreObjects(const std::vector<CampObject>& objects)
+    {
+        m_Objects = objects;
+        m_NextId = 0;
+        for (const auto& object : m_Objects)
+        {
+            m_NextId = std::max(m_NextId, object.id);
+        }
+    }
 
 } // namespace bunker

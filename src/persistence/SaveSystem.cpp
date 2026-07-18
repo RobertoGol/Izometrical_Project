@@ -1,5 +1,6 @@
 #include "persistence/SaveSystem.hpp"
 #include "engine/Log.hpp"
+#include "gameplay/AdvancedMechanics.hpp"
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -59,7 +60,7 @@ namespace bunker
             return false;
         }
 
-        RuntimeWorldSaveData makeRuntimeWorldSaveData(const Registry* registry)
+        RuntimeWorldSaveData makeRuntimeWorldSaveData(const Registry* registry, const AdvancedMechanics* advanced)
         {
             RuntimeWorldSaveData data;
             if (registry != nullptr)
@@ -68,12 +69,17 @@ namespace bunker
                 const auto& meshEntities = registry->meshes.getDenseEntities();
                 data.ecsEntityCount = static_cast<std::uint32_t>(std::min(meshes.size(), meshEntities.size()));
             }
+            if (advanced != nullptr)
+            {
+                data.campObjectCount = static_cast<std::uint32_t>(advanced->camp.objects().size());
+                data.breakableStateCount = static_cast<std::uint32_t>(advanced->reactive.breakables().size());
+            }
             return data;
         }
     }
 
     bool SaveSystem::writeSave(unsigned int slot, const GameState& gs, const PlayerInventory& inventory,
-                               const Registry* registry)
+                               const Registry* registry, const AdvancedMechanics* advanced)
     {
         std::filesystem::create_directories("saves");
 
@@ -135,9 +141,38 @@ namespace bunker
             !writeBlock(file, gs.titan.systems))
             return false;
 
-        RuntimeWorldSaveData runtimeData = makeRuntimeWorldSaveData(registry);
+        RuntimeWorldSaveData runtimeData = makeRuntimeWorldSaveData(registry, advanced);
         if (!writeBlock(file, runtimeData))
             return false;
+
+        if (advanced != nullptr)
+        {
+            for (const auto& object : advanced->camp.objects())
+            {
+                CampObjectSaveData objectData;
+                objectData.id = object.id;
+                objectData.type = static_cast<std::uint32_t>(object.type);
+                objectData.tileX = object.tileX;
+                objectData.tileY = object.tileY;
+                objectData.health = object.health;
+                if (!writeBlock(file, objectData))
+                    return false;
+            }
+
+            for (const auto& breakable : advanced->reactive.breakables())
+            {
+                BreakableSaveData breakableData;
+                breakableData.id = breakable.id;
+                breakableData.kind = static_cast<std::uint32_t>(breakable.kind);
+                breakableData.position = breakable.position;
+                breakableData.health = breakable.health;
+                breakableData.radius = breakable.radius;
+                breakableData.broken = breakable.broken;
+                breakableData.velocity = breakable.velocity;
+                if (!writeBlock(file, breakableData))
+                    return false;
+            }
+        }
 
         if (registry != nullptr)
         {
@@ -171,7 +206,11 @@ namespace bunker
         return true;
     }
 
-    bool SaveSystem::readSave(unsigned int slot, GameState& gs, PlayerInventory& inventory, Registry* registry)
+    bool SaveSystem::readSave(unsigned int slot,
+                              GameState& gs,
+                              PlayerInventory& inventory,
+                              Registry* registry,
+                              AdvancedMechanics* advanced)
     {
         std::string path = "saves/slot_" + std::to_string(slot) + ".sav";
         std::ifstream file(path, std::ios::binary);
@@ -271,6 +310,51 @@ namespace bunker
             RuntimeWorldSaveData runtimeData;
             if (!readBlock(file, runtimeData, "runtime world metadata"))
                 return false;
+
+            if (header.version >= 19)
+            {
+                std::vector<CampObject> campObjects;
+                campObjects.reserve(runtimeData.campObjectCount);
+                for (std::uint32_t i = 0; i < runtimeData.campObjectCount; ++i)
+                {
+                    CampObjectSaveData objectData;
+                    if (!readBlock(file, objectData, "camp object"))
+                        return false;
+
+                    CampObject object;
+                    object.id = objectData.id;
+                    object.type = static_cast<CampObjectType>(objectData.type);
+                    object.tileX = objectData.tileX;
+                    object.tileY = objectData.tileY;
+                    object.health = objectData.health;
+                    campObjects.push_back(object);
+                }
+
+                std::vector<BreakableObject> breakables;
+                breakables.reserve(runtimeData.breakableStateCount);
+                for (std::uint32_t i = 0; i < runtimeData.breakableStateCount; ++i)
+                {
+                    BreakableSaveData breakableData;
+                    if (!readBlock(file, breakableData, "breakable state"))
+                        return false;
+
+                    BreakableObject breakable;
+                    breakable.id = breakableData.id;
+                    breakable.kind = static_cast<BreakableKind>(breakableData.kind);
+                    breakable.position = breakableData.position;
+                    breakable.health = breakableData.health;
+                    breakable.radius = breakableData.radius;
+                    breakable.broken = breakableData.broken;
+                    breakable.velocity = breakableData.velocity;
+                    breakables.push_back(breakable);
+                }
+
+                if (advanced != nullptr)
+                {
+                    advanced->camp.restoreObjects(campObjects);
+                    advanced->reactive.restoreBreakables(breakables);
+                }
+            }
 
             for (std::uint32_t i = 0; i < runtimeData.ecsEntityCount; ++i)
             {

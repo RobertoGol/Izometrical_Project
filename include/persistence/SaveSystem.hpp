@@ -9,6 +9,7 @@
 
 namespace bunker
 {
+    class AdvancedMechanics;
 
     class SaveSystem
     {
@@ -16,8 +17,12 @@ namespace bunker
         SaveSystem() = default;
 
         static bool writeSave(unsigned int slot, const GameState& gs, const PlayerInventory& inventory,
-                              const Registry* registry = nullptr);
-        static bool readSave(unsigned int slot, GameState& gs, PlayerInventory& inventory, Registry* registry = nullptr);
+                              const Registry* registry = nullptr, const AdvancedMechanics* advanced = nullptr);
+        static bool readSave(unsigned int slot,
+                             GameState& gs,
+                             PlayerInventory& inventory,
+                             Registry* registry = nullptr,
+                             AdvancedMechanics* advanced = nullptr);
         static bool saveExists(unsigned int slot);
     };
 

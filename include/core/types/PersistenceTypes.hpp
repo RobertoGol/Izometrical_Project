@@ -9,7 +9,7 @@
 
 namespace bunker
 {
-    inline constexpr unsigned int SAVE_FORMAT_VERSION = 18;
+    inline constexpr unsigned int SAVE_FORMAT_VERSION = 19;
 
     // ══════════════════════════════════════════════════════════════════════
     // Данные сохранения
@@ -18,7 +18,7 @@ namespace bunker
     struct SaveFileHeader
     {
         char magic[4] = {'B', 'S', 'A', 'V'};
-        unsigned int version = SAVE_FORMAT_VERSION; // BSAV v18
+        unsigned int version = SAVE_FORMAT_VERSION; // BSAV v19
         unsigned int slotIndex = 0;
     };
 
@@ -60,6 +60,26 @@ namespace bunker
         EntityID entity = MAX_ENTITIES;
         TransformComponent transform;
         std::uint32_t materialID = 0;
+    };
+
+    struct CampObjectSaveData
+    {
+        int id = 0;
+        std::uint32_t type = 0;
+        int tileX = 0;
+        int tileY = 0;
+        float health = 100.0f;
+    };
+
+    struct BreakableSaveData
+    {
+        int id = 0;
+        std::uint32_t kind = 0;
+        Vector3D position;
+        float health = 30.0f;
+        float radius = 0.35f;
+        bool broken = false;
+        Vector3D velocity;
     };
 
 } // namespace bunker
