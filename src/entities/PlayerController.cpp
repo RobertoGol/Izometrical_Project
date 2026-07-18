@@ -1,5 +1,6 @@
 #include "PlayerController.hpp"
-#include "Collisions.hpp"
+#include "physics/CollisionSystem.hpp"
+#include "physics/PhysicsWorld.hpp"
 #include <cmath>
 #include <algorithm>
 
@@ -120,14 +121,17 @@ namespace bunker
         float nextX = gs.playerPos.x + m_DiveDirection.x * Config::PLAYER_DIVE_SPEED * dt;
         float nextY = gs.playerPos.y + m_DiveDirection.y * Config::PLAYER_DIVE_SPEED * dt;
 
-        if (!Collisions::checkWorldCollision(gs, nextX, gs.playerPos.y, playerRadius))
-        {
-            gs.playerPos.x = nextX;
-        }
-        if (!Collisions::checkWorldCollision(gs, gs.playerPos.x, nextY, playerRadius))
-        {
-            gs.playerPos.y = nextY;
-        }
+        PhysicsWorld physicsWorld(gs);
+        CollisionProbe probe{};
+        probe.position = gs.playerPos;
+        probe.radius = playerRadius;
+        probe.height = 1.8f;
+
+        const CollisionMoveResult move =
+            CollisionSystem::sweepAndSlide(physicsWorld,
+                                           probe,
+                                           {nextX - gs.playerPos.x, nextY - gs.playerPos.y, 0.0f});
+        gs.playerPos = move.position;
 
         float progress = 1.0f - (m_DiveTimer / Config::PLAYER_DIVE_TIME);
         gs.playerPos.z = std::sin(progress * 3.14159265f) * 0.5f;
@@ -163,14 +167,17 @@ namespace bunker
         float nextX = gs.playerPos.x + m_Velocity.x * dt;
         float nextY = gs.playerPos.y + m_Velocity.y * dt;
 
-        if (!Collisions::checkWorldCollision(gs, nextX, gs.playerPos.y, playerRadius))
-        {
-            gs.playerPos.x = nextX;
-        }
-        if (!Collisions::checkWorldCollision(gs, gs.playerPos.x, nextY, playerRadius))
-        {
-            gs.playerPos.y = nextY;
-        }
+        PhysicsWorld physicsWorld(gs);
+        CollisionProbe probe{};
+        probe.position = gs.playerPos;
+        probe.radius = playerRadius;
+        probe.height = 1.8f;
+
+        const CollisionMoveResult move =
+            CollisionSystem::sweepAndSlide(physicsWorld,
+                                           probe,
+                                           {nextX - gs.playerPos.x, nextY - gs.playerPos.y, 0.0f});
+        gs.playerPos = move.position;
     }
 
     void PlayerController::updateFacingAngle(const GameState& gs)

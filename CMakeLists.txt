@@ -128,6 +128,8 @@ add_library(game_core STATIC
     src/persistence/Progression.cpp
     src/persistence/SaveSystem.cpp
     src/persistence/StoryFlagRegistry.cpp
+    src/physics/CollisionSystem.cpp
+    src/physics/PhysicsWorld.cpp
     src/RecipeDatabase.cpp
     src/render/GameRenderer.cpp
     src/render/GameRendererAdvancedHUD.cpp
@@ -171,6 +173,7 @@ target_include_directories(game_core PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/include/entities"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/gameplay"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/persistence"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/physics"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/render"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/ui"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/vehicles"

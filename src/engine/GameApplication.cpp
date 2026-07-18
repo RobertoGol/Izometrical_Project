@@ -9,6 +9,7 @@
 
 #include <SFML/Graphics.hpp>
 #include "engine/Log.hpp"
+#include "physics/CollisionSystem.hpp"
 #include <cstdlib>
 #include <ctime>
 
@@ -518,7 +519,7 @@ namespace bunker
         m_BossAI.updateBosses(m_GameState, dt);
         PerceptionSystem::updateStimuli(dt);
 
-        Collisions::resolveAllCollisions(m_GameState);
+        CollisionSystem::resolveDynamicCollisions(m_GameState);
 
         // Мир: эрозия, осада, Pip-Pad.
         m_WorldSession.update(m_GameState, dt);

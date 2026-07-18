@@ -45,6 +45,15 @@
 * `PhysicsWorld.hpp`
 * `PhysicsWorld.cpp`
 
+### Status
+
+* [x] Added `PhysicsWorld` tile-solid query layer over current `GameState`.
+* [x] Added `CollisionSystem` sweep/slide movement result API.
+* [x] Added ground and ceiling contact flags for the 3D movement pipeline.
+* [x] Routed player walk/dive movement through `CollisionSystem::sweepAndSlide`.
+* [x] Routed dynamic collision resolve through `CollisionSystem::resolveDynamicCollisions`.
+* [ ] Manual QA: feel-test player slide, wall blocking, and 3D camera movement in the running game.
+
 ---
 
 ## 2. InteractionManager
