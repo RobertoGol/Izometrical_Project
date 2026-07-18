@@ -757,3 +757,834 @@
 - Использовать терминалы через Lang_for_my_decisions
 
 Это и будет первый настоящий играбельный билд Bunker Protocol.
+
+
+---
+
+# PLAYER EXPERIENCE, UI AND GAME FLOW ROADMAP
+
+## Общая концепция
+
+Bunker Protocol создаётся как survival RPG с опытом, вдохновлённым:
+
+- Fallout 4
+- Fallout 76
+- State of Decay 2
+- Titanfall 2
+- другими играми с сильным ощущением выживания, экспедиции и управления ресурсами.
+
+Главная цель:
+
+Игрок должен ощущать не просто запуск технического прототипа, а полноценное путешествие:
+
+
+Game Launch
+↓
+Main Menu
+↓
+Character Creation
+↓
+AIMP Selection / Creation
+↓
+World Loading
+↓
+Gameplay
+↓
+Exploration
+↓
+Combat
+↓
+Loot
+↓
+Progression
+↓
+Expansion of AIMP
+
+
+---
+
+# CURRENT MISSING PLAYER SYSTEMS
+
+## Системы, которых сейчас не хватает
+
+### Main Menu
+
+Отсутствует полноценный входной экран игры.
+
+Необходимо создать:
+
+- Continue
+- New Game
+- Load Game
+- Settings
+- Credits
+- Exit
+
+---
+
+# MAIN MENU SYSTEM
+
+## Continue
+
+Загрузка последнего состояния.
+
+Отображать:
+
+- имя персонажа;
+- уровень;
+- время игры;
+- последний регион;
+- состояние AIMP;
+- состояние BT-72.
+
+Пример:
+
+
+CONTINUE
+
+Robert
+
+Level 12
+
+AIMP: Northern Camp
+
+Play Time:
+38h 24m
+
+
+---
+
+# New Game
+
+Новая игра.
+
+Порядок:
+
+
+New Game
+
+↓
+
+Character Creation
+
+↓
+
+Character Background
+
+↓
+
+Create Personal AIMP
+
+↓
+
+Starting Location
+
+↓
+
+World Introduction
+
+
+---
+
+# Load Game
+
+Экран сохранений.
+
+Каждое сохранение должно показывать:
+
+- персонажа;
+- уровень;
+- дату;
+- место;
+- состояние мира;
+- состояние AIMP;
+- последний прогресс.
+
+---
+
+# SETTINGS MENU
+
+## Graphics
+
+Настройки:
+
+- Resolution
+- Fullscreen / Window Mode
+- VSync
+- FPS Limit
+- Texture Quality
+- Shadow Quality
+- View Distance
+- Effects Quality
+
+---
+
+## Audio
+
+Настройки:
+
+- Master Volume
+- Music
+- Effects
+- Voice
+- Radio
+- Ambient Sounds
+
+---
+
+## Controls
+
+Настройки управления:
+
+Пример:
+
+
+Move WASD
+
+Interact E
+
+Pip-Pad TAB / P
+
+Inventory I
+
+Reload R
+
+Jump SPACE
+
+Map M
+
+
+---
+
+## Gameplay
+
+Настройки:
+
+- Difficulty
+- HUD visibility
+- Auto-save
+- Tutorials
+- Interaction hints
+- Damage indicators
+
+---
+
+## Accessibility
+
+Настройки:
+
+- Subtitle size
+- Text scaling
+- Color options
+- Interface scaling
+
+---
+
+# CHARACTER CREATION SYSTEM
+
+## Общая идея
+
+Каждый игрок создаёт своего собственного персонажа.
+
+В кооперативном режиме:
+
+- Host не создаёт персонажей за других игроков.
+- Каждый игрок имеет своего персонажа.
+- Каждый игрок имеет свой прогресс персонажа.
+- Каждый игрок имеет свой набор навыков и экипировки.
+
+---
+
+# Character Creation Flow
+
+
+Create Character
+
+↓
+
+Appearance
+
+↓
+
+Attributes
+
+↓
+
+Background
+
+↓
+
+Name
+
+↓
+
+Create AIMP
+
+↓
+
+Start Game
+
+
+---
+
+# Appearance Editor
+
+Вдохновение:
+
+Fallout 4 character creator.
+
+Настройки:
+
+## Face
+
+- Head shape
+- Jaw
+- Nose
+- Eyes
+- Mouth
+- Skin details
+
+---
+
+## Hair
+
+- Hair style
+- Color
+- Facial hair
+
+---
+
+## Body
+
+- Height
+- Body type
+- Build
+
+---
+
+# Character Identity
+
+## Name
+
+Игрок задаёт имя.
+
+Пример:
+
+
+Name:
+Robert
+
+
+---
+
+# Background System
+
+Перед стартом игрок выбирает прошлое.
+
+Примеры:
+
+## Engineer
+
+Бонусы:
+
++ ремонт техники
++ создание модулей
+
+Минусы:
+
+- меньше боевых бонусов
+
+
+---
+
+## Explorer
+
+Бонусы:
+
++ поиск ресурсов
++ исследование карты
+
+
+---
+
+## Soldier
+
+Бонусы:
+
++ оружие
++ тактика
+
+---
+
+# Attribute System
+
+Вариант Fallout SPECIAL.
+
+Для Bunker Protocol возможно использовать:
+
+
+Strength
+
+Engineering
+
+Survival
+
+Science
+
+Tactics
+
+Mobility
+
+Leadership
+
+
+---
+
+# AIMP SYSTEM
+
+## Personal Camp System
+
+В отличие от Fallout:
+
+Игрок не имеет один общий дом.
+
+Вдохновение:
+
+State of Decay 2.
+
+---
+
+## Каждый игрок имеет собственный AIMP
+
+AIMP:
+
+Autonomous Integrated Mobile Platform / Personal Camp System
+
+Это личная база игрока.
+
+---
+
+## В кооперативе:
+
+
+Player 1
+|
+AIMP 1
+
+Player 2
+|
+AIMP 2
+
+Player 3
+|
+AIMP 3
+
+
+---
+
+# AIMP Features
+
+## Base Management
+
+Возможности:
+
+- хранение ресурсов;
+- производство;
+- ремонт;
+- улучшение;
+- настройка оборудования;
+- управление экспедициями.
+
+---
+
+## AIMP Modules
+
+Примеры:
+
+- Storage Module
+- Workshop Module
+- Medical Module
+- Research Module
+- Defense Module
+- Energy Module
+
+---
+
+# GAME HUD SYSTEM
+
+## Игровой интерфейс
+
+Во время игры нужен постоянный HUD.
+
+Отображать:
+
+- здоровье;
+- энергию;
+- состояние брони;
+- радиацию;
+- оружие;
+- боезапас;
+- активные эффекты.
+
+---
+
+Пример:
+
+
+HP
+
+ENERGY
+
+RADIATION
+
+    CROSSHAIR
+
+WEAPON
+
+AMMO
+
+
+---
+
+# PIP-PAD SYSTEM
+
+## Игровой планшет
+
+Pip-Pad является главным устройством игрока.
+
+Не просто меню.
+
+Это часть мира.
+
+---
+
+# Pip-Pad Sections
+
+## Status
+
+Информация:
+
+- здоровье;
+- состояние тела;
+- эффекты;
+- травмы.
+
+---
+
+## Inventory
+
+Раздел:
+
+- предметы;
+- ресурсы;
+- оружие;
+- материалы.
+
+---
+
+## Equipment
+
+Раздел:
+
+- оружие;
+- броня;
+- модули.
+
+---
+
+## Map
+
+Особенность:
+
+Карта изначально неизвестна.
+
+
+UNKNOWN AREA
+
+
+После исследования:
+
+
+DISCOVERED REGION
+
+
+---
+
+## Radio
+
+Система:
+
+- сигналы;
+- сообщения;
+- события;
+- предупреждения.
+
+---
+
+## Quests
+
+Журнал:
+
+- Main Quest
+- Side Quest
+- Tasks
+
+---
+
+# IN-GAME MENU
+
+Отдельно от Main Menu.
+
+Открывается во время игры.
+
+Пример:
+
+
+Resume
+
+Save
+
+Load
+
+Settings
+
+Exit
+
+
+---
+
+# SAVE SYSTEM UI
+
+Экран сохранений должен учитывать:
+
+- персонажа;
+- AIMP;
+- мир;
+- время;
+- найденные места;
+- выполненные задачи.
+
+---
+
+# LOADING SCREEN SYSTEM
+
+Загрузка должна использоваться как часть атмосферы.
+
+Показывать:
+
+- советы;
+- информацию о мире;
+- состояние оборудования;
+- историю.
+
+Пример:
+
+
+BT-72 POWER CORE
+
+Energy:
+82%
+
+Current Mission:
+Northern Expedition
+
+
+---
+
+# CHARACTER PROGRESSION
+
+## Level System
+
+После получения опыта:
+
+
+LEVEL UP
+
+Choose Upgrade
+
+
+---
+
+# Skills / Perks
+
+Примеры:
+
+## Engineering Rank 1
+
+Позволяет:
+
+- ремонтировать оборудование.
+
+## Engineering Rank 2
+
+Позволяет:
+
+- создавать улучшенные модули.
+
+---
+
+# BT-72 / AIMP CONTROL INTERFACE
+
+Отдельное меню управления.
+
+Пример:
+
+
+BT-72 STATUS
+
+Power:
+82%
+
+Heat:
+34%
+
+Damage:
+12%
+
+Modules:
+
+Scanner
+Storage
+Armor
+Engine
+
+
+---
+
+# EXPEDITION PLANNING SYSTEM
+
+Перед выходом игрок готовит экспедицию.
+
+Пример:
+
+
+Destination:
+
+Northern Factory
+
+Required:
+
+Food
+Ammo
+Repair Kit
+Energy
+
+
+---
+
+# CO-OP MODEL
+
+## Архитектура
+
+Модель:
+
+State of Decay 2.
+
+Не MMO.
+
+---
+
+## Основные правила:
+
+- Dedicated servers не нужны.
+- Каждый игрок создаёт своего персонажа.
+- Каждый игрок имеет собственный AIMP.
+- Host управляет состоянием мира.
+- Клиенты подключаются к существующему миру.
+
+---
+
+# CO-OP PLAYER STRUCTURE
+
+Пример:
+
+
+HOST
+
+World State
+
+AI
+
+Events
+
+Loot
+
+PLAYER 1
+
+Character
+
+Inventory
+
+AIMP
+
+PLAYER 2
+
+Character
+
+Inventory
+
+AIMP
+
+
+---
+
+# PRIORITY ORDER FOR PLAYER SYSTEMS
+
+## P0
+
+- Main Menu
+- Pause Menu
+- Settings
+- Save/Load UI
+
+
+## P1
+
+- Character Creation
+- Basic HUD
+- Inventory UI
+- Pip-Pad
+
+
+## P2
+
+- Perks
+- Skills
+- Dialogue UI
+- Quest Journal
+
+
+## P3
+
+- AIMP Management
+- BT-72 Interface
+- Expedition Planning
+
+
+---
+
+# FINAL GOAL
+
+Игрок должен чувствовать:
+
+
+I create my survivor.
+
+I build my AIMP.
+
+I explore the world.
+
+I collect resources.
+
+I upgrade my equipment.
+
+I survive dangerous expeditions.
+
+I build my own story.
+
+
+Bunker Protocol должен быть не просто техническим движком.
+
+Он должен стать полноценной survival RPG системой, где интерфейс, персонаж, база и мир работают как единая экосистема.
+
+---
