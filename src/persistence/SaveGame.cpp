@@ -24,9 +24,51 @@ namespace bunker
             file << key << '=' << part.currentHp << '\n';
         }
 
+        void writeRuntimeWorldState(std::ofstream& file, const GameState& gameState)
+        {
+            file << "containers=";
+            for (std::size_t i = 0; i < gameState.lootContainers.size(); ++i)
+            {
+                const LootContainer& container = gameState.lootContainers[i];
+                if (i > 0)
+                {
+                    file << ';';
+                }
+                file << i << ',' << (container.isOpened ? 1 : 0) << ',' << container.respawnTimerSeconds << ','
+                     << container.respawnDelaySeconds;
+            }
+            file << '\n';
+
+            file << "collectedPickups=";
+            bool wrotePickup = false;
+            for (std::size_t i = 0; i < gameState.loosePickups.size(); ++i)
+            {
+                if (!gameState.loosePickups[i].collected)
+                {
+                    continue;
+                }
+                file << (wrotePickup ? "," : "") << i;
+                wrotePickup = true;
+            }
+            file << '\n';
+
+            file << "talkedNpcs=";
+            bool wroteNpc = false;
+            for (std::size_t i = 0; i < gameState.neutralNpcs.size(); ++i)
+            {
+                if (!gameState.neutralNpcs[i].hasTalked)
+                {
+                    continue;
+                }
+                file << (wroteNpc ? "," : "") << i;
+                wroteNpc = true;
+            }
+            file << '\n';
+        }
+
         bool writeRuntimeSidecar(const SaveGameContext& context)
         {
-            if (context.doorTransition == nullptr && context.modularEquipment == nullptr)
+            if (context.gameState == nullptr && context.doorTransition == nullptr && context.modularEquipment == nullptr)
             {
                 return true;
             }
@@ -54,6 +96,11 @@ namespace bunker
                 file << '\n';
             }
 
+            if (context.gameState != nullptr)
+            {
+                writeRuntimeWorldState(file, *context.gameState);
+            }
+
             if (context.modularEquipment != nullptr)
             {
                 const ModularTankChassis& tank = context.modularEquipment->titanRuntimeChassis();
@@ -68,22 +115,32 @@ namespace bunker
             return static_cast<bool>(file);
         }
 
-        std::vector<int> parseOpenedDoors(const std::string& value)
+        std::vector<std::string> split(const std::string& value, char delimiter)
         {
-            std::vector<int> ids;
+            std::vector<std::string> tokens;
             std::stringstream stream(value);
             std::string token;
-            while (std::getline(stream, token, ','))
+            while (std::getline(stream, token, delimiter))
             {
                 if (!token.empty())
                 {
-                    try
-                    {
-                        ids.push_back(std::stoi(token));
-                    }
-                    catch (...)
-                    {
-                    }
+                    tokens.push_back(token);
+                }
+            }
+            return tokens;
+        }
+
+        std::vector<int> parseOpenedDoors(const std::string& value)
+        {
+            std::vector<int> ids;
+            for (const std::string& token : split(value, ','))
+            {
+                try
+                {
+                    ids.push_back(std::stoi(token));
+                }
+                catch (...)
+                {
                 }
             }
             return ids;
@@ -94,6 +151,34 @@ namespace bunker
             try
             {
                 parsed = std::stof(value);
+            }
+            catch (...)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        bool tryParseSize(const std::string& value, std::size_t& parsed)
+        {
+            try
+            {
+                parsed = static_cast<std::size_t>(std::stoull(value));
+            }
+            catch (...)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        bool tryParseInt(const std::string& value, int& parsed)
+        {
+            try
+            {
+                parsed = std::stoi(value);
             }
             catch (...)
             {
@@ -117,6 +202,68 @@ namespace bunker
                 tank.frontalArmor.currentHp = value;
             else if (key == "rearArmorHp")
                 tank.rearArmor.currentHp = value;
+        }
+
+        void applyContainerRuntime(const std::string& value, GameState& gameState)
+        {
+            for (const std::string& entry : split(value, ';'))
+            {
+                const std::vector<std::string> fields = split(entry, ',');
+                if (fields.size() < 4)
+                {
+                    continue;
+                }
+
+                std::size_t index = 0;
+                int opened = 0;
+                float timer = 0.0f;
+                float delay = 0.0f;
+                if (!tryParseSize(fields[0], index) || !tryParseInt(fields[1], opened) ||
+                    !tryParseFloat(fields[2], timer) || !tryParseFloat(fields[3], delay) ||
+                    index >= gameState.lootContainers.size())
+                {
+                    continue;
+                }
+
+                LootContainer& container = gameState.lootContainers[index];
+                container.isOpened = opened != 0;
+                container.respawnTimerSeconds = timer;
+                container.respawnDelaySeconds = delay;
+            }
+        }
+
+        void applyPickupRuntime(const std::string& value, GameState& gameState)
+        {
+            for (auto& pickup : gameState.loosePickups)
+            {
+                pickup.collected = false;
+            }
+
+            for (const std::string& token : split(value, ','))
+            {
+                std::size_t index = 0;
+                if (tryParseSize(token, index) && index < gameState.loosePickups.size())
+                {
+                    gameState.loosePickups[index].collected = true;
+                }
+            }
+        }
+
+        void applyNpcRuntime(const std::string& value, GameState& gameState)
+        {
+            for (auto& npc : gameState.neutralNpcs)
+            {
+                npc.hasTalked = false;
+            }
+
+            for (const std::string& token : split(value, ','))
+            {
+                std::size_t index = 0;
+                if (tryParseSize(token, index) && index < gameState.neutralNpcs.size())
+                {
+                    gameState.neutralNpcs[index].hasTalked = true;
+                }
+            }
         }
 
         bool readRuntimeSidecar(const SaveGameContext& context)
@@ -147,6 +294,18 @@ namespace bunker
                 else if (key == "openedDoors")
                 {
                     openedDoors = parseOpenedDoors(value);
+                }
+                else if (key == "containers" && context.gameState != nullptr)
+                {
+                    applyContainerRuntime(value, *context.gameState);
+                }
+                else if (key == "collectedPickups" && context.gameState != nullptr)
+                {
+                    applyPickupRuntime(value, *context.gameState);
+                }
+                else if (key == "talkedNpcs" && context.gameState != nullptr)
+                {
+                    applyNpcRuntime(value, *context.gameState);
                 }
                 else if (context.modularEquipment != nullptr)
                 {

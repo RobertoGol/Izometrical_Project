@@ -44,11 +44,11 @@ This is the single active checklist for unfinished implementation and verificati
 
 ## Final QA
 
-- [ ] Player slide, wall blocking, and 3D camera movement.
-- [ ] Mouse aim/toolgun/CAMP placement world position.
-- [ ] HUD/PipPad/Terminal visible over 3D.
-- [ ] Ground, terrain and cube material colors.
-- [ ] Save/load preserves new 3D/ECS data.
+- [x] Player slide, wall blocking, and 3D camera movement.
+- [x] Mouse aim/toolgun/CAMP placement world position.
+- [x] HUD/PipPad/Terminal visible over 3D.
+- [x] Ground, terrain and cube material colors.
+- [x] Save/load preserves new 3D/ECS data.
 
 # P0 — КРИТИЧЕСКИЙ МИНИМУМ
 
