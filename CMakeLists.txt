@@ -219,6 +219,14 @@ if(EXISTS "${SFML_ROOT}/bin")
         "${SFML_ROOT}/bin"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
     )
+
+    foreach(SFML_COMPONENT_NAME audio graphics network system window)
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SFML_ROOT}/bin/sfml-${SFML_COMPONENT_NAME}-d-3.dll"
+            "$<TARGET_FILE_DIR:${PROJECT_NAME}>/sfml-${SFML_COMPONENT_NAME}-d.dll"
+        )
+    endforeach()
 endif()
 
 if(BUILD_TESTING)

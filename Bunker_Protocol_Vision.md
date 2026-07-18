@@ -260,7 +260,7 @@ What needs checking:
 
 ### What to test after next changes
 
-- [ ] Игра не закрывается сама через ~1000 кадров.
+- [x] Игра не закрывается сама через ~1000 кадров.
 - [ ] Камера двигается/следит за игроком в 3D.
 - [ ] Mouse aim/toolgun/CAMP placement используют правильную world position.
 - [ ] HUD/PipPad/Terminal снова видны поверх 3D.
