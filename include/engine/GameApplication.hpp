@@ -15,6 +15,7 @@
 #include "HostileAISystem.hpp"
 #include "InputManager.hpp"
 #include "Inventory.hpp"
+#include "InteractionManager.hpp"
 #include "MapScreen.hpp"
 #include "PlayerController.hpp"
 #include "Progression.hpp"
@@ -90,6 +91,7 @@ namespace bunker
         EnemySpawner m_EnemySpawner;
         WorldSession m_WorldSession;
         PlayerInventory m_Inventory;
+        InteractionManager m_InteractionManager;
         HUD m_Hud;
         TerminalManager m_TerminalUI;
         PipPadUI m_PipPad;

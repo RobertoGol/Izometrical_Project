@@ -78,6 +78,16 @@
 * CraftingStation
 * NPC
 
+### Status
+
+* [x] Added `InteractionManager.hpp/.cpp`.
+* [x] Added best-target query with distance checks.
+* [x] Added line-of-sight checks through `PhysicsWorld`.
+* [x] Routed `E` interaction through `InteractionManager`.
+* [x] Connected current working interaction types: `Terminal`, `Container`, `Vehicle`.
+* [ ] Highlight rendering hook is API-ready through `highlightedTarget()`, but visual overlay still needs renderer/UI integration.
+* [ ] Door, Pickup, CraftingStation and NPC execution need their own systems before they can be enabled.
+
 ### Файлы
 
 * `InteractionManager.hpp`

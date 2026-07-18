@@ -435,13 +435,7 @@ namespace bunker
         // Посадка в транспорт, подключение к терминалу или подбор лута (E).
         if (input.interact)
         {
-            if (!m_TerminalUI.tryInteractTerminal(m_GameState))
-            {
-                if (!m_VehicleManager.mountNearest(m_GameState))
-                {
-                    m_WorldSession.interactWithContainers(m_GameState, m_Inventory, m_GameState.mouseWorldPos);
-                }
-            }
+            m_InteractionManager.tryInteract(m_GameState, m_TerminalUI, m_VehicleManager, m_WorldSession, m_Inventory);
         }
     }
 
