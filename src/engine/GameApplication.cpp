@@ -437,7 +437,7 @@ namespace bunker
             {
                 if (!m_VehicleManager.mountNearest(m_GameState))
                 {
-                    m_WorldSession.interactWithContainers(m_GameState, m_Inventory);
+                    m_WorldSession.interactWithContainers(m_GameState, m_Inventory, m_GameState.mouseWorldPos);
                 }
             }
         }
@@ -540,7 +540,7 @@ namespace bunker
         }
 
         // Advanced переносы из двух старых репозиториев.
-        m_Advanced.update(m_GameState, m_Inventory, input, dt);
+        m_Advanced.update(m_GameState, m_Inventory, input, dt, m_CampValidator);
 
         // C.A.M.P. place: B включает режим, ЛКМ ставит объект если не стреляем по врагу.
         if (m_Advanced.camp.enabled() && input.isShooting)

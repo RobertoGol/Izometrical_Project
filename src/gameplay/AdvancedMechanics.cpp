@@ -27,7 +27,11 @@ namespace bunker
         }
     }
 
-    void AdvancedMechanics::update(GameState& gs, PlayerInventory& inv, const InputSnapshot& input, float dt)
+    void AdvancedMechanics::update(GameState& gs,
+                                   PlayerInventory& inv,
+                                   const InputSnapshot& input,
+                                   float dt,
+                                   const CampPlacementValidator& campValidator)
     {
         profile.update(playerProfile, dt);
         weather.update(gs, dt);
@@ -36,7 +40,7 @@ namespace bunker
         survival.update(gs, inv, dt);
         tankUtility.update(gs, dt);
         reactive.update(gs, dt);
-        camp.updatePreview(gs, gs.mouseWorldPos);
+        camp.updatePreview(gs, gs.mouseWorldPos, campValidator);
         camp.updateTurrets(gs, dt);
         lanline.update(gs, inv, dt);
 

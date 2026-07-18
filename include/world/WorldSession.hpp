@@ -14,7 +14,7 @@ namespace bunker
         WorldSession() = default;
         void generateDefaultWorld(GameState &gs, EnemySpawner &spawner);
         void update(GameState &gs, float dt);
-        void interactWithContainers(GameState &gs, PlayerInventory &inventory);
+        void interactWithContainers(GameState &gs, PlayerInventory &inventory, const Vector3D &interactionPoint);
 
     private:
         void spreadErosionToNeighbors(GameState &gs);

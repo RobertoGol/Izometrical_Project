@@ -17,7 +17,11 @@ namespace bunker
     {
       public:
         void initialize(GameState& gs, PlayerInventory& inv);
-        void update(GameState& gs, PlayerInventory& inv, const InputSnapshot& input, float dt);
+        void update(GameState& gs,
+                    PlayerInventory& inv,
+                    const InputSnapshot& input,
+                    float dt,
+                    const CampPlacementValidator& campValidator);
         void onExplosion(GameState& gs, Vector3D pos, float radius, float damage);
 
         WeatherSystem weather;

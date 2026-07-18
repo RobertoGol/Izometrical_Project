@@ -139,17 +139,25 @@ namespace bunker
         }
     }
 
-    void WorldSession::interactWithContainers(GameState& gs, PlayerInventory& inventory)
+    void WorldSession::interactWithContainers(GameState& gs,
+                                              PlayerInventory& inventory,
+                                              const Vector3D& interactionPoint)
     {
+        constexpr float PlayerReachSq = 2.25f;
+        constexpr float TargetRadiusSq = 1.0f;
+
         for (auto& container : gs.lootContainers)
         {
             if (container.isOpened)
                 continue;
 
-            float dx = gs.playerPos.x - container.position.x;
-            float dy = gs.playerPos.y - container.position.y;
+            const float playerDx = gs.playerPos.x - container.position.x;
+            const float playerDy = gs.playerPos.y - container.position.y;
+            const float targetDx = interactionPoint.x - container.position.x;
+            const float targetDy = interactionPoint.y - container.position.y;
 
-            if ((dx * dx + dy * dy) < 1.0f)
+            if ((playerDx * playerDx + playerDy * playerDy) <= PlayerReachSq &&
+                (targetDx * targetDx + targetDy * targetDy) <= TargetRadiusSq)
             {
                 container.isOpened = true;
 

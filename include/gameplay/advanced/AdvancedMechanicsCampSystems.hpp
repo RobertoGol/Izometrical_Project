@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gameplay/advanced/AdvancedMechanicsCommon.hpp"
+#include "world/CampPlacementValidator.hpp"
 namespace bunker
 {
 
@@ -32,7 +33,7 @@ namespace bunker
         }
 
         void cycleType();
-        void updatePreview(const GameState& gs, const Vector3D& mouseWorld);
+        void updatePreview(const GameState& gs, const Vector3D& mouseWorld, const CampPlacementValidator& validator);
         bool place(GameState& gs, PlayerInventory& inv, float costMult = 1.0f);
         void updateTurrets(GameState& gs, float dt);
 

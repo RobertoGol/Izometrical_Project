@@ -31,10 +31,22 @@ namespace bunker
         }
     }
 
-    void CampSystem::updatePreview(const GameState& gs, const Vector3D& mouseWorld)
+    void CampSystem::updatePreview(const GameState& gs,
+                                   const Vector3D& mouseWorld,
+                                   const CampPlacementValidator& validator)
     {
-        m_Preview.tileX = static_cast<int>(std::floor(mouseWorld.x));
-        m_Preview.tileY = static_cast<int>(std::floor(mouseWorld.y));
+        int tileX = static_cast<int>(std::floor(mouseWorld.x));
+        int tileY = static_cast<int>(std::floor(mouseWorld.y));
+        const bool validatorAccepted = validator.validateAndSnap(gs, tileX, tileY);
+
+        m_Preview.tileX = tileX;
+        m_Preview.tileY = tileY;
+        if (!validatorAccepted)
+        {
+            m_Preview.isPlacementValid = false;
+            return;
+        }
+
         m_Preview.isPlacementValid = canPlace(gs, m_Preview.tileX, m_Preview.tileY);
     }
 
