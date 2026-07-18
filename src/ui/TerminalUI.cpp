@@ -6,6 +6,26 @@
 
 namespace bunker
 {
+    namespace
+    {
+        constexpr const char* TerminalCrtShader = R"(
+            uniform sampler2D texture;
+            uniform float u_time;
+            uniform vec2 u_resolution;
+
+            void main()
+            {
+                vec2 uv = gl_TexCoord[0].xy;
+                vec2 centered = uv - vec2(0.5);
+                float vignette = 1.0 - dot(centered, centered) * 0.65;
+                float scanline = 0.88 + 0.12 * sin((uv.y * u_resolution.y + u_time * 80.0) * 3.14159);
+                float jitter = sin((uv.y * 180.0) + u_time * 18.0) * 0.0015;
+                vec4 base = texture2D(texture, vec2(uv.x + jitter, uv.y));
+                vec3 phosphor = vec3(base.r * 0.70, base.g * 1.08, base.b * 0.72);
+                gl_FragColor = vec4(phosphor * scanline * vignette, base.a);
+            }
+        )";
+    }
 
     TerminalManager::TerminalManager()
     {
@@ -147,19 +167,64 @@ namespace bunker
             return;
 
         const auto& term = m_Terminals[m_ActiveTerminalIndex];
-        float W = static_cast<float>(Config::SCREEN_WIDTH);
-        float H = static_cast<float>(Config::SCREEN_HEIGHT);
+        if (ensureCrtResources(window.getSize()))
+        {
+            m_CrtSurface.clear(sf::Color::Transparent);
+            renderTerminalContent(m_CrtSurface, term);
+            m_CrtSurface.display();
+
+            sf::Sprite terminalSprite(m_CrtSurface.getTexture());
+            m_CrtShader.setUniform("u_time", m_CrtScanlineTimer);
+            m_CrtShader.setUniform("u_resolution",
+                                   sf::Glsl::Vec2(static_cast<float>(window.getSize().x),
+                                                  static_cast<float>(window.getSize().y)));
+            window.draw(terminalSprite, &m_CrtShader);
+            return;
+        }
+
+        renderTerminalContent(window, term);
+    }
+
+    bool TerminalManager::ensureCrtResources(sf::Vector2u size) const
+    {
+        if (!sf::Shader::isAvailable())
+        {
+            return false;
+        }
+
+        if (!m_CrtSurfaceReady || m_CrtSurface.getSize() != size)
+        {
+            m_CrtSurfaceReady = m_CrtSurface.resize(size);
+        }
+        if (!m_CrtSurfaceReady)
+        {
+            return false;
+        }
+
+        if (!m_CrtShaderReady)
+        {
+            m_CrtShaderReady = m_CrtShader.loadFromMemory(TerminalCrtShader, sf::Shader::Type::Fragment);
+        }
+
+        return m_CrtShaderReady;
+    }
+
+    void TerminalManager::renderTerminalContent(sf::RenderTarget& target, const BunkerTerminal& term) const
+    {
+        float W = static_cast<float>(target.getSize().x);
+        float H = static_cast<float>(target.getSize().y);
+        sf::RenderTarget& window = target;
 
         sf::RectangleShape crtBg({W, H});
         crtBg.setFillColor(sf::Color(10, 20, 12, 245));
-        window.draw(crtBg);
+        target.draw(crtBg);
 
         sf::RectangleShape border({W - 120, H - 120});
         border.setPosition({60.0f, 60.0f});
         border.setFillColor(sf::Color(15, 30, 18));
         border.setOutlineThickness(3.0f);
         border.setOutlineColor(sf::Color(50, 220, 80));
-        window.draw(border);
+        target.draw(border);
 
         if (m_FontLoaded)
         {
@@ -193,6 +258,17 @@ namespace bunker
         text.setFillColor(color);
         text.setPosition({x, y});
         window.draw(text);
+    }
+
+    void TerminalManager::drawText(sf::RenderTarget& target, const std::string& str, float x, float y, int size,
+                                   sf::Color color) const
+    {
+        if (!m_FontLoaded)
+            return;
+        sf::Text text(m_Font, str, static_cast<unsigned int>(size));
+        text.setFillColor(color);
+        text.setPosition({x, y});
+        target.draw(text);
     }
 
 } // namespace bunker

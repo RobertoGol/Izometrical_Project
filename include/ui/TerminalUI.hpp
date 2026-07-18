@@ -31,6 +31,10 @@ namespace bunker
         float m_CrtScanlineTimer = 0.0f;
         sf::Font m_Font;
         bool m_FontLoaded = false;
+        mutable sf::RenderTexture m_CrtSurface;
+        mutable sf::Shader m_CrtShader;
+        mutable bool m_CrtSurfaceReady = false;
+        mutable bool m_CrtShaderReady = false;
 
     public:
         TerminalManager();
@@ -56,7 +60,10 @@ namespace bunker
         const std::vector<BunkerTerminal> &getTerminals() const { return m_Terminals; }
 
     private:
+        bool ensureCrtResources(sf::Vector2u size) const;
+        void renderTerminalContent(sf::RenderTarget &target, const BunkerTerminal &term) const;
         void drawText(sf::RenderWindow &window, const std::string &str, float x, float y, int size, sf::Color color) const;
+        void drawText(sf::RenderTarget &target, const std::string &str, float x, float y, int size, sf::Color color) const;
     };
 
 } // namespace bunker
