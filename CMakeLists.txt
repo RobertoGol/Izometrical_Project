@@ -133,6 +133,7 @@ add_library(game_core STATIC
     src/render/GameRendererAdvancedHUD.cpp
     src/render/GameRendererAdvancedWorld.cpp
     src/render/GameRendererEntities.cpp
+    src/render/MaterialSystem.cpp
     src/render/Renderer3D.cpp
     src/render/ShaderManager.cpp
     src/ResourceManager.cpp

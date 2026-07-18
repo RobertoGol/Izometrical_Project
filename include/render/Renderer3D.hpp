@@ -1,6 +1,7 @@
 #pragma once
 #include "core/ECS.hpp"
 #include "entities/Camera.hpp"
+#include "render/MaterialSystem.hpp"
 #include "world/WeatherSystem.hpp"
 #include <cstdint>
 #include <glm/glm.hpp>
@@ -49,16 +50,12 @@ namespace bunker {
         int m_locView = -1;
         int m_locProjection = -1;
         int m_locModel = -1;
-        int m_locMaterialColor = -1;
-        int m_locMaterialEmissive = -1;
-        int m_locMaterialRoughness = -1;
-        int m_locMaterialMetallic = -1;
         int m_locLightDirection = -1;
         int m_locAmbientColor = -1;
         int m_locLightColor = -1;
         int m_locFogColor = -1;
         int m_locDebugOverlay = -1;
-        int m_locMaterialDebugColor = -1;
+        MaterialSystem m_Materials;
         bool m_initialized = false;
         bool m_wireframeEnabled = false;
         RendererDebugOverlay m_debugOverlay = RendererDebugOverlay::None;
@@ -74,8 +71,6 @@ namespace bunker {
         bool ensurePostProcessTarget(unsigned int width, unsigned int height);
         void renderPostProcess(unsigned int width, unsigned int height);
         void releasePostProcessTarget();
-        void bindMaterial(std::uint32_t materialID);
-        static glm::vec3 materialDebugColor(std::uint32_t materialID);
     };
 
 } // namespace bunker

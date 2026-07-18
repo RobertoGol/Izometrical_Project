@@ -234,7 +234,7 @@ What needs checking:
 - [x] Добавить texture slots: albedo, normal, roughness, metallic; связать их с generated textures.
 - [x] Добавить validation material catalog: duplicate IDs, unknown ID fallback logging.
 - [x] Добавить editor/debug UI для выбора и просмотра material ID/name/hex.
-- [ ] Когда появятся texture bindings, вынести material binding из `Renderer3D` в dedicated material system.
+- [x] Когда появятся texture bindings, вынести material binding из `Renderer3D` в dedicated material system.
 
 ### P2 - architecture and code health
 

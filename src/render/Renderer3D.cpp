@@ -140,7 +140,7 @@ namespace bunker {
                 glUniformMatrix4fv(m_locModel, 1, GL_FALSE, glm::value_ptr(model));
             }
 
-            bindMaterial(mesh.materialID);
+            m_Materials.bind(mesh.materialID);
             glBindVertexArray(mesh.vaoID);
             glDrawElements(GL_TRIANGLES, mesh.indexCount, GL_UNSIGNED_INT, 0);
         }
@@ -244,16 +244,12 @@ namespace bunker {
         m_locView = glGetUniformLocation(m_shaderProgram, "u_view");
         m_locProjection = glGetUniformLocation(m_shaderProgram, "u_projection");
         m_locModel = glGetUniformLocation(m_shaderProgram, "u_model");
-        m_locMaterialColor = glGetUniformLocation(m_shaderProgram, "u_materialColor");
-        m_locMaterialEmissive = glGetUniformLocation(m_shaderProgram, "u_materialEmissive");
-        m_locMaterialRoughness = glGetUniformLocation(m_shaderProgram, "u_materialRoughness");
-        m_locMaterialMetallic = glGetUniformLocation(m_shaderProgram, "u_materialMetallic");
         m_locLightDirection = glGetUniformLocation(m_shaderProgram, "u_lightDirection");
         m_locAmbientColor = glGetUniformLocation(m_shaderProgram, "u_ambientColor");
         m_locLightColor = glGetUniformLocation(m_shaderProgram, "u_lightColor");
         m_locFogColor = glGetUniformLocation(m_shaderProgram, "u_fogColor");
         m_locDebugOverlay = glGetUniformLocation(m_shaderProgram, "u_debugOverlay");
-        m_locMaterialDebugColor = glGetUniformLocation(m_shaderProgram, "u_materialDebugColor");
+        m_Materials.cacheUniforms(m_shaderProgram);
     }
 
     void Renderer3D::loadPostProcessShader() {
@@ -385,38 +381,6 @@ namespace bunker {
         }
         m_sceneTargetWidth = 0;
         m_sceneTargetHeight = 0;
-    }
-
-    void Renderer3D::bindMaterial(std::uint32_t materialID) {
-        if (m_shaderProgram == 0 || m_locMaterialColor < 0) {
-            return;
-        }
-
-        const auto& material = getMaterial(materialID);
-        const glm::vec3 color = hexToLinearRgb(material.hex);
-        glUniform3fv(m_locMaterialColor, 1, glm::value_ptr(color));
-        if (m_locMaterialDebugColor >= 0) {
-            const glm::vec3 debugColor = materialDebugColor(materialID);
-            glUniform3fv(m_locMaterialDebugColor, 1, glm::value_ptr(debugColor));
-        }
-        if (m_locMaterialEmissive >= 0) {
-            const glm::vec3 emissive = hexToLinearRgb(material.emissiveHex);
-            glUniform3fv(m_locMaterialEmissive, 1, glm::value_ptr(emissive));
-        }
-        if (m_locMaterialRoughness >= 0) {
-            glUniform1f(m_locMaterialRoughness, material.roughness);
-        }
-        if (m_locMaterialMetallic >= 0) {
-            glUniform1f(m_locMaterialMetallic, material.metallic);
-        }
-    }
-
-    glm::vec3 Renderer3D::materialDebugColor(std::uint32_t materialID) {
-        const std::uint32_t hash = materialID * 2654435761u;
-        const float r = static_cast<float>((hash >> 16) & 0xFFu) / 255.0f;
-        const float g = static_cast<float>((hash >> 8) & 0xFFu) / 255.0f;
-        const float b = static_cast<float>(hash & 0xFFu) / 255.0f;
-        return glm::clamp(glm::vec3{r, g, b} * 0.75f + glm::vec3{0.20f}, glm::vec3{0.0f}, glm::vec3{1.0f});
     }
 
 } // namespace bunker
