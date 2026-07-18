@@ -258,11 +258,7 @@ What needs checking:
 - [x] Добавить smoke test или run-mode без ручного окна: build + shader file check + asset path check.
 - [x] Проверить MapEditor после 3D/runtime изменений, чтобы editor branch не отстал от game assets.
 
-### What to test after next changes
+### Archived test notes
 
-- [x] Игра не закрывается сама через ~1000 кадров.
-- [ ] Камера двигается/следит за игроком в 3D.
-- [ ] Mouse aim/toolgun/CAMP placement используют правильную world position.
-- [ ] HUD/PipPad/Terminal снова видны поверх 3D.
-- [ ] Ground, terrain и cube имеют разные material colors.
-- [ ] Save/load сохраняет не только старый 2D state, но и новые 3D/ECS данные.
+Active runtime QA items were moved to `# BUNKER PROTOCOL — MASTER ROADMAP.md` under `CODEX ACTIVE CHECKLIST`.
+This file is kept as historical 3D reconstruction notes and should not be used as an active task list.

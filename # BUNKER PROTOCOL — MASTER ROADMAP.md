@@ -3363,6 +3363,8 @@ This is the current implementation checklist for unfinished in-development work.
 - [ ] Fullscreen DoorTransition fade overlay.
 - [ ] Equipment save/load verification against `ModularEquipmentSystem`.
 - [ ] Persist opened doors and current `.bwld` world id.
+- [ ] Code health: finish MapEditor ownership/size review after earlier `main.cpp` split.
+- [ ] Code health: review remaining string parser chains for dispatch-table extraction where it improves readability.
 - [ ] Manual QA: player slide, wall blocking, and 3D camera movement.
 - [ ] Manual QA: mouse aim/toolgun/CAMP placement world position.
 - [ ] Manual QA: HUD/PipPad/Terminal visible over 3D.
