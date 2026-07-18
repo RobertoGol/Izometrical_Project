@@ -184,6 +184,15 @@
 * Metadata serialization
 * Binary/JSON helpers
 
+### Status
+
+* [x] Added `SaveGame.hpp/.cpp` facade over the existing binary `SaveSystem`.
+* [x] Routed app autosave, restore, manual save and manual load through `SaveGame`.
+* [x] Player position, inventory, containers, world grid, progression/story and ECS runtime data remain covered by current serialization.
+* [x] Save versioning remains handled by `SaveSystem`.
+* [ ] Equipment-specific state needs a dedicated verification pass against `ModularEquipmentSystem`.
+* [ ] Opened doors/current `.bwld` world id need real DoorTransition/world-loader persistence once those systems stop being simulated.
+
 ### Файлы
 
 * `SaveGame.hpp`

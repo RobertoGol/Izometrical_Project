@@ -128,6 +128,7 @@ add_library(game_core STATIC
     src/persistence/Inventory.cpp
     src/persistence/ModularEquipmentSystem.cpp
     src/persistence/Progression.cpp
+    src/persistence/SaveGame.cpp
     src/persistence/SaveSystem.cpp
     src/persistence/StoryFlagRegistry.cpp
     src/physics/CollisionSystem.cpp

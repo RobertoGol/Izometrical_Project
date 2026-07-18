@@ -19,6 +19,7 @@
 #include "MapScreen.hpp"
 #include "PlayerController.hpp"
 #include "Progression.hpp"
+#include "persistence/SaveGame.hpp"
 #include "SaveSystem.hpp"
 #include "Tactics.hpp"
 #include "TimeShift.hpp"

@@ -80,7 +80,7 @@ namespace bunker
             MeshBuilder::releaseFromGPU(mesh);
         }
         m_Renderer3D.shutdown();
-        SaveSystem::writeSave(1, m_GameState, m_Inventory, &m_Registry, &m_Advanced);
+        SaveGame::save({1, &m_GameState, &m_Inventory, &m_Registry, &m_Advanced});
         if (m_ImGuiInitialized)
         {
             ImGui::SFML::Shutdown(m_Window);
@@ -157,9 +157,9 @@ namespace bunker
 
     void GameApplication::restoreSaveIfAvailable()
     {
-        if (SaveSystem::saveExists(1))
+        if (SaveGame::exists(1))
         {
-            SaveSystem::readSave(1, m_GameState, m_Inventory, &m_Registry, &m_Advanced);
+            SaveGame::load({1, &m_GameState, &m_Inventory, &m_Registry, &m_Advanced});
             syncGameplayAnchorsToECS();
             bunker::logInfo() << "[SYSTEM] Сохранение восстановлено." << std::endl;
         }
@@ -352,11 +352,11 @@ namespace bunker
     {
         if (input.saveGame)
         {
-            SaveSystem::writeSave(1, m_GameState, m_Inventory, &m_Registry, &m_Advanced);
+            SaveGame::save({1, &m_GameState, &m_Inventory, &m_Registry, &m_Advanced});
         }
         if (input.loadGame)
         {
-            SaveSystem::readSave(1, m_GameState, m_Inventory, &m_Registry, &m_Advanced);
+            SaveGame::load({1, &m_GameState, &m_Inventory, &m_Registry, &m_Advanced});
             syncGameplayAnchorsToECS();
         }
     }
