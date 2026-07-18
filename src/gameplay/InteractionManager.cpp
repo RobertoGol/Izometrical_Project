@@ -2,6 +2,7 @@
 
 #include "ui/TerminalUI.hpp"
 #include "vehicles/VehicleManager.hpp"
+#include "world/DoorTransition.hpp"
 #include "world/WorldSession.hpp"
 
 #include <cmath>
@@ -26,7 +27,8 @@ namespace bunker
 
     std::optional<InteractionTarget> InteractionManager::queryBestTarget(const GameState& gameState,
                                                                          const TerminalManager& terminals,
-                                                                         const VehicleManager& vehicles) const
+                                                                         const VehicleManager& vehicles,
+                                                                         const DoorTransition& doors) const
     {
         PhysicsWorld world(gameState);
         std::optional<InteractionTarget> bestTarget;
@@ -45,6 +47,17 @@ namespace bunker
                 target.label = terminalList[i].title;
                 considerTarget(world, gameState.playerPos, target, bestTarget);
             }
+        }
+
+        if (const std::optional<DoorLink> door = doors.findNearestDoor(gameState.playerPos))
+        {
+            InteractionTarget target{};
+            target.type = InteractionType::Door;
+            target.position = door->triggerPosition;
+            target.index = door->id;
+            target.distanceSq = distanceSq2D(gameState.playerPos, door->triggerPosition);
+            target.label = door->linkTarget;
+            considerTarget(world, gameState.playerPos, target, bestTarget);
         }
 
         const auto& spawnedVehicles = vehicles.getSpawned();
@@ -96,10 +109,11 @@ namespace bunker
     bool InteractionManager::tryInteract(GameState& gameState,
                                          TerminalManager& terminals,
                                          VehicleManager& vehicles,
+                                         DoorTransition& doors,
                                          WorldSession& worldSession,
                                          PlayerInventory& inventory)
     {
-        m_HighlightedTarget = queryBestTarget(gameState, terminals, vehicles);
+        m_HighlightedTarget = queryBestTarget(gameState, terminals, vehicles, doors);
         if (!m_HighlightedTarget)
         {
             return false;
@@ -115,6 +129,7 @@ namespace bunker
             worldSession.interactWithContainers(gameState, inventory, m_HighlightedTarget->position);
             return true;
         case InteractionType::Door:
+            return doors.requestTransition(m_HighlightedTarget->index);
         case InteractionType::Pickup:
         case InteractionType::CraftingStation:
         case InteractionType::None:

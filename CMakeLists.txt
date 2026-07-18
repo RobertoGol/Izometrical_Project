@@ -158,6 +158,7 @@ add_library(game_core STATIC
     src/Workstations.cpp
     src/world/CampPlacementValidator.cpp
     src/world/DestructibleEnvironment.cpp
+    src/world/DoorTransition.cpp
     src/world/MapScreen.cpp
     src/world/StoryEventManager.cpp
     src/world/WeatherSystem.cpp

@@ -13,6 +13,7 @@ namespace bunker
     class TerminalManager;
     class VehicleManager;
     class WorldSession;
+    class DoorTransition;
 
     enum class InteractionType
     {
@@ -40,11 +41,13 @@ namespace bunker
       public:
         std::optional<InteractionTarget> queryBestTarget(const GameState& gameState,
                                                          const TerminalManager& terminals,
-                                                         const VehicleManager& vehicles) const;
+                                                         const VehicleManager& vehicles,
+                                                         const DoorTransition& doors) const;
 
         bool tryInteract(GameState& gameState,
                          TerminalManager& terminals,
                          VehicleManager& vehicles,
+                         DoorTransition& doors,
                          WorldSession& worldSession,
                          PlayerInventory& inventory);
 

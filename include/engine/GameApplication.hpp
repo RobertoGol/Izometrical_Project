@@ -36,6 +36,7 @@
 #include "vehicles/ThermalLoadSystem.hpp"
 #include "vehicles/VehicleSeatController.hpp"
 #include "world/CampPlacementValidator.hpp"
+#include "world/DoorTransition.hpp"
 #include "world/StoryEventManager.hpp"
 
 namespace bunker
@@ -90,6 +91,7 @@ namespace bunker
         VehicleManager m_VehicleManager;
         EnemySpawner m_EnemySpawner;
         WorldSession m_WorldSession;
+        DoorTransition m_DoorTransition;
         PlayerInventory m_Inventory;
         InteractionManager m_InteractionManager;
         HUD m_Hud;

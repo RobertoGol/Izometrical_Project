@@ -146,6 +146,16 @@
 * Fade in/out
 * World unload
 
+### Status
+
+* [x] Added `DoorTransition.hpp/.cpp`.
+* [x] Added door links with `linkTarget` and destination spawn point.
+* [x] Added transition phases: fade out, loading, fade in.
+* [x] Connected door targets to `InteractionManager` and `E` interaction.
+* [x] Connected transition update to the game loop.
+* [ ] Async file/world loading is simulated for now; real `.bwld` load/unload still needs loader integration.
+* [ ] Fade alpha is tracked, but rendering a fullscreen fade overlay still needs UI/render integration.
+
 ### Файлы
 
 * `DoorTransition.hpp`

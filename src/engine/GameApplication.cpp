@@ -435,7 +435,8 @@ namespace bunker
         // Посадка в транспорт, подключение к терминалу или подбор лута (E).
         if (input.interact)
         {
-            m_InteractionManager.tryInteract(m_GameState, m_TerminalUI, m_VehicleManager, m_WorldSession, m_Inventory);
+            m_InteractionManager.tryInteract(
+                m_GameState, m_TerminalUI, m_VehicleManager, m_DoorTransition, m_WorldSession, m_Inventory);
         }
     }
 
@@ -517,6 +518,7 @@ namespace bunker
 
         // Мир: эрозия, осада, Pip-Pad.
         m_WorldSession.update(m_GameState, dt);
+        m_DoorTransition.update(m_GameState, dt);
         m_PipPad.update(m_GameState, dt);
 
         m_Audio.update(dt);
