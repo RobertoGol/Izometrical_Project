@@ -7,32 +7,6 @@
 #include <string>
 #include <vector>
 
-// ==================== LUA (заглушка) ====================
-// В будущем здесь будет полноценная интеграция через sol2 или lua.hpp
-// Пока просто заглушка для архитектуры
-
-static bool luaInitialized = false;
-
-void DevMenu::LoadScripts()
-{
-    bunker::logInfo() << "[DevMenu] Loading Lua scripts from dev/..." << std::endl;
-    // TODO: Загрузка dev/DevMenu.lua
-    luaInitialized = true;
-}
-
-void DevMenu::ExecuteLuaCommand(const std::string& cmd)
-{
-    if (!luaInitialized)
-    {
-        consoleHistory.push_back("[Lua] Lua not initialized");
-        return;
-    }
-    // TODO: Выполнение Lua кода
-    consoleHistory.push_back("[Lua] Executed: " + cmd);
-}
-
-// ==================== ОСТАЛЬНОЙ КОД ====================
-
 DevMenu& DevMenu::Get()
 {
     static DevMenu instance;
@@ -46,7 +20,7 @@ void DevMenu::Initialize()
 
     for (int i = 0; i < 5; ++i)
     {
-        layerVisibility[i] = true;
+        m_LayerVisibility[i] = true;
     }
 }
 
@@ -108,71 +82,6 @@ void DevMenu::Render()
     ImGui::End();
 }
 
-// ==================== CONSOLE ====================
-static std::string consoleInput;
-static std::vector<std::string> consoleHistory;
-
-void DevMenu::RenderConsoleTab()
-{
-    ImGui::Text("Console Commands");
-    ImGui::Separator();
-
-    if (ImGui::InputText("##cmd", &consoleInput, ImGuiInputTextFlags_EnterReturnsTrue))
-    {
-        if (!consoleInput.empty())
-        {
-            ExecuteCommand(consoleInput);
-            consoleInput.clear();
-        }
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Execute"))
-    {
-        if (!consoleInput.empty())
-        {
-            ExecuteCommand(consoleInput);
-            consoleInput.clear();
-        }
-    }
-
-    ImGui::BeginChild("History", ImVec2(0, 500), true);
-    for (const auto& line : consoleHistory)
-    {
-        ImGui::TextUnformatted(line.c_str());
-    }
-    ImGui::EndChild();
-}
-
-void DevMenu::ExecuteCommand(const std::string& cmd)
-{
-    consoleHistory.push_back("> " + cmd);
-
-    if (cmd.find("lua ") == 0)
-    {
-        ExecuteLuaCommand(cmd.substr(4));
-    }
-    else if (cmd.find("place tile") == 0)
-    {
-        consoleHistory.push_back("[Console] Tile placed");
-    }
-    else if (cmd.find("spawn") == 0)
-    {
-        consoleHistory.push_back("[Console] Entity spawned");
-    }
-    else if (cmd == "help")
-    {
-        consoleHistory.push_back("Commands: place tile, spawn, set layer, time, weather, god, noclip, lua <code>");
-    }
-    else if (cmd == "clear")
-    {
-        consoleHistory.clear();
-    }
-    else
-    {
-        consoleHistory.push_back("[Console] Unknown command");
-    }
-}
-
 // ==================== WORLD ====================
 static float timeScale = 1.0f;
 static float timeOfDay = 12.0f;
@@ -186,7 +95,7 @@ void DevMenu::RenderWorldTab()
 
     if (ImGui::SliderFloat("Time Scale", &timeScale, 0.0f, 10.0f))
     {
-        consoleHistory.push_back("[World] Time Scale: " + std::to_string(timeScale));
+        m_ConsoleHistory.push_back("[World] Time Scale: " + std::to_string(timeScale));
     }
 
     if (ImGui::Button("Freeze Time"))
@@ -217,12 +126,12 @@ void DevMenu::RenderWorldTab()
     ImGui::Text("Weather & Lighting");
     if (ImGui::Combo("Weather", &weatherIndex, "Clear\0Rain\0Storm\0Fog\0Sandstorm\0"))
     {
-        consoleHistory.push_back("[World] Weather changed");
+        m_ConsoleHistory.push_back("[World] Weather changed");
     }
 
     if (ImGui::Checkbox("Global Lighting", &globalLighting))
     {
-        consoleHistory.push_back("[World] Global Lighting: " + std::string(globalLighting ? "ON" : "OFF"));
+        m_ConsoleHistory.push_back("[World] Global Lighting: " + std::string(globalLighting ? "ON" : "OFF"));
     }
 }
 
@@ -233,13 +142,13 @@ void DevMenu::RenderSpawnTab()
     ImGui::Separator();
 
     if (ImGui::Button("Spawn Enemy: Bandit"))
-        consoleHistory.push_back("[Spawn] Bandit spawned");
+        m_ConsoleHistory.push_back("[Spawn] Bandit spawned");
     if (ImGui::Button("Spawn Enemy: Mutant"))
-        consoleHistory.push_back("[Spawn] Mutant spawned");
+        m_ConsoleHistory.push_back("[Spawn] Mutant spawned");
     if (ImGui::Button("Spawn NPC: Trader"))
-        consoleHistory.push_back("[Spawn] Trader spawned");
+        m_ConsoleHistory.push_back("[Spawn] Trader spawned");
     if (ImGui::Button("Spawn Object: Crate"))
-        consoleHistory.push_back("[Spawn] Crate spawned");
+        m_ConsoleHistory.push_back("[Spawn] Crate spawned");
 }
 
 // ==================== PLAYER ====================
@@ -255,11 +164,11 @@ void DevMenu::RenderPlayerTab()
 
     if (ImGui::Checkbox("God Mode", &godMode))
     {
-        consoleHistory.push_back("[Player] God Mode: " + std::string(godMode ? "ON" : "OFF"));
+        m_ConsoleHistory.push_back("[Player] God Mode: " + std::string(godMode ? "ON" : "OFF"));
     }
     if (ImGui::Checkbox("No Clip", &noClip))
     {
-        consoleHistory.push_back("[Player] No Clip: " + std::string(noClip ? "ON" : "OFF"));
+        m_ConsoleHistory.push_back("[Player] No Clip: " + std::string(noClip ? "ON" : "OFF"));
     }
 
     ImGui::Separator();
@@ -272,17 +181,17 @@ void DevMenu::RenderPlayerTab()
 
     ImGui::Separator();
     if (ImGui::Button("Give: 100 Scrap"))
-        consoleHistory.push_back("[Player] +100 Scrap");
+        m_ConsoleHistory.push_back("[Player] +100 Scrap");
     if (ImGui::Button("Give: Assault Rifle"))
-        consoleHistory.push_back("[Player] Gave Assault Rifle");
+        m_ConsoleHistory.push_back("[Player] Gave Assault Rifle");
     if (ImGui::Button("Give: Medkit x5"))
-        consoleHistory.push_back("[Player] Gave Medkits");
+        m_ConsoleHistory.push_back("[Player] Gave Medkits");
 
     ImGui::Separator();
     if (ImGui::Button("Restore Health & Stamina"))
-        consoleHistory.push_back("[Player] Fully restored");
+        m_ConsoleHistory.push_back("[Player] Fully restored");
     if (ImGui::Button("Kill Player"))
-        consoleHistory.push_back("[Player] Player killed");
+        m_ConsoleHistory.push_back("[Player] Player killed");
 }
 
 // ==================== MAP TOOLS ====================
@@ -295,10 +204,10 @@ void DevMenu::RenderMapToolsTab()
 
     for (int i = 0; i < 5; ++i)
     {
-        bool visible = layerVisibility[i];
-        if (ImGui::Checkbox(layers[i], &visible))
+        bool layerIsVisible = m_LayerVisibility[i];
+        if (ImGui::Checkbox(layers[i], &layerIsVisible))
         {
-            SetLayerVisibility(i, visible);
+            SetLayerVisibility(i, layerIsVisible);
         }
     }
 
@@ -322,41 +231,41 @@ void DevMenu::RenderDebugTab()
 
     ImGui::Checkbox("Show FPS", &showFPS);
     ImGui::Text("Frame Time: %.2f ms", 1000.0f / ImGui::GetIO().Framerate);
-    ImGui::Text("RAM / VRAM: N/A (заглушка)");
+    ImGui::Text("RAM / VRAM: N/A (Р·Р°РіР»СѓС€РєР°)");
 
     ImGui::Separator();
     if (ImGui::Checkbox("Show Collision / Hitboxes", &showCollision))
     {
-        consoleHistory.push_back("[Debug] Collision: " + std::string(showCollision ? "ON" : "OFF"));
+        m_ConsoleHistory.push_back("[Debug] Collision: " + std::string(showCollision ? "ON" : "OFF"));
     }
     if (ImGui::Checkbox("Show AI Debug (NavMesh, Vision)", &showAI))
     {
-        consoleHistory.push_back("[Debug] AI Debug: " + std::string(showAI ? "ON" : "OFF"));
+        m_ConsoleHistory.push_back("[Debug] AI Debug: " + std::string(showAI ? "ON" : "OFF"));
     }
 }
 
-// ==================== СЛОИ ====================
-void DevMenu::SetLayerVisibility(int layer, bool visible)
+// ==================== РЎР›РћР ====================
+void DevMenu::SetLayerVisibility(int layer, bool isVisible)
 {
-    layerVisibility[layer] = visible;
-    consoleHistory.push_back("[Map] Layer " + std::to_string(layer) + (visible ? " ON" : " OFF"));
+    m_LayerVisibility[layer] = isVisible;
+    m_ConsoleHistory.push_back("[Map] Layer " + std::to_string(layer) + (isVisible ? " ON" : " OFF"));
 }
 
 bool DevMenu::IsLayerVisible(int layer) const
 {
-    auto it = layerVisibility.find(layer);
-    return it != layerVisibility.end() ? it->second : true;
+    auto it = m_LayerVisibility.find(layer);
+    return it != m_LayerVisibility.end() ? it->second : true;
 }
 
 bool DevMenu::SaveMap(const std::string& filepath)
 {
-    consoleHistory.push_back("[Map] Saving to: " + filepath);
+    m_ConsoleHistory.push_back("[Map] Saving to: " + filepath);
     return true;
 }
 
 bool DevMenu::LoadMap(const std::string& filepath)
 {
-    consoleHistory.push_back("[Map] Loading from: " + filepath);
+    m_ConsoleHistory.push_back("[Map] Loading from: " + filepath);
     return true;
 }
 

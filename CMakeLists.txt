@@ -38,6 +38,7 @@ set(IMGUI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source/ImGui")
 add_library(imgui_sfml_vendor STATIC
     "${IMGUI_DIR}/imgui.cpp"
     "${IMGUI_DIR}/imgui_draw.cpp"
+    "${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp"
     "${IMGUI_DIR}/imgui_tables.cpp"
     "${IMGUI_DIR}/imgui_widgets.cpp"
     "${IMGUI_DIR}/imgui-SFML.cpp"
@@ -71,6 +72,7 @@ add_library(game_core STATIC
     src/content/Workstations.cpp
     src/content/MeshBuilder.cpp
     src/DevMenu.cpp
+    src/DevMenuConsole.cpp
     src/engine/AudioController.cpp
     src/engine/GameApplication.cpp
     src/engine/GameApplicationECSBridge.cpp

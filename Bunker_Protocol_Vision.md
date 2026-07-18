@@ -247,6 +247,7 @@ What needs checking:
 - [x] Вынести OBJ model loader из `AdvancedMechanicsServices.cpp` в отдельный модуль `AdvancedMechanicsObjModel.cpp`.
 - [x] Вынести `LanlineServices` из `AdvancedMechanicsServices.cpp` в отдельный модуль `AdvancedMechanicsLanline.cpp`.
 - [x] Вынести `VehicleInstance` physics/drive methods из `VehicleManager.cpp` в отдельный модуль `VehicleInstance.cpp`.
+- [x] Вынести Lua/console часть `DevMenu` в отдельный модуль `DevMenuConsole.cpp` и объявить скрытые DEV_BUILD методы/state в header.
 - [ ] Очистить mojibake/битую кодировку русских комментариев, чтобы документация и комментарии были читаемыми в IDE.
 
 ### P2 - build, dependencies, and verification
