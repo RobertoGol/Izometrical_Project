@@ -14,6 +14,52 @@ namespace bunker
     {
         using EnemyConfigSetter = void (*)(EnemyConfig&, const std::string&);
 
+        bool parseFloat(const std::string& value, float& out)
+        {
+            try
+            {
+                out = std::stof(value);
+            }
+            catch (...)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        bool parseInt(const std::string& value, int& out)
+        {
+            try
+            {
+                out = std::stoi(value);
+            }
+            catch (...)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        void assignFloat(float& field, const std::string& value)
+        {
+            float parsed = 0.0f;
+            if (parseFloat(value, parsed))
+            {
+                field = parsed;
+            }
+        }
+
+        void assignInt(int& field, const std::string& value)
+        {
+            int parsed = 0;
+            if (parseInt(value, parsed))
+            {
+                field = parsed;
+            }
+        }
+
         EnemyClassType parseEnemyClassType(const std::string& value)
         {
             static const std::map<std::string, EnemyClassType> classTypes = {
@@ -31,12 +77,11 @@ namespace bunker
         {
             static const std::map<std::string, EnemyConfigSetter> setters = {
                 {"name", [](EnemyConfig& cfg, const std::string& val) { cfg.displayName = val; }},
-                {"health", [](EnemyConfig& cfg, const std::string& val) { cfg.maxHealth = std::stof(val); }},
-                {"speed", [](EnemyConfig& cfg, const std::string& val) { cfg.baseSpeed = std::stof(val); }},
-                {"radius", [](EnemyConfig& cfg, const std::string& val) { cfg.physicalRadius = std::stof(val); }},
-                {"erosion_damage",
-                 [](EnemyConfig& cfg, const std::string& val) { cfg.erosionDamage = std::stof(val); }},
-                {"reward_score", [](EnemyConfig& cfg, const std::string& val) { cfg.rewardScore = std::stoi(val); }},
+                {"health", [](EnemyConfig& cfg, const std::string& val) { assignFloat(cfg.maxHealth, val); }},
+                {"speed", [](EnemyConfig& cfg, const std::string& val) { assignFloat(cfg.baseSpeed, val); }},
+                {"radius", [](EnemyConfig& cfg, const std::string& val) { assignFloat(cfg.physicalRadius, val); }},
+                {"erosion_damage", [](EnemyConfig& cfg, const std::string& val) { assignFloat(cfg.erosionDamage, val); }},
+                {"reward_score", [](EnemyConfig& cfg, const std::string& val) { assignInt(cfg.rewardScore, val); }},
                 {"faction", [](EnemyConfig& cfg, const std::string& val) { cfg.factionID = val; }},
                 {"texture", [](EnemyConfig& cfg, const std::string& val) { cfg.texturePath = val; }},
                 {"sound_death", [](EnemyConfig& cfg, const std::string& val) { cfg.soundDeathPath = val; }},

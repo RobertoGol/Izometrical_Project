@@ -10,17 +10,40 @@ namespace bunker
     {
         using VehicleConfigSetter = void (*)(VehicleConfig&, const std::string&);
 
+        bool parseFloat(const std::string& value, float& out)
+        {
+            try
+            {
+                out = std::stof(value);
+            }
+            catch (...)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        void assignFloat(float& field, const std::string& value)
+        {
+            float parsed = 0.0f;
+            if (parseFloat(value, parsed))
+            {
+                field = parsed;
+            }
+        }
+
         const std::map<std::string, VehicleConfigSetter>& vehicleConfigSetters()
         {
             static const std::map<std::string, VehicleConfigSetter> setters = {
                 {"name", [](VehicleConfig& cfg, const std::string& val) { cfg.displayName = val; }},
-                {"max_speed", [](VehicleConfig& cfg, const std::string& val) { cfg.maxSpeed = std::stof(val); }},
-                {"acceleration", [](VehicleConfig& cfg, const std::string& val) { cfg.acceleration = std::stof(val); }},
-                {"deceleration", [](VehicleConfig& cfg, const std::string& val) { cfg.deceleration = std::stof(val); }},
-                {"turn_speed", [](VehicleConfig& cfg, const std::string& val) { cfg.turnSpeed = std::stof(val); }},
+                {"max_speed", [](VehicleConfig& cfg, const std::string& val) { assignFloat(cfg.maxSpeed, val); }},
+                {"acceleration", [](VehicleConfig& cfg, const std::string& val) { assignFloat(cfg.acceleration, val); }},
+                {"deceleration", [](VehicleConfig& cfg, const std::string& val) { assignFloat(cfg.deceleration, val); }},
+                {"turn_speed", [](VehicleConfig& cfg, const std::string& val) { assignFloat(cfg.turnSpeed, val); }},
                 {"collision_radius",
-                 [](VehicleConfig& cfg, const std::string& val) { cfg.collisionRadius = std::stof(val); }},
-                {"max_pressure", [](VehicleConfig& cfg, const std::string& val) { cfg.maxPressure = std::stof(val); }},
+                 [](VehicleConfig& cfg, const std::string& val) { assignFloat(cfg.collisionRadius, val); }},
+                {"max_pressure", [](VehicleConfig& cfg, const std::string& val) { assignFloat(cfg.maxPressure, val); }},
                 {"drive_type", [](VehicleConfig& cfg, const std::string& val) { cfg.driveType = val; }},
                 {"texture", [](VehicleConfig& cfg, const std::string& val) { cfg.texturePath = val; }},
                 {"sound_engine", [](VehicleConfig& cfg, const std::string& val) { cfg.soundPath = val; }},

@@ -15,6 +15,7 @@ public:
     WorldWorkstation *FindNearest(float x, float y, float maxDistance = 5.0f);
 
     void DestroyWorkstation(int objectID);
+    void Clear();
     void SaveAll();
     void LoadAll();
 

@@ -10,6 +10,7 @@
 #include <SFML/Graphics.hpp>
 #include "engine/Log.hpp"
 #include "physics/CollisionSystem.hpp"
+#include "world/WorldFileLoader.hpp"
 #include <cstdlib>
 #include <ctime>
 
@@ -63,6 +64,9 @@ namespace bunker
     void GameApplication::initialize()
     {
         std::srand(static_cast<unsigned int>(std::time(nullptr)));
+        m_DoorTransition.setWorldLoader([this](const DoorLink& link, GameState& gameState) {
+            return WorldFileLoader::load(WorldFileLoader::pathForWorldId(link.linkTarget), gameState, &m_DoorTransition);
+        });
 
         generateAndLoadContent();
         generateWorld();

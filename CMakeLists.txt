@@ -164,6 +164,7 @@ add_library(game_core STATIC
     src/world/StoryEventManager.cpp
     src/world/WeatherSystem.cpp
     src/world/WorldSession.cpp
+    src/world/WorldFileLoader.cpp
     src/world/TerrainGenerator.cpp
     src/WorldWorkstation.cpp
 )

@@ -35,12 +35,12 @@ This is the single active checklist for unfinished implementation and verificati
 - [x] Fullscreen DoorTransition fade overlay.
 - [x] Equipment save/load verification against `ModularEquipmentSystem`.
 - [x] Persist opened doors and current `.bwld` world id.
-- [ ] Add real `.bwld` parser/assets and wire the DoorTransition loader callback to world unload/load when map files exist.
+- [x] Add real `.bwld` parser/assets and wire the DoorTransition loader callback to world unload/load when map files exist.
 
 ## Code health
 
-- [ ] Finish MapEditor ownership/size review after earlier `main.cpp` split.
-- [ ] Review remaining string parser chains for dispatch-table extraction where it improves readability.
+- [x] Finish MapEditor ownership/size review after earlier `main.cpp` split.
+- [x] Review remaining string parser chains for dispatch-table extraction where it improves readability.
 
 ## Final QA
 

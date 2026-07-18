@@ -60,6 +60,12 @@ void WorkstationManager::DestroyWorkstation(int objectID)
     stations.erase(it, stations.end());
 }
 
+void WorkstationManager::Clear()
+{
+    stations.clear();
+    nextObjectID = 1;
+}
+
 void WorkstationManager::SaveAll()
 {
     // TODO: Сериализация в файл

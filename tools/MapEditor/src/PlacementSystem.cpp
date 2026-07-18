@@ -98,14 +98,16 @@ void PlacementSystem::SnapToWall(int x, int y, int &outX, int &outY)
 
     for (const auto &obj : objects)
     {
-        if (obj.category == PlacementCategory::Wall)
+        if (obj.category != PlacementCategory::Wall)
         {
-            if (std::abs(obj.x - x) <= 1 && std::abs(obj.y - y) <= 1)
-            {
-                outX = obj.x;
-                outY = obj.y;
-                return;
-            }
+            continue;
+        }
+
+        if (std::abs(obj.x - x) <= 1 && std::abs(obj.y - y) <= 1)
+        {
+            outX = obj.x;
+            outY = obj.y;
+            return;
         }
     }
 }
@@ -116,24 +118,27 @@ void PlacementSystem::UpdateWallConnections(int x, int y)
     {
         for (auto &obj : objects)
         {
-            if (obj.category == PlacementCategory::Wall && obj.x == cx && obj.y == cy)
+            if (obj.category != PlacementCategory::Wall || obj.x != cx || obj.y != cy)
             {
-                obj.connectionMask = 0;
+                continue;
+            }
 
-                for (const auto &other : objects)
+            obj.connectionMask = 0;
+            for (const auto &other : objects)
+            {
+                if (other.category != PlacementCategory::Wall)
                 {
-                    if (other.category == PlacementCategory::Wall)
-                    {
-                        if (other.x == cx && other.y == cy - 1)
-                            obj.connectionMask |= PlacementSystem::NORTH;
-                        if (other.x == cx && other.y == cy + 1)
-                            obj.connectionMask |= PlacementSystem::SOUTH;
-                        if (other.x == cx - 1 && other.y == cy)
-                            obj.connectionMask |= PlacementSystem::WEST;
-                        if (other.x == cx + 1 && other.y == cy)
-                            obj.connectionMask |= PlacementSystem::EAST;
-                    }
+                    continue;
                 }
+
+                if (other.x == cx && other.y == cy - 1)
+                    obj.connectionMask |= PlacementSystem::NORTH;
+                if (other.x == cx && other.y == cy + 1)
+                    obj.connectionMask |= PlacementSystem::SOUTH;
+                if (other.x == cx - 1 && other.y == cy)
+                    obj.connectionMask |= PlacementSystem::WEST;
+                if (other.x == cx + 1 && other.y == cy)
+                    obj.connectionMask |= PlacementSystem::EAST;
             }
         }
     };
