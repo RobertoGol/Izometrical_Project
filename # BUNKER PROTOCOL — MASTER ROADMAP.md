@@ -625,3 +625,125 @@
 - [ ] HUD/PipPad/Terminal снова видны поверх 3D.
 - [ ] Ground, terrain и cube имеют разные material colors.
 - [ ] Save/load сохраняет не только старый 2D state, но и новые 3D/ECS данные.
+
+
+---
+
+# ДОПОЛНЕНИЕ ПОСЛЕ ПРОВЕРКИ РЕКОМЕНДАЦИЙ
+
+## Изменение приоритетов
+
+### Базовый Combat переносится выше
+
+**Было:** P2
+**Стало:** P1.5 (между P1 и P2)
+
+### Причина
+Без стрельбы вертикальный срез ощущается как редактор мира с инвентарём, а не как Fallout-подобная игра.
+
+### Минимальный набор Combat для первого играбельного билда
+- Hitscan оружие
+- Урон по цели
+- Перезарядка
+- Боеприпасы
+- HP игрока
+- Смерть игрока
+- Лечение аптечкой
+
+### Файлы
+- CombatSystem.hpp
+- CombatSystem.cpp
+- HealthComponent.hpp
+- WeaponComponent.hpp
+
+---
+
+## Что можно отложить до после первого играбельного билда
+
+### Survival Advanced
+- Diseases
+- Temperature
+- Bleeding
+- Infections
+- Advanced medical effects
+
+### Economy Advanced
+- Dynamic prices
+- Resource scarcity simulation
+- Repair services
+- Contracts
+
+### AI Advanced
+- Companions
+- Squad behavior
+- Procedural encounters
+- Daily schedules
+
+---
+
+## Что убрать из ближайшего плана (до v1)
+
+### Engine Optimization
+- Occlusion Culling
+- World Origin Shifting
+- Texture Streaming
+- Mesh Streaming
+- Shader Cache
+- Job System
+- Multithreaded Loading
+- Instanced Rendering
+- Crash Reporter
+- Profiler
+
+Эти задачи важны, но не приближают проект к первому играбельному билду.
+
+---
+
+# ОБНОВЛЁННЫЙ ПОРЯДОК РАЗРАБОТКИ
+
+1. P0 — полностью
+2. P1 — полностью
+3. P1.5 — Combat + Health
+4. P2 — Survival + Crafting + Weather
+5. P3 — BT-72 + Quests
+6. P4 — NPC + AI
+7. P5 — Co-op (State of Decay 2 модель)
+8. P6 — Optimization
+
+---
+
+# РЕАЛИСТИЧНЫЙ ПЛАН НА БЛИЖАЙШИЕ 6 НЕДЕЛЬ
+
+## Неделя 1
+- CollisionSystem
+
+## Неделя 2
+- InteractionManager
+
+## Неделя 3
+- LootManager + Container UI
+
+## Неделя 4
+- DoorTransition + SaveGame
+
+## Неделя 5
+- Inventory + Equipment
+
+## Неделя 6
+- Combat + Health + Lang_for_my_decisions VM
+
+---
+
+# РЕЗУЛЬТАТ ПОСЛЕ ЭТОГО ЭТАПА
+
+Игрок сможет:
+- Исследовать мир
+- Открывать двери
+- Лутать контейнеры
+- Стрелять
+- Получать урон
+- Умирать и лечиться
+- Сохранять и загружать игру
+- Использовать терминалы через Lang_for_my_decisions
+
+Это и будет первый настоящий играбельный билд Bunker Protocol.
