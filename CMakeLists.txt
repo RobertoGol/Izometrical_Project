@@ -8,9 +8,23 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(CTest)
 
 set(SFML_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/source/SFML-3.1.0" CACHE PATH "Bundled SFML root")
-set(SFML_DIR "${SFML_ROOT}/lib/cmake/SFML" CACHE PATH "SFML CMake package directory")
-
-find_package(SFML 3.1 CONFIG REQUIRED COMPONENTS Audio Graphics Window System)
+set(LOCAL_SFML_CONFIG "${SFML_ROOT}/lib/cmake/SFML/SFMLConfig.cmake")
+set(SFML_COMPONENTS Audio Graphics Window System)
+if(EXISTS "${LOCAL_SFML_CONFIG}")
+    set(SFML_DIR "${SFML_ROOT}/lib/cmake/SFML" CACHE PATH "SFML CMake package directory")
+    find_package(SFML 3.1 CONFIG REQUIRED COMPONENTS ${SFML_COMPONENTS})
+else()
+    include(FetchContent)
+    set(SFML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(SFML_BUILD_DOC OFF CACHE BOOL "" FORCE)
+    set(SFML_BUILD_NETWORK OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.1.0
+    )
+    FetchContent_MakeAvailable(SFML)
+endif()
 find_package(OpenGL REQUIRED)
 
 # --- Загрузка GLM ---
