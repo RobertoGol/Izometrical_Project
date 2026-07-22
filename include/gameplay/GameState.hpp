@@ -79,6 +79,12 @@ namespace bunker
 
         // ── Титан / БТ-7274 ──
         TitanAlly titan;
+
+        // ── Сетевые данные (P2P Co-op) ──
+        std::vector<RemotePlayer> remotePlayers;
+        int localPeerId = 1;
+        bool isNetworkGame = false;
+        NetRole netRole = NetRole::Offline;
     };
 
 } // namespace bunker

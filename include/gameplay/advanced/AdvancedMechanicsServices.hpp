@@ -1,7 +1,11 @@
 #pragma once
 
+#include "engine/Log.hpp"
+#include <SFML/Network.hpp>
+
 #include "gameplay/advanced/AdvancedMechanicsCommon.hpp"
 namespace bunker
+
 {
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -82,54 +86,53 @@ namespace bunker
 
     class LanlineServices
     {
-      public:
+    public:
         static constexpr int MAX_COOP_PLAYERS = 20;
 
-        int createLocalLobby(const std::string& playerName);
-        int addPeer(const std::string& name);
-        int addPeerWithSocket(const std::string& name, Vector3D pos, unsigned int sockFd);
-        void sendChat(int fromPeer, const std::string& text);
-        void setVoice(int peerId, bool active);
-        int requestDelivery(const std::string& payload, Vector3D dropPos);
-        void update(GameState& gs, PlayerInventory& inv, float dt);
+static constexpr unsigned short DEFAULT_PORT = 7777;
 
-        void cullInactiveOrDistantPeers(const Vector3D& localPlayerPos, float interestRadius);
-        void simulateWinsockUdpHeartbeat(float dt);
+    LanlineServices();
+    ~LanlineServices();
 
-        bool connected() const
-        {
-            return m_Connected;
-        }
-        const std::vector<LanlinePeer>& peers() const
-        {
-            return m_Peers;
-        }
-        const std::vector<LanlineChatMessage>& chat() const
-        {
-            return m_Chat;
-        }
-        const std::vector<LanlineDelivery>& deliveries() const
-        {
-            return m_Deliveries;
-        }
+    bool hostGame(unsigned short port = DEFAULT_PORT);
+    bool joinGame(const std::string& hostIp, unsigned short port = DEFAULT_PORT, const std::string& playerName = "Pilot");
+    void disconnect();
 
-      private:
-        bool m_Connected = false;
-        int m_LobbyId = 0;
-        int m_NextLobbyId = 1000;
-        int m_NextPeerId = 0;
-        int m_NextDeliveryId = 0;
-        unsigned int m_NextSocketFd = 100042;
-        float m_HeartbeatTimer = 0.0f;
-        std::vector<LanlinePeer> m_Peers;
-        std::vector<LanlineChatMessage> m_Chat;
-        std::vector<LanlineDelivery> m_Deliveries;
+    void update(GameState& gs, PlayerInventory& inv, float dt);
+    void sendPlayerState(const Vector3D& pos, const Vector3D& vel, float health, UnitMode mode, float facing);
+    void sendChat(const std::string& text);
 
-        void systemMessage(const std::string& text)
-        {
-            m_Chat.push_back({0, text, 8.0f});
-        }
-    };
+    bool connected() const { return m_Connected; }
+    NetRole role() const { return m_Role; }
+    bool isHost() const { return m_Role == NetRole::Host; }
+    int localPeerId() const { return m_LocalPeerId; }
+
+    const std::vector<RemotePlayer>& peers() const { return m_Peers; }
+    const std::vector<LanlineChatMessage>& chat() const { return m_Chat; }
+
+private:
+    bool m_Connected = false;
+    NetRole m_Role = NetRole::Offline;
+    int m_LocalPeerId = 1;
+    int m_NextPeerId = 2;
+    unsigned short m_LocalUdpPort = 0;
+    std::string m_LocalPlayerName = "Pilot";
+
+    sf::UdpSocket m_UdpSocket;
+    sf::TcpListener m_TcpListener;
+    sf::TcpSocket m_HostTcpSocket;
+    sf::SocketSelector m_Selector;
+
+    std::vector<RemotePlayer> m_Peers;
+    std::vector<LanlineChatMessage> m_Chat;
+
+    void systemMessage(const std::string& text) { m_Chat.push_back({0, text, 8.0f}); }
+    
+    void acceptNewTcpClient();
+    void processUdpPacket(GameState& gs);
+    void processTcpPacket(RemotePlayer& peer, GameState& gs);
+    void broadcastUdp(sf::Packet& packet, int excludePeerId = -1);
+};
 
     // ═══════════════════════════════════════════════════════════════════════════════
     // 14) PROFILE / SESSION MIGRATION

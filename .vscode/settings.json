@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "*.h": "cpp",
+        "*.hpp": "cpp",
+        "*.cpp": "cpp",
+        "*.cc": "cpp",
+        "*.cxx": "cpp",
+        "*.c++": "cpp",
+        "*.C": "cpp",
+        "*.tpp": "cpp",
+        "*.ipp": "cpp",
+        "cstdint": "cpp"
+    }
+}

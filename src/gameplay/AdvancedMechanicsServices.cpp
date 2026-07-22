@@ -177,162 +177,202 @@ namespace bunker
     // 13) LANLINE SERVICES
     // ═══════════════════════════════════════════════════════════════════════════════
 
-    int LanlineServices::createLocalLobby(const std::string& playerName)
-    {
-        m_Peers.clear();
-        m_Deliveries.clear();
-        m_Chat.clear();
+{
+    LanlineServices::LanlineServices() {
+        m_UdpSocket.setBlocking(false);
+    }
+
+    LanlineServices::~LanlineServices() {
+    disconnect();
+    }
+
+        bool LanlineServices::hostGame(unsigned short port) {
+        if (m_Role != NetRole::Offline) disconnect();
+        
+        if (m_UdpSocket.bind(port) != sf::Socket::Done) return false;
+        if (m_TcpListener.listen(port) != sf::Socket::Done) {
+            m_UdpSocket.unbind();
+            return false;
+        }
+
+        m_TcpListener.setBlocking(false);
+        m_Selector.add(m_UdpSocket);
+        m_Selector.add(m_TcpListener);
+
+        m_Role = NetRole::Host;
+        m_LocalPeerId = 1;
         m_Connected = true;
-        m_LobbyId = ++m_NextLobbyId;
-        addPeerWithSocket(playerName.empty() ? "Solo_Pilot" : playerName, {10.0f, 10.0f, 0.0f}, ++m_NextSocketFd);
-        addPeerWithSocket("Gunner_BT7274", {11.0f, 10.0f, 0.0f}, ++m_NextSocketFd);
-        addPeerWithSocket("Scout_LogHorizon", {12.0f, 12.0f, 0.0f}, ++m_NextSocketFd);
-        addPeerWithSocket("Vault17_Quartermaster", {15.0f, 8.0f, 0.0f}, ++m_NextSocketFd);
+        systemMessage("HOST: P2P Session started. Waiting for pilots on port " + std::to_string(port));
+        return true;
+    }
 
-        const char* coopNames[] = {"Ranger_Kodiak", "Tech_Valerie",   "Heavy_Goliath",  "Medic_Mercy",
-                                   "Sniper_Ghost",  "Engineer_Spark", "Recon_Viper",    "Trooper_Blaze",
-                                   "Sapper_Boom",   "Sentinel_Apex",  "Commando_Rex",   "Guardian_Shield",
-                                   "Warden_Frost",  "Striker_Bolt",   "Vanguard_Storm", "Overseer_Vault17"};
-        for (int i = 0; i < 16 && static_cast<int>(m_Peers.size()) < MAX_COOP_PLAYERS; ++i)
-        {
-            float px = 8.0f + static_cast<float>((i * 5) % 40);
-            float py = 8.0f + static_cast<float>((i * 7) % 35);
-            addPeerWithSocket(coopNames[i], {px, py, 0.0f}, ++m_NextSocketFd);
+    bool LanlineServices::joinGame(const std::string& hostIp, unsigned short port, const std::string& playerName) {
+        if (m_Role != NetRole::Offline) disconnect();
+        m_LocalPlayerName = playerName;
+
+        if (m_UdpSocket.bind(sf::Socket::AnyPort) != sf::Socket::Done) return false;
+        m_LocalUdpPort = m_UdpSocket.getLocalPort();
+
+        if (m_HostTcpSocket.connect(sf::IpAddress(hostIp), port, sf::seconds(5)) != sf::Socket::Done) {
+            m_UdpSocket.unbind();
+            return false;
         }
+        
+        m_HostTcpSocket.setBlocking(false);
+        m_Selector.add(m_UdpSocket);
+        m_Selector.add(m_HostTcpSocket);
 
-        systemMessage("LANLINE Winsock net #1001 connected. " + std::to_string(m_Peers.size()) +
-                      " squad combatants online.");
-        return m_LobbyId;
+        sf::Packet handshake;
+        handshake << static_cast<std::uint8_t>(PacketType::Handshake) 
+                << static_cast<std::uint16_t>(m_LocalUdpPort) 
+                << playerName;
+        m_HostTcpSocket.send(handshake);
+
+        m_Role = NetRole::Client;
+        m_Connected = true;
+        systemMessage("CLIENT: Successfully connected to Host " + hostIp);
+        return true;
     }
 
-    int LanlineServices::addPeer(const std::string& name)
-    {
-        return addPeerWithSocket(name, {10.0f, 10.0f, 0.0f}, ++m_NextSocketFd);
-    }
-
-    int LanlineServices::addPeerWithSocket(const std::string& name, Vector3D pos, unsigned int sockFd)
-    {
-        LanlinePeer p;
-        p.id = ++m_NextPeerId;
-        p.name = name;
-        p.lastKnownPos = pos;
-        p.simulatedSocketFd = sockFd;
-        p.inInterestArea = true;
-        m_Peers.push_back(p);
-        return p.id;
-    }
-
-    void LanlineServices::cullInactiveOrDistantPeers(const Vector3D& localPlayerPos, float interestRadius)
-    {
-        float rSq = interestRadius * interestRadius;
-        for (auto& p : m_Peers)
-        {
-            float dx = p.lastKnownPos.x - localPlayerPos.x;
-            float dy = p.lastKnownPos.y - localPlayerPos.y;
-            p.inInterestArea = (dx * dx + dy * dy <= rSq);
+    void LanlineServices::disconnect() {
+        if (m_Role == NetRole::Offline) return;
+        
+        m_TcpListener.close();
+        m_HostTcpSocket.disconnect();
+        m_UdpSocket.unbind();
+        m_Selector.clear();
+        
+        for(auto& p : m_Peers) {
+            if(p.tcpSocket) { delete p.tcpSocket; p.tcpSocket = nullptr; }
         }
+        m_Peers.clear();
+        
+        m_Role = NetRole::Offline;
+        m_Connected = false;
+        systemMessage("Lanline connection terminated.");
     }
 
-    void LanlineServices::simulateWinsockUdpHeartbeat(float dt)
-    {
-        m_HeartbeatTimer += dt;
-        if (m_HeartbeatTimer >= 1.0f)
-        {
-            m_HeartbeatTimer = 0.0f;
-            for (auto& p : m_Peers)
-            {
-                if (p.simulatedSocketFd > 0)
-                {
-                    p.lastKnownPos.x += (std::rand() % 3 - 1) * 0.1f;
-                    p.lastKnownPos.y += (std::rand() % 3 - 1) * 0.1f;
+    void LanlineServices::update(GameState& gs, PlayerInventory& inv, float dt) {
+        gs.isNetworkGame = m_Connected;
+        gs.netRole = m_Role;
+        gs.localPeerId = m_LocalPeerId;
+
+        if (m_Role == NetRole::Offline) return;
+
+        if (m_Selector.wait(sf::milliseconds(1))) {
+            if (m_Selector.isReady(m_UdpSocket)) {
+                processUdpPacket(gs);
+            }
+            if (isHost() && m_Selector.isReady(m_TcpListener)) {
+                acceptNewTcpClient();
+            }
+            for (auto& peer : m_Peers) {
+                if (peer.tcpSocket && m_Selector.isReady(*peer.tcpSocket)) {
+                    processTcpPacket(peer, gs);
                 }
             }
         }
     }
 
-    void LanlineServices::sendChat(int fromPeer, const std::string& text)
-    {
-        if (!m_Connected)
-        {
-            return;
-        }
-        m_Chat.push_back({fromPeer, text, 10.0f});
-        if (m_Chat.size() > 20)
-        {
-            m_Chat.erase(m_Chat.begin());
+    void LanlineServices::acceptNewTcpClient() {
+        auto* clientSock = new sf::TcpSocket();
+        if (m_TcpListener.accept(*clientSock) == sf::Socket::Done) {
+            clientSock->setBlocking(false);
+            m_Selector.add(*clientSock);
+
+            RemotePlayer p;
+            p.id = m_NextPeerId++;
+            p.tcpSocket = clientSock;
+            p.ip = clientSock->getRemoteAddress();
+            m_Peers.push_back(p);
+            
+            systemMessage("Incoming TCP connection established.");
+        } else {
+            delete clientSock;
         }
     }
 
-    void LanlineServices::setVoice(int peerId, bool active)
-    {
-        for (auto& p : m_Peers)
-        {
-            if (p.id == peerId)
-            {
-                p.voiceActive = active;
+    void LanlineServices::processTcpPacket(RemotePlayer& peer, GameState& gs) {
+        sf::Packet pkt;
+        if (peer.tcpSocket->receive(pkt) == sf::Socket::Done) {
+            std::uint8_t typeRaw;
+            pkt >> typeRaw;
+            if (static_cast<PacketType>(typeRaw) == PacketType::Handshake) {
+                std::uint16_t udpPort;
+                std::string pName;
+                pkt >> udpPort >> pName;
+                peer.udpPort = udpPort;
+                peer.name = pName;
+                systemMessage("Pilot " + pName + " joined the session.");
+                
+                sf::Packet ack;
+                ack << static_cast<std::uint8_t>(PacketType::HandshakeAck) << static_cast<std::uint16_t>(peer.id);
+                peer.tcpSocket->send(ack);
             }
         }
     }
 
-    int LanlineServices::requestDelivery(const std::string& payload, Vector3D dropPos)
-    {
-        LanlineDelivery d;
-        d.id = ++m_NextDeliveryId;
-        d.payload = payload;
-        d.dropPos = dropPos;
-        d.eta = 8.0f + static_cast<float>((m_NextDeliveryId * 7) % 6);
-        m_Deliveries.push_back(d);
-        return d.id;
-    }
+    void LanlineServices::processUdpPacket(GameState& gs) {
+        sf::IpAddress sender;
+        unsigned short senderPort;
+        sf::Packet pkt;
 
-    void LanlineServices::update(GameState& gs, PlayerInventory& inv, float dt)
-    {
-        simulateWinsockUdpHeartbeat(dt);
-        cullInactiveOrDistantPeers(gs.playerPos, 40.0f);
+        while (m_UdpSocket.receive(pkt, sender, senderPort) == sf::Socket::Done) {
+            std::uint8_t rawType;
+            if (!(pkt >> rawType)) continue;
+            PacketType type = static_cast<PacketType>(rawType);
 
-        for (auto& c : m_Chat)
-        {
-            c.ttl -= dt;
-        }
-        m_Chat.erase(
-            std::remove_if(m_Chat.begin(), m_Chat.end(), [](const LanlineChatMessage& c) { return c.ttl <= 0.0f; }),
-            m_Chat.end());
+            if (type == PacketType::PlayerState) {
+                PlayerNetState s;
+                pkt >> s.peerId >> s.x >> s.y >> s.z >> s.vx >> s.vy >> s.vz >> s.health >> s.playerMode >> s.facingAngle;
 
-        for (auto& d : m_Deliveries)
-        {
-            if (d.delivered)
-            {
-                continue;
-            }
-            d.eta -= dt;
-            if (d.eta <= 0.0f)
-            {
-                d.delivered = true;
-                if (d.payload == "ammo")
-                {
-                    inv.addItem(SurvivalSystem::ITEM_AMMO_556, ItemType::Ammo, 2, 0.15f, "5.56 AMMO BOX");
+                auto it = std::find_if(gs.remotePlayers.begin(), gs.remotePlayers.end(), [&](const RemotePlayer& p){ return p.id == s.peerId; });
+                if (it != gs.remotePlayers.end()) {
+                    it->position = {s.x, s.y, s.z};
+                    it->velocity = {s.vx, s.vy, s.vz};
+                    it->health = s.health;
+                    it->facingAngle = s.facingAngle;
+                    it->mode = static_cast<UnitMode>(s.playerMode);
+                } else {
+                    RemotePlayer newRp;
+                    newRp.id = s.peerId;
+                    newRp.position = {s.x, s.y, s.z};
+                    newRp.health = s.health;
+                    gs.remotePlayers.push_back(newRp);
                 }
-                else if (d.payload == "med")
-                {
-                    inv.addItem(SurvivalSystem::ITEM_STIM, ItemType::Medicine, 1, 0.10f, "STIM INJECTOR");
+
+                if (isHost()) {
+                    sf::Packet relayPkt;
+                    relayPkt << rawType << s.peerId << s.x << s.y << s.z << s.vx << s.vy << s.vz << s.health << s.playerMode << s.facingAngle;
+                    broadcastUdp(relayPkt, s.peerId);
                 }
-                else
-                {
-                    inv.addItem(201, ItemType::Resource, 10, 0.08f, "SCRAP METAL");
-                }
-                gs.score += 25;
-                systemMessage("Delivery arrived: " + d.payload);
             }
         }
+    }
 
-        static float s_ChatTimer = 15.0f;
-        s_ChatTimer -= dt;
-        if (s_ChatTimer <= 0.0f && m_Peers.size() > 1)
-        {
-            s_ChatTimer = 30.0f;
-            sendChat(m_Peers[1].id, "Сенсоры бастиона в норме. Готов прикрыть огнём.");
+    void LanlineServices::sendPlayerState(const Vector3D& pos, const Vector3D& vel, float health, UnitMode mode, float facing) {
+        if (m_Role == NetRole::Offline) return;
+
+        sf::Packet pkt;
+        pkt << static_cast<std::uint8_t>(PacketType::PlayerState);
+        pkt << static_cast<std::uint16_t>(m_LocalPeerId);
+        pkt << pos.x << pos.y << pos.z << vel.x << vel.y << vel.vz << health << static_cast<std::uint8_t>(mode) << facing;
+
+        if (isHost()) {
+            broadcastUdp(pkt, m_LocalPeerId);
+        } else if (m_HostTcpSocket.getRemoteAddress() != sf::IpAddress::None) {
+            m_UdpSocket.send(pkt, m_HostTcpSocket.getRemoteAddress(), DEFAULT_PORT);
         }
     }
+
+    void LanlineServices::broadcastUdp(sf::Packet& packet, int excludePeerId) {
+        for (const auto& peer : m_Peers) {
+            if (peer.id != excludePeerId && peer.udpPort != 0) {
+                m_UdpSocket.send(packet, peer.ip, peer.udpPort);
+            }
+        }
+    }
+
 
     // ═══════════════════════════════════════════════════════════════════════════════
     // 14) PROFILE / SESSION MIGRATION
@@ -374,8 +414,8 @@ namespace bunker
     {
         std::ostringstream ss;
         ss << "PROFILE v" << p.version << " name=" << p.playerName << " kills=" << p.totalKills
-           << " deaths=" << p.totalDeaths << " sessions=" << p.sessionsPlayed << " playtime=" << std::fixed
-           << std::setprecision(1) << p.totalPlayTime;
+            << " deaths=" << p.totalDeaths << " sessions=" << p.sessionsPlayed << " playtime=" << std::fixed
+            << std::setprecision(1) << p.totalPlayTime;
         return ss.str();
     }
 
